@@ -12,14 +12,14 @@
   <div id="app">
     <!-- superficie única (píldora + panel): lleva el material, el recorte del morph y el contorno; la sombra va en #app -->
     <div id="surface">
-      <div id="dot" title="taskghost">
+      <div id="dot" data-tip="taskghost">
         <svg viewBox="270 230 530 610" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M300,450 A212,212 0 0 1 724,450 C724,610 700,700 770,806 C660,826 576,776 528,712 C484,780 410,812 316,800 C344,712 300,640 300,450 Z M415,458 a31,45 0 1 0 62,0 a31,45 0 1 0 -62,0 Z M549,458 a31,45 0 1 0 62,0 a31,45 0 1 0 -62,0 Z"/></svg>
       </div>
       <header id="pill">
         <div class="ttl"><span id="ttl-l">taskghost</span><span id="ttl-r"></span></div>
         <div class="times">
-          <span id="t-task" class="clock" title="Tiempo en la tarea actual"></span>
-          <span id="t-sess" title="Tiempo de sesión"></span>
+          <span id="t-task" class="clock" data-tip="Tiempo en la tarea activa"></span>
+          <span id="t-sess" data-tip="Tiempo de la sesión"></span>
         </div>
         <div id="cur" class="cur"></div>
         <div id="legend"></div>
@@ -30,18 +30,18 @@
           <button id="btn-end" class="btn"></button>
           <span id="proj-chip" class="tag"></span>
           <span class="grow"></span>
-          <button id="btn-theme" class="ibtn" title="Cambiar tema claro/oscuro (c)"></button>
-          <button id="btn-dash" class="ibtn" title="Abrir dashboard (d)"><span data-icon="grid"></span></button>
+          <button id="btn-theme" class="ibtn" data-tip="Cambiar de tema" data-key="c"></button>
+          <button id="btn-dash" class="ibtn" data-tip="Abrir el dashboard" data-key="d" aria-label="Abrir el dashboard"><span data-icon="grid"></span></button>
         </div>
         <div id="warn" style="--i:0"></div>
         <div id="hidden-note" style="--i:0"></div>
         <ul id="list" style="--i:1"></ul>
         <div id="help" style="--i:1"></div>
-        <label class="nw" style="--i:2"><span data-icon="plus"></span><input id="new" placeholder="Nueva tarea…  (#proyecto)" autocomplete="off" spellcheck="false"></label>
+        <label class="nw" style="--i:2" data-tip="Nueva tarea" data-key="n"><span data-icon="plus"></span><input id="new" placeholder="Nueva tarea…  (#proyecto)" autocomplete="off" spellcheck="false"></label>
         <footer id="status" style="--i:3">
           <span id="mode-tag">NORMAL</span>
           <span id="hint"></span>
-          <button id="btn-clear" title="Archivar las tareas hechas (l)"><u>l</u>impiar</button>
+          <button id="btn-clear" data-tip="Archivar las tareas hechas" data-key="l"><u>l</u>impiar</button>
           <div id="hud" role="status"><span id="hud-t"></span><kbd>Ctrl Z</kbd></div>
         </footer>
       </section>

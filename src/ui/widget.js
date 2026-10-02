@@ -14,6 +14,14 @@
     if (m < 1) return ms >= 1000 ? `${Math.floor(ms / 1000)}s` : '';
     return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h${pad(m % 60)}`;
   };
+  // tooltip propio (tooltip.js): texto + tecla; sin texto lo quita
+  function tip(el, text, key) {
+    if (text) el.dataset.tip = text; else delete el.dataset.tip;
+    if (text && key) el.dataset.key = key; else delete el.dataset.key;
+    if (text && el.tagName === 'BUTTON' && !el.textContent.trim()) el.setAttribute('aria-label', text); // botones de ícono: nombre accesible
+  }
+  // fragmento con tooltip para la barra de estado
+  const tipped = (html, text, key) => `<span data-tip="${esc(text)}"${key ? ` data-key="${esc(key)}"` : ''}>${html}</span>`;
   const motionOk = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
   const EASE_OUT = 'cubic-bezier(0.23, 1, 0.32, 1)'; // = --ease-out
 
@@ -94,6 +102,8 @@
     const r = $('#ttl-r');
     r.className = leaderOn || !s ? '' : s.status === 'running' ? 'run' : 'pause';
     r.textContent = leaderOn ? 'líder' : !s ? 'sin sesión' : s.status === 'running' ? 'en curso' : 'pausada';
+    tip(r, leaderOn ? 'Tecla líder activa (2 s)' : !s ? 'Sin sesión iniciada' : s.status === 'running' ? 'Sesión en curso' : 'Sesión en pausa');
+    tip($('#ttl-l'), p ? 'Proyecto del widget' : '', p && !s ? '#' : '');
   }
 
   function renderCur() {
@@ -101,6 +111,7 @@
     const cur = $('#cur');
     if (notice && Date.now() < notice.until) {
       cur.classList.add('notice'); // visible tambien durante la tecla lider
+      tip(cur, '');
       cur.innerHTML = `<span class="bad">${esc(notice.text)}</span>`;
       return;
     }
@@ -109,6 +120,7 @@
     const t = activeTask();
     const title = t ? esc(t.title) : 'sin tarea activa';
     cur.classList.toggle('paused', !!s && s.status === 'paused');
+    tip(cur, s && t ? (s.status === 'paused' ? 'Tarea activa (en pausa)' : 'Tarea activa') : '');
     cur.innerHTML = !s
       ? 'sin sesión · <b>Ctrl+Alt+T</b> abre el panel'
       : `${Icons.svg(s.status === 'paused' ? 'pause' : 'play')}<b>${title}</b>`;
@@ -121,13 +133,13 @@
       const st = startTask();
       btn.innerHTML = st ? U('Iniciar') : 'Sin tareas abiertas';
       btn.disabled = !st;
-      btn.title = st ? 'Iniciar sesión (i)' : 'Agregá una tarea para iniciar';
+      tip(btn, st ? 'Iniciar la sesión' : 'Agregá una tarea para iniciar', st ? 'i' : '');
       btn.className = 'btn fill';
     } else {
       btn.disabled = false;
       const running = s.status === 'running';
       btn.innerHTML = U(running ? 'Pausar' : 'Reanudar');
-      btn.title = running ? 'Pausar (p)' : 'Reanudar (r)';
+      tip(btn, running ? 'Pausar la sesión' : 'Reanudar la sesión', running ? 'p' : 'r');
       btn.className = running ? 'btn tint' : 'btn fill';
     }
 
@@ -136,10 +148,11 @@
     const why = discardReason();
     end.innerHTML = U('Terminar'); // la tecla es t: con la sesion por descartarse sigue siendo "Terminar", en ambar
     end.className = why ? 'btn warn' : 'btn';
-    end.title = why ? `No se guardará: ${why} (tt)` : 'Terminar y guardar la sesión (tt)';
+    tip(end, why ? `Terminar sin guardar: ${why}` : 'Terminar y guardar la sesión', 't t');
     const warn = $('#warn');
     warn.style.display = why ? 'flex' : 'none';
     warn.innerHTML = why ? `${Icons.svg('warn')}<span>No se guardará: ${esc(why)}</span>` : '';
+    tip(warn, why ? 'Se descarta al terminar la sesión' : '');
 
     const p = scope();
     const chip = $('#proj-chip');
@@ -147,12 +160,13 @@
     chip.textContent = projLabel(p);
     chip.style.setProperty('--c', p ? colorOf(p) : '#8d95a6');
     chip.classList.toggle('locked', !!s);
-    chip.title = s ? 'Proyecto de la sesión (se cambia al terminarla)' : 'Cambiar de proyecto (#)';
+    tip(chip, s ? 'Proyecto de la sesión: se cambia al terminarla' : 'Cambiar de proyecto', s ? '' : '#');
 
     const hidden = hiddenCount();
     const note = $('#hidden-note');
     note.style.display = hidden ? 'block' : 'none';
     note.textContent = hidden ? `${hidden} de otros proyectos oculta${hidden > 1 ? 's' : ''} · # cambia` : '';
+    tip(note, hidden ? (s ? 'Terminá la sesión para cambiar de proyecto' : 'Cambiar de proyecto') : '', hidden && !s ? '#' : '');
   }
 
   // Regla de teclas: la letra es la primera de la accion (subrayada en la interfaz); las mas frecuentes mandan
@@ -185,21 +199,37 @@
     const p = snap && scope();
     const base = p ? `Nueva tarea en #${p}…  (#otro solo: cambia)` : 'Nueva tarea…  (#proyecto solo: cambia)';
     input.placeholder = ins || mode === 'capture' ? base : 'n escribe una tarea · # proyecto';
-    if (mode === 'capture') { tag.textContent = 'NUEVA'; hint.innerHTML = '<kbd>enter</kbd> agrega · <kbd>esc</kbd> cancela'; return; }
-    if (help) { tag.textContent = 'AYUDA'; hint.innerHTML = '<kbd>?</kbd> o <kbd>esc</kbd> cierra'; return; }
-    if (ins) { tag.textContent = 'INSERT'; hint.innerHTML = '<kbd>enter</kbd> agrega · <kbd>esc</kbd> normal'; return; }
+    if (mode === 'capture') {
+      tag.textContent = 'NUEVA'; tip(tag, 'Captura rápida: para cancelar', 'Esc');
+      hint.innerHTML = `${tipped('<kbd>enter</kbd> agrega', 'Agregar la tarea', 'Enter')} · ${tipped('<kbd>esc</kbd> cancela', 'Cancelar la captura', 'Esc')}`;
+      return;
+    }
+    if (help) {
+      tag.textContent = 'AYUDA'; tip(tag, 'Ayuda: para cerrar', 'Esc');
+      hint.innerHTML = tipped('<kbd>?</kbd> o <kbd>esc</kbd> cierra', 'Cerrar la ayuda', '?');
+      return;
+    }
+    if (ins) {
+      tag.textContent = 'INSERT'; tip(tag, 'Modo escritura: para salir', 'Esc');
+      hint.innerHTML = `${tipped('<kbd>enter</kbd> agrega', 'Agregar la tarea', 'Enter')} · ${tipped('<kbd>esc</kbd> normal', 'Volver a modo normal', 'Esc')}`;
+      return;
+    }
     tag.textContent = 'NORMAL';
+    tip(tag, 'Modo normal: para escribir', 'n');
     if (pending) {
       const what = { b: 'otra <kbd>b</kbd> borra', t: 'otra <kbd>t</kbd> termina' }[pending];
-      hint.innerHTML = `<span class="pend">${pending}-</span> ${what} · <kbd>esc</kbd>`;
+      hint.innerHTML = `${tipped(`<span class="pend">${pending}-</span> ${what}`, pending === 'b' ? 'Confirmar el borrado' : 'Confirmar el final de la sesión', pending)} · ${tipped('<kbd>esc</kbd>', 'Cancelar', 'Esc')}`;
       return;
     }
     // la pista muestra solo lo que aplica al estado de la sesion; la letra subrayada es la tecla
-    const items = ['hecha', 'borrar', 'nueva'].map(U);
-    if (!s) items.push(U('iniciar'));
-    else items.push(U(s.status === 'running' ? 'pausa' : 'reanudar'), U('terminar'));
-    if (snap && snap.undo) items.push('<kbd>Ctrl+Z</kbd> deshacer');
-    items.push('<kbd>?</kbd>');
+    const items = [tipped(U('hecha'), 'Marcar como hecha', 'h'), tipped(U('borrar'), 'Borrar la tarea', 'b b'), tipped(U('nueva'), 'Nueva tarea', 'n')];
+    if (!s) items.push(tipped(U('iniciar'), 'Iniciar la sesión', 'i'));
+    else {
+      items.push(s.status === 'running' ? tipped(U('pausa'), 'Pausar la sesión', 'p') : tipped(U('reanudar'), 'Reanudar la sesión', 'r'));
+      items.push(tipped(U('terminar'), 'Terminar la sesión', 't t'));
+    }
+    if (snap && snap.undo) items.push(tipped('<kbd>Ctrl+Z</kbd> deshacer', 'Deshacer lo último', 'Ctrl+Z'));
+    items.push(tipped('<kbd>?</kbd>', 'Ver todos los atajos', '?'));
     hint.innerHTML = items.join(` ${SEP} `);
   }
 
@@ -218,10 +248,10 @@
     li.dataset.id = id;
     li.innerHTML = '<div class="rw"><div class="task">'
       + '<span class="n"></span>'
-      + '<button class="chk" data-act="done" title="Hecha / reabrir (h)"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.3 5 8.6l4.6-5.2"/></svg></button>'
-      + '<span class="title" data-act="active"><span class="tt"></span></span>'
-      + '<span class="tag" hidden></span><span class="now"></span><span class="ms"></span>'
-      + `<button class="x" data-act="del" title="Eliminar (bb)">${Icons.svg('x')}</button>`
+      + '<button class="chk" data-act="done" data-tip="Marcar como hecha" data-key="h"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 6.3 5 8.6l4.6-5.2"/></svg></button>'
+      + '<span class="title" data-act="active" data-tip="Activar la tarea" data-key="Enter"><span class="tt"></span></span>'
+      + '<span class="tag" hidden data-tip="Proyecto de la tarea"></span><span class="now"></span><span class="ms" data-tip="Tiempo en esta tarea"></span>'
+      + `<button class="x" data-act="del" data-tip="Borrar la tarea" data-key="b b" aria-label="Borrar la tarea">${Icons.svg('x')}</button>`
       + '</div></div>';
     return li;
   }
@@ -233,7 +263,6 @@
       li._sig = x.sig;
       const t = x.t;
       const title = task.querySelector('.title');
-      title.title = t.title;
       task.querySelector('.tt').textContent = t.title;
       const tag = task.querySelector('.tag');
       tag.hidden = !x.tag;
@@ -241,7 +270,11 @@
       if (x.tag) tag.style.setProperty('--c', colorOf(x.tag));
     }
     const n = task.querySelector('.n');
-    if (n.textContent !== x.n) n.textContent = x.n;
+    if (n.textContent !== x.n) { n.textContent = x.n; tip(n, x.n ? 'Seleccionar la tarea' : '', x.n); }
+    // el tooltip del check sigue al estado (con la animacion del check ya se ve el estado nuevo)
+    const chk = task.querySelector('.chk');
+    const done = x.cls.includes(' done');
+    if (chk._done !== done) { chk._done = done; tip(chk, done ? 'Reabrir la tarea' : 'Marcar como hecha', 'h'); }
     const ms = task.querySelector('.ms');
     if (ms.textContent !== x.ms) ms.textContent = x.ms;
   }
@@ -450,6 +483,7 @@
       document.documentElement.dataset.theme = theme;
       window.Theme.apply(document.documentElement, theme, c.accent);
       $('#btn-theme').innerHTML = Icons.svg(theme === 'light' ? 'sun' : 'moon');
+      tip($('#btn-theme'), theme === 'light' ? 'Pasar a tema oscuro' : 'Pasar a tema claro', 'c');
     };
     shortcuts = c.shortcuts || {};
     // cambio de tema: crossfade de 250 ms (View Transitions); la primera vez y con movimiento reducido, directo
@@ -534,6 +568,15 @@
     if (act === 'done') toggleDone(id);
     else if (act === 'active') { dispatch('setActive', { id }); render(); }
     else if (act === 'del') deleteRow(id);
+  });
+
+  // el tooltip del título depende de si es la tarea activa y de si el texto está cortado con "…" (entonces se muestra completo)
+  $('#list').addEventListener('pointerover', (e) => {
+    const el = e.target.closest && e.target.closest('.title');
+    if (!el) return;
+    const act = el.parentElement.classList.contains('active');
+    const cut = el.firstElementChild.scrollWidth > el.clientWidth;
+    tip(el, cut ? el.firstElementChild.textContent : act ? 'Tarea activa' : 'Activar la tarea', act ? '' : 'Enter');
   });
 
   function startOrResume() {

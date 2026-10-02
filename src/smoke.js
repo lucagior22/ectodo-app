@@ -103,6 +103,23 @@ module.exports = async function smoke(ctx) {
     await wait(100);
   }
 
+  // --- tooltips propios del panel: pointerover sobre varios elementos, captura y cobertura de data-tip ---
+  {
+    const over = (sel) => js0(widget, `(() => { const el = document.querySelector(${JSON.stringify(sel)}); el.dispatchEvent(new PointerEvent('pointerover', { bubbles: true })); return !!el; })()`);
+    const out = (sel) => js0(widget, `document.querySelector(${JSON.stringify(sel)}).dispatchEvent(new PointerEvent('pointerout', { bubbles: true, relatedTarget: document.body }))`);
+    const tipNow = () => js0(widget, `(() => { const t = document.querySelector('#tip'); if (!t || getComputedStyle(t).display === 'none') return null; const r = t.getBoundingClientRect(); return t.textContent + ' | ' + Math.round(r.left) + ',' + Math.round(r.top) + ' ' + Math.round(r.width) + 'x' + Math.round(r.height) + ' | viewport ' + document.documentElement.clientWidth + 'x' + document.documentElement.clientHeight; })()`);
+    for (const [name, sel] of [['sesion', '#btn-session'], ['tema', '#btn-theme'], ['dash', '#btn-dash'], ['check', '.row .chk'], ['borrar', '.row .x'], ['modo', '#mode-tag'], ['terminar', '#btn-end'], ['estado', '#ttl-r'], ['hint', '#hint > span:nth-child(1)']]) {
+      await over(sel);
+      await wait(700);
+      console.log(`[smoke] tooltip ${name}:`, await tipNow());
+      await shot(widget, `widget-tip-${name}`);
+      await out(sel);
+      await wait(100);
+    }
+    console.log('[smoke] tooltips: elementos interactivos del panel sin data-tip:', await js0(widget, `JSON.stringify([...document.querySelectorAll('#panel button, #panel [data-act], #panel input')].filter((e) => !e.closest('[data-tip]')).map((e) => e.id || e.className))`));
+    console.log('[smoke] tooltips: title nativos que quedan:', await js0(widget, `document.querySelectorAll('[title]').length`));
+  }
+
   ctx.openDashboard();
   await wait(1500);
   const dash = ctx.getDashboard();

@@ -40,7 +40,8 @@
 
   function place(el) {
     const r = el.getBoundingClientRect();
-    const t = tip.getBoundingClientRect();
+    // offsetWidth/Height: el tamaño real, sin el scale(.97) de la entrada (getBoundingClientRect lo achica)
+    const t = { width: tip.offsetWidth, height: tip.offsetHeight };
     const vw = document.documentElement.clientWidth;
     const vh = document.documentElement.clientHeight;
     let top = r.bottom + GAP;
