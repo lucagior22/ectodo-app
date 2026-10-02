@@ -1,0 +1,1291 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>taskghost · auditoría Apple</title>
+<style>
+@font-face { font-family: 'Inter Variable'; font-weight: 100 900; font-display: block;
+  src: url(../assets/fonts/inter-latin-opsz-normal.woff2) format('woff2-variations'); }
+@font-face { font-family: 'Inter Variable'; font-weight: 100 900; font-display: block;
+  src: url(../assets/fonts/inter-latin-ext-opsz-normal.woff2) format('woff2-variations');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+
+/* ================= tokens propuestos (los mismos que recomienda M1) ================= */
+:root {
+  --sans: "Inter Variable", -apple-system, "Segoe UI Variable Text", system-ui, sans-serif;
+  --mono: "Cascadia Mono", ui-monospace, Consolas, monospace;
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --spring-smooth: linear(0, 0.024, 0.081, 0.158, 0.243, 0.329, 0.412, 0.49, 0.561, 0.625, 0.681, 0.73, 0.773, 0.809, 0.841, 0.867, 0.89, 0.908, 0.924, 0.937, 0.948, 0.958, 0.965, 0.971, 0.977, 0.981, 0.984, 0.987, 0.99, 0.991, 0.993, 0.994, 0.995, 0.996, 0.997, 0.998, 1);
+  --spring-snappy: linear(0, 0.022, 0.078, 0.154, 0.242, 0.333, 0.423, 0.509, 0.587, 0.659, 0.721, 0.776, 0.822, 0.861, 0.894, 0.921, 0.942, 0.959, 0.973, 0.983, 0.991, 0.996, 1, 1.003, 1.005, 1.006, 1.006, 1.006, 1.006, 1.006, 1.005, 1.005, 1.004, 1.003, 1.003, 1.002, 1);
+  --spring-bouncy: linear(0, 0.029, 0.101, 0.201, 0.314, 0.43, 0.543, 0.646, 0.738, 0.816, 0.881, 0.933, 0.973, 1.002, 1.023, 1.036, 1.043, 1.046, 1.045, 1.042, 1.038, 1.033, 1.028, 1.022, 1.018, 1.013, 1.009, 1.006, 1.004, 1.002, 1, 0.999, 0.998, 0.998, 0.998, 0.998, 1);
+
+  /* claro */
+  --bg: #f2f2f7; --bg-raised: #ffffff; --bg-raised-2: #f2f2f7;
+  --label: #000000; --label-2: rgba(60,60,67,.72); --label-3: rgba(60,60,67,.36); --label-4: rgba(60,60,67,.18);
+  --fill-1: rgba(120,120,128,.20); --fill-2: rgba(120,120,128,.16); --fill-3: rgba(120,120,128,.12); --fill-4: rgba(120,120,128,.08);
+  --sep: rgba(60,60,67,.18);
+  --accent: #0088ff; --accent-rgb: 0,136,255; --on-accent: #fff;
+  --orange: #c55300; --orange-fill: rgba(255,141,40,.14);
+  --card-shadow: 0 0 0 .5px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.05);
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #000000; --bg-raised: #1c1c1e; --bg-raised-2: #2c2c2e;
+  --label: #ffffff; --label-2: rgba(235,235,245,.60); --label-3: rgba(235,235,245,.30); --label-4: rgba(235,235,245,.16);
+  --fill-1: rgba(120,120,128,.36); --fill-2: rgba(120,120,128,.32); --fill-3: rgba(120,120,128,.24); --fill-4: rgba(120,120,128,.18);
+  --sep: rgba(84,84,88,.60);
+  --accent: #0091ff; --accent-rgb: 0,145,255;
+  --orange: #ffa056; --orange-fill: rgba(255,146,48,.16);
+  --card-shadow: 0 0 0 .5px rgba(255,255,255,.06);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000; --bg-raised: #1c1c1e; --bg-raised-2: #2c2c2e;
+    --label: #ffffff; --label-2: rgba(235,235,245,.60); --label-3: rgba(235,235,245,.30); --label-4: rgba(235,235,245,.16);
+    --fill-1: rgba(120,120,128,.36); --fill-2: rgba(120,120,128,.32); --fill-3: rgba(120,120,128,.24); --fill-4: rgba(120,120,128,.18);
+    --sep: rgba(84,84,88,.60);
+    --accent: #0091ff; --accent-rgb: 0,145,255;
+    --orange: #ffa056; --orange-fill: rgba(255,146,48,.16);
+    --card-shadow: 0 0 0 .5px rgba(255,255,255,.06);
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+body {
+  background: var(--bg); color: var(--label);
+  font: 15px/1.55 var(--sans); font-optical-sizing: auto; font-feature-settings: "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { font: 12.5px/1.4 var(--mono); background: var(--fill-4); padding: 1px 5px; border-radius: 5px; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+/* barra superior con material */
+.top { position: sticky; top: 0; z-index: 50; backdrop-filter: saturate(180%) blur(20px); background: color-mix(in srgb, var(--bg) 72%, transparent); border-bottom: .5px solid var(--sep); }
+.top .wrap { display: flex; align-items: center; gap: 4px; height: 52px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+.top b { font-weight: 650; letter-spacing: -.01em; margin-right: 10px; }
+.top a { color: var(--label-2); font-size: 13px; padding: 5px 10px; border-radius: 8px; }
+.top a:hover { background: var(--fill-4); color: var(--label); text-decoration: none; }
+.top .sp { flex: 1; }
+.seg { display: inline-flex; padding: 2px; background: var(--fill-3); border-radius: 9px; }
+.seg button { font: 500 12.5px var(--sans); color: var(--label); background: none; border: 0; padding: 4px 12px; border-radius: 7px; cursor: pointer; }
+.seg button.on { background: var(--bg-raised); box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04); }
+
+/* tipografía del documento: la misma escala que propone M7 */
+.hero { padding: 64px 0 28px; }
+.eyebrow { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+h1 { font-size: 44px; line-height: 1.08; font-weight: 700; letter-spacing: -.028em; max-width: 820px; }
+.lead { font-size: 19px; line-height: 1.45; color: var(--label-2); max-width: 760px; margin-top: 14px; letter-spacing: -.012em; }
+h2 { font-size: 30px; line-height: 1.15; font-weight: 700; letter-spacing: -.024em; margin: 72px 0 8px; }
+h2 + .sub { color: var(--label-2); font-size: 16px; max-width: 760px; margin-bottom: 24px; }
+h3 { font-size: 17px; line-height: 1.3; font-weight: 650; letter-spacing: -.012em; }
+h4 { font-size: 13px; font-weight: 600; margin: 16px 0 6px; }
+
+.card { background: var(--bg-raised); border-radius: 18px; box-shadow: var(--card-shadow); padding: 20px 22px; }
+.grid { display: grid; gap: 14px; }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.g2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.k { font-size: 13px; color: var(--label-2); }
+.big { white-space: nowrap; font-size: 34px; font-weight: 700; letter-spacing: -.026em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.big small { font-size: 17px; font-weight: 600; color: var(--label-2); letter-spacing: -.01em; margin-left: 2px; }
+
+/* principios */
+.pr h3 { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
+.pr p { color: var(--label-2); font-size: 14px; }
+.ico { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; flex: none; color: #fff; }
+.ico svg { width: 17px; height: 17px; }
+
+/* tabla de auditoría (lista agrupada, separadores con sangría) */
+.list { background: var(--bg-raised); border-radius: 14px; box-shadow: var(--card-shadow); overflow: hidden; }
+.row { display: grid; grid-template-columns: 26px minmax(0, 1.25fr) minmax(0, 1.6fr) 74px; gap: 14px; padding: 12px 18px; align-items: start; position: relative; font-size: 14px; }
+.row + .row::before { content: ""; position: absolute; top: 0; left: 58px; right: 0; border-top: .5px solid var(--sep); }
+.row.hd { font-size: 12px; color: var(--label-2); font-weight: 500; padding-top: 10px; padding-bottom: 8px; }
+.row .n { color: var(--label-3); font-variant-numeric: tabular-nums; font-size: 13px; padding-top: 1px; }
+.row .w { color: var(--label-2); font-size: 13px; }
+.row .m a { font-size: 12.5px; font-weight: 600; }
+.sev { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.s3 { background: #ff4245; } .s2 { background: #ff9230; } .s1 { background: #8e8e93; }
+@media (max-width: 720px) { .row { grid-template-columns: 22px 1fr; } .row .w, .row .m { grid-column: 2; } .row.hd { display: none; } }
+
+/* capturas */
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.shot { background: var(--bg-raised); border-radius: 14px; box-shadow: var(--card-shadow); padding: 10px; }
+.shot img { width: 100%; display: block; border-radius: 8px; }
+.shot figcaption { font-size: 12.5px; color: var(--label-2); padding: 8px 4px 2px; }
+.shot.wide { grid-column: span 2; }
+@media (max-width: 560px) { .shot.wide { grid-column: auto; } }
+
+/* mejoras */
+.frente { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 48px 0 14px; }
+.frente h3 { white-space: nowrap; font-size: 22px; letter-spacing: -.02em; }
+.frente span { color: var(--label-2); font-size: 14px; }
+.mj { background: var(--bg-raised); border-radius: 18px; box-shadow: var(--card-shadow); padding: 22px 24px 20px; margin-bottom: 14px; }
+.mj-h { display: flex; gap: 12px; align-items: flex-start; }
+.mj-id { flex: none; font: 600 12px/1 var(--sans); color: var(--accent); background: rgba(var(--accent-rgb), .12); padding: 6px 8px; border-radius: 8px; font-variant-numeric: tabular-nums; margin-top: 1px; }
+.mj-h h3 { flex: 1; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.tag { font-size: 11.5px; font-weight: 500; color: var(--label-2); background: var(--fill-4); padding: 2px 8px; border-radius: 999px; }
+.tag.hi { color: #fff; background: var(--accent); }
+.tag.ask { color: var(--orange); background: var(--orange-fill); }
+.mj-b { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 28px; margin-top: 14px; }
+@media (max-width: 760px) { .mj-b { grid-template-columns: 1fr; } }
+.mj-b p, .mj-b li { font-size: 14px; color: var(--label-2); }
+.mj-b p b, .mj-b li b { color: var(--label); font-weight: 600; }
+.mj-b .full { grid-column: 1 / -1; }
+.mj-b ol { padding-left: 20px; display: grid; gap: 5px; }
+.mj-b ol li::marker { color: var(--label-3); font-variant-numeric: tabular-nums; font-size: 13px; }
+.files { font-size: 12.5px; color: var(--label-3); margin-top: 10px; }
+.files code { font-size: 11.5px; }
+pre { font: 12px/1.55 var(--mono); background: var(--fill-4); border-radius: 10px; padding: 12px 14px; overflow-x: auto; margin-top: 8px; color: var(--label); white-space: pre; }
+.demo { margin-top: 16px; border-radius: 14px; background: var(--bg-raised-2); padding: 18px; }
+.demo-cap { font-size: 12.5px; color: var(--label-2); margin-top: 12px; }
+.demo-cap kbd, .kbd { font: 500 11px/1 var(--sans); background: var(--bg-raised); padding: 3px 6px; border-radius: 5px; box-shadow: 0 0 0 .5px var(--sep), 0 1px 0 var(--sep); color: var(--label); }
+
+/* ======== DEMO: widget propuesto ======== */
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 760px) { .stage { grid-template-columns: 1fr; } }
+.stage .side { border-radius: 16px; padding: 22px 22px 70px; min-height: 470px; display: grid; place-items: start center; }
+.stage .before { background: #3a4a5c url() center/cover; background-image: linear-gradient(135deg, #46607a, #2b3542 55%, #6b5a4a); }
+.stage .after { background-image: linear-gradient(135deg, #46607a, #2b3542 55%, #6b5a4a); }
+.stage .lbl { font-size: 12px; font-weight: 600; color: rgba(255,255,255,.75); margin-bottom: 10px; justify-self: start; }
+.stage .before img { width: 300px; max-width: 100%; display: block; }
+
+.gw { /* tokens del widget propuesto, siempre oscuro en la demo salvo .light */
+  --w-l1: #fff; --w-l2: rgba(235,235,245,.62); --w-l3: rgba(235,235,245,.32); --w-f: rgba(120,120,128,.24); --w-f2: rgba(120,120,128,.16);
+  --w-sep: rgba(255,255,255,.09);
+  --w-bg-top: rgba(46,46,50,.94); --w-bg-bot: rgba(28,28,30,.94);
+  --w-acc: #0091ff; --w-acc-rgb: 0,145,255;
+  position: relative; width: 300px; max-width: 100%; color: var(--w-l1); font-size: 13px; line-height: 18px;
+  font-family: var(--sans); font-weight: 450; outline: none;
+}
+.gw.light {
+  --w-l1: #000; --w-l2: rgba(60,60,67,.72); --w-l3: rgba(60,60,67,.36); --w-f: rgba(120,120,128,.16); --w-f2: rgba(120,120,128,.10);
+  --w-sep: rgba(0,0,0,.08); --w-bg-top: rgba(255,255,255,.95); --w-bg-bot: rgba(246,246,248,.95);
+  --w-acc: #0088ff; --w-acc-rgb: 0,136,255;
+}
+.gw-card {
+  position: relative; border-radius: 22px; corner-shape: superellipse(1.6);
+  background: linear-gradient(180deg, var(--w-bg-top), var(--w-bg-bot));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 .5px rgba(255,255,255,.08), 0 0 0 .5px rgba(0,0,0,.35), 0 2px 4px rgba(0,0,0,.18), 0 14px 36px rgba(0,0,0,.38);
+  clip-path: inset(0 0 calc(100% - var(--pill-h, 100px)) 0 round 22px);
+  transition: clip-path 260ms var(--ease-out);
+}
+.gw.light .gw-card { box-shadow: inset 0 1px 0 #fff, 0 0 0 .5px rgba(0,0,0,.10), 0 2px 4px rgba(0,0,0,.06), 0 14px 36px rgba(0,0,0,.22); }
+.gw.open .gw-card { clip-path: inset(0 0 0 0 round 22px); transition: clip-path 460ms var(--spring-snappy); }
+.gw-pill { padding: 12px 16px 13px; cursor: pointer; }
+.gw-st { display: flex; justify-content: space-between; align-items: center; font-size: 11px; line-height: 14px; font-weight: 500; color: var(--w-l2); }
+.gw-st .live { display: inline-flex; align-items: center; gap: 6px; color: var(--w-acc); font-weight: 600; }
+.gw-st .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px rgba(var(--w-acc-rgb), .2); }
+.gw-time { display: flex; align-items: baseline; gap: 10px; margin: 4px 0 3px; }
+.clock { font-size: 34px; line-height: 38px; font-weight: 620; letter-spacing: -.026em; font-variant-numeric: tabular-nums; display: inline-flex; }
+.clock .dg { display: inline-block; position: relative; overflow: hidden; height: 38px; }
+.clock .dg i { font-style: normal; display: block; }
+.clock .dg i.in { animation: dgIn 380ms var(--spring-snappy) both; }
+.clock .dg i.out { position: absolute; inset: 0; animation: dgOut 240ms var(--ease-out) both; }
+@keyframes dgIn { from { transform: translateY(70%); filter: blur(3px); opacity: 0; } }
+@keyframes dgOut { to { transform: translateY(-70%); filter: blur(3px); opacity: 0; } }
+.clock .colon { opacity: .9; padding: 0 .02em; transform: translateY(-.06em); }
+.gw-time .sess { font-size: 13px; font-weight: 500; color: var(--w-l2); font-variant-numeric: tabular-nums; }
+.gw-cur { display: flex; align-items: center; gap: 6px; color: var(--w-l2); white-space: nowrap; overflow: hidden; }
+.gw-cur svg { width: 12px; height: 12px; flex: none; color: var(--w-acc); }
+.gw-cur b { color: var(--w-l1); font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+
+.gw-panel { padding: 2px 8px 0; }
+.gw-panel > * { transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out), filter 160ms var(--ease-out); }
+.gw:not(.open) .gw-panel > * { opacity: 0; transform: translateY(-6px) scale(.985); filter: blur(3px); }
+.gw.open .gw-panel > * { transition: opacity 300ms var(--ease-out), transform 420ms var(--spring-smooth), filter 300ms var(--ease-out); }
+.gw.open .gw-panel > :nth-child(1) { transition-delay: 30ms; }
+.gw.open .gw-panel > :nth-child(2) { transition-delay: 60ms; }
+.gw.open .gw-panel > :nth-child(3) { transition-delay: 90ms; }
+.gw.open .gw-panel > :nth-child(4) { transition-delay: 120ms; }
+.gw-bar { display: flex; align-items: center; gap: 4px; padding: 4px 6px 10px; }
+.gw-bar .grow { flex: 1; }
+.btn { font: 600 12.5px/1 var(--sans); border: 0; border-radius: 999px; padding: 7px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; color: var(--w-l1); background: var(--w-f2);
+  transition: transform 120ms var(--ease-out), background 150ms var(--ease-out); }
+.btn:active { transform: scale(.96); }
+.btn svg { width: 12px; height: 12px; }
+.btn.tint { background: rgba(var(--w-acc-rgb), .18); color: var(--w-acc); }
+.btn.fill { background: var(--w-acc); color: #fff; }
+.ibtn { width: 28px; height: 28px; border: 0; border-radius: 999px; background: none; color: var(--w-l2); display: grid; place-items: center; cursor: pointer; transition: background 150ms, transform 120ms var(--ease-out); }
+.ibtn:hover { background: var(--w-f2); color: var(--w-l1); }
+.ibtn:active { transform: scale(.92); }
+.ibtn svg { width: 15px; height: 15px; }
+.chip { font-size: 11.5px; font-weight: 550; color: var(--w-l2); background: var(--w-f2); padding: 4px 9px; border-radius: 999px; }
+
+.gw-list { list-style: none; display: grid; }
+.gw-row { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 280ms var(--ease-out), opacity 220ms var(--ease-out); }
+.gw-row.gone { grid-template-rows: 0fr; opacity: 0; }
+.gw-row > div { min-height: 0; overflow: hidden; }
+.gw-it { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px 0 8px; border-radius: 13px; corner-shape: superellipse(1.4); position: relative; }
+.gw-it .title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; position: relative; }
+.gw-it .meta { color: var(--w-l3); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.gw-it:hover { background: var(--w-f2); }
+.gw-it.sel { background: var(--w-acc); color: #fff; }
+.gw-it.sel .meta { color: rgba(255,255,255,.75); }
+.gw:not(:focus-within):not(:focus) .gw-it.sel { background: var(--w-f); color: var(--w-l1); }
+.gw:not(:focus-within):not(:focus) .gw-it.sel .meta { color: var(--w-l3); }
+.gw-it.act .title { font-weight: 620; }
+.chk { flex: none; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--w-l3); display: grid; place-items: center; cursor: pointer; background: none; padding: 0; position: relative;
+  transition: border-color 150ms; }
+.gw-it.sel .chk { border-color: rgba(255,255,255,.7); }
+.chk::after { content: ""; position: absolute; inset: -1.5px; border-radius: 50%; background: var(--w-acc); transform: scale(.4); opacity: 0; transition: transform 380ms var(--spring-bouncy), opacity 120ms; }
+.gw-it.sel .chk::after { background: #fff; }
+.chk svg { position: relative; z-index: 1; width: 10px; height: 10px; color: #fff; stroke-dasharray: 14; stroke-dashoffset: 14; transition: stroke-dashoffset 220ms var(--ease-out) 90ms; }
+.gw-it.sel .chk svg { color: var(--w-acc); }
+.done .chk { border-color: transparent; }
+.done .chk::after { transform: none; opacity: 1; }
+.done .chk svg { stroke-dashoffset: 0; }
+.gw-it .title::after { content: ""; position: absolute; left: 0; top: 50%; height: 1.5px; width: 100%; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform 260ms var(--ease-out) 120ms; }
+.done .title { color: var(--w-l2); transition: color 200ms 120ms; }
+.done .title::after { transform: scaleX(1); }
+.gw-it.act .now { width: 6px; height: 6px; border-radius: 50%; background: var(--w-acc); flex: none; }
+.gw-it.sel .now { background: #fff; }
+.gw-new { display: flex; align-items: center; gap: 10px; height: 34px; margin: 6px 0 0; padding: 0 10px; border-radius: 13px; background: var(--w-f2); color: var(--w-l3); }
+.gw-new svg { width: 14px; height: 14px; }
+.gw-foot { display: flex; align-items: center; gap: 8px; margin: 8px -8px 0; padding: 9px 14px 11px; border-top: .5px solid var(--w-sep); font-size: 11px; color: var(--w-l2); }
+.mode { font-size: 10px; font-weight: 650; letter-spacing: .02em; color: var(--w-l2); background: var(--w-f2); padding: 2px 7px; border-radius: 6px; }
+.gw-foot u { text-decoration: underline; text-decoration-color: var(--w-l3); text-underline-offset: 2px; text-decoration-thickness: 1px; color: var(--w-l1); }
+.kc { font: 550 10.5px/1 var(--sans); color: var(--w-l1); background: var(--w-f2); padding: 3px 5px; border-radius: 5px; box-shadow: inset 0 -1px 0 rgba(0,0,0,.25); }
+.toast { position: absolute; left: 50%; bottom: -46px; transform: translate(-50%, 8px) scale(.96); opacity: 0; pointer-events: none;
+  background: rgba(30,30,32,.92); color: #fff; font-size: 12px; font-weight: 500; padding: 8px 12px 8px 14px; border-radius: 999px; white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 8px 24px rgba(0,0,0,.35); display: flex; gap: 10px; align-items: center;
+  transition: opacity 200ms var(--ease-out), transform 360ms var(--spring-snappy); }
+.toast.on { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.toast .kc { background: rgba(255,255,255,.14); color: #fff; box-shadow: none; }
+
+/* ======== DEMO: esquinas ======== */
+.corners { display: flex; gap: 28px; flex-wrap: wrap; align-items: end; }
+.corners figure { text-align: center; font-size: 12.5px; color: var(--label-2); }
+.corners .sq { width: 132px; height: 132px; background: var(--accent); margin-bottom: 10px; }
+.corners .r { border-radius: 30px; }
+.corners .s { border-radius: 42px; corner-shape: superellipse(2); }
+.corners .o { position: relative; }
+.corners .o .sq { position: absolute; inset: 0; margin: 0; }
+.corners .o .sq.r { background: transparent; outline: 2px solid #ff4245; outline-offset: -2px; }
+.corners .o .wrap2 { position: relative; width: 132px; height: 132px; margin-bottom: 10px; }
+
+/* ======== DEMO: curvas ======== */
+.curves { display: grid; gap: 10px; }
+.curve { display: grid; grid-template-columns: 150px 1fr; gap: 14px; align-items: center; font-size: 13px; }
+.curve .name { color: var(--label-2); }
+.curve .name b { color: var(--label); font-weight: 600; display: block; }
+.track { position: relative; height: 34px; border-radius: 10px; background: var(--bg-raised); box-shadow: var(--card-shadow); }
+.ball { position: absolute; top: 5px; left: 5px; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); }
+.curves.go .ball { left: calc(100% - 29px); }
+
+/* ======== DEMO: dashboard propuesto ======== */
+.dash { display: grid; grid-template-columns: 190px 1fr; height: 470px; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 .5px var(--sep), 0 18px 50px rgba(0,0,0,.18); background: var(--bg-raised); font-size: 13px; line-height: 18px; }
+@media (max-width: 720px) { .dash { grid-template-columns: 1fr; height: auto; } .dash .sb { display: none; } }
+.sb { background: color-mix(in srgb, var(--bg-raised-2) 80%, var(--accent) 3%); border-right: .5px solid var(--sep); padding: 12px 10px; display: grid; align-content: start; gap: 2px; }
+.sb .tl { display: flex; gap: 7px; padding: 2px 6px 14px; }
+.sb .tl i { width: 12px; height: 12px; border-radius: 50%; background: var(--fill-1); }
+.sb .it { display: flex; align-items: center; gap: 9px; padding: 0 8px; height: 30px; border-radius: 8px; color: var(--label); }
+.sb .it .ico { width: 22px; height: 22px; border-radius: 6px; }
+.sb .it .ico svg { width: 13px; height: 13px; }
+.sb .it span { flex: 1; }
+.sb .it em { font-style: normal; font-size: 11px; color: var(--label-3); }
+.sb .it.on { background: var(--fill-3); font-weight: 600; }
+.sb .sec { font-size: 11px; font-weight: 600; color: var(--label-3); padding: 14px 8px 4px; }
+.mainv { overflow: hidden; display: grid; grid-template-rows: 46px 1fr 26px; }
+.tbar { display: flex; align-items: center; gap: 10px; padding: 0 16px; }
+.tbar .grow { flex: 1; }
+.tbar .liv { font-size: 12px; color: var(--label-2); display: flex; gap: 6px; align-items: center; }
+.tbar .liv b { color: var(--label); font-variant-numeric: tabular-nums; font-weight: 600; }
+.tbar .liv::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.content { padding: 4px 28px 0; overflow: hidden; }
+.content h5 { font-size: 26px; line-height: 32px; font-weight: 700; letter-spacing: -.021em; }
+.content .date { color: var(--label-2); font-size: 13px; margin-bottom: 16px; }
+.hrow { display: grid; grid-template-columns: 1.1fr 1fr; gap: 12px; }
+.tile { background: var(--bg-raised-2); border-radius: 14px; padding: 14px 16px; }
+.tile .k { font-size: 12px; font-weight: 500; }
+.ringwrap { display: flex; align-items: center; gap: 16px; }
+.ring { width: 76px; height: 76px; flex: none; }
+.ring circle { fill: none; stroke-width: 10; stroke-linecap: round; }
+.ring .bgc { stroke: rgba(var(--accent-rgb), .18); }
+.ring .fg { stroke: var(--accent); stroke-dasharray: 201; stroke-dashoffset: 201; transform: rotate(-90deg); transform-origin: center; transition: stroke-dashoffset 1100ms var(--spring-smooth); }
+.dash.in .ring .fg { stroke-dashoffset: 62; }
+.glist { margin-top: 12px; background: var(--bg-raised-2); border-radius: 14px; }
+.glist div { display: flex; justify-content: space-between; padding: 9px 16px; position: relative; }
+.glist div + div::before { content: ""; position: absolute; top: 0; left: 16px; right: 0; border-top: .5px solid var(--sep); }
+.glist span { color: var(--label-2); font-variant-numeric: tabular-nums; }
+.bars { display: flex; align-items: flex-end; gap: 7px; height: 92px; margin-top: 6px; position: relative; }
+.bars i { flex: 1; background: var(--fill-1); border-radius: 5px 5px 2px 2px; transform-origin: bottom; transform: scaleY(0); transition: transform 700ms var(--spring-smooth); }
+.dash.in .bars i { transform: none; }
+.bars i.t { background: var(--accent); }
+.bars .avg { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--label-3); }
+.bars .avg span { position: absolute; right: 0; top: -17px; font-size: 10.5px; color: var(--label-2); }
+.days { display: flex; gap: 7px; font-size: 10.5px; color: var(--label-3); margin-top: 5px; }
+.days span { flex: 1; text-align: center; }
+.sbar { display: flex; align-items: center; gap: 10px; padding: 0 16px; border-top: .5px solid var(--sep); font-size: 11px; color: var(--label-2); }
+.sbar .mode { color: var(--label-2); background: var(--fill-3); }
+
+/* ======== DEMO: ícono ======== */
+.icons { display: flex; gap: 26px; flex-wrap: wrap; align-items: flex-end; }
+.icons figure { text-align: center; font-size: 12.5px; color: var(--label-2); }
+.icons svg.app { width: 168px; height: 168px; display: block; margin-bottom: 8px; filter: drop-shadow(0 10px 18px rgba(0,0,0,.28)); }
+.tray { display: flex; gap: 0; border-radius: 10px; overflow: hidden; box-shadow: var(--card-shadow); }
+.tray div { display: flex; gap: 14px; align-items: center; padding: 12px 16px; }
+.tray .d { background: #202020; color: #fff; }
+.tray .l { background: #f3f3f3; color: #000; }
+
+/* fases */
+.phase { display: grid; grid-template-columns: 120px 1fr; gap: 18px; padding: 16px 20px; position: relative; }
+.phase + .phase::before { content: ""; position: absolute; top: 0; left: 20px; right: 0; border-top: .5px solid var(--sep); }
+.phase b { font-size: 14px; }
+.phase .k { margin-top: 2px; }
+.phase p { font-size: 14px; color: var(--label-2); }
+.phase p a { font-weight: 600; }
+@media (max-width: 600px) { .phase { grid-template-columns: 1fr; gap: 4px; } }
+
+.src li { font-size: 14px; color: var(--label-2); margin-bottom: 6px; }
+.src { padding-left: 20px; columns: 2 380px; column-gap: 36px; }
+footer.end { color: var(--label-3); font-size: 12.5px; padding: 48px 0 64px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-play" viewBox="0 0 16 16"><path d="M5 3.2v9.6a.6.6 0 0 0 .9.5l7.6-4.8a.6.6 0 0 0 0-1L5.9 2.7a.6.6 0 0 0-.9.5Z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 16 16"><rect x="4" y="3" width="2.8" height="10" rx="1" fill="currentColor"/><rect x="9.2" y="3" width="2.8" height="10" rx="1" fill="currentColor"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9" rx="2" fill="currentColor"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 16 16"><path d="M13.2 10.1A5.6 5.6 0 0 1 5.9 2.8a5.6 5.6 0 1 0 7.3 7.3Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1.3"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="1.3"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="1.3"/><rect x="9" y="9" width="4.5" height="4.5" rx="1.3"/></g></symbol>
+    <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 12 12"><path d="M2.5 6.3 5 8.6l4.6-5.2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 16 16"><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"><circle cx="8" cy="8" r="2.8"/><path d="M8 1.5v1.3M8 13.2v1.3M1.5 8h1.3M13.2 8h1.3M3.4 3.4l.9.9M11.7 11.7l.9.9M3.4 12.6l.9-.9M11.7 4.3l.9-.9"/></g></symbol>
+    <symbol id="i-list" viewBox="0 0 16 16"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M6 4.5h7M6 8h7M6 11.5h7"/><circle cx="3" cy="4.5" r=".6" fill="currentColor"/><circle cx="3" cy="8" r=".6" fill="currentColor"/><circle cx="3" cy="11.5" r=".6" fill="currentColor"/></g></symbol>
+    <symbol id="i-folder" viewBox="0 0 16 16"><path d="M2 4.6c0-.6.5-1.1 1.1-1.1h3l1.4 1.5h5.4c.6 0 1.1.5 1.1 1.1v5.8c0 .6-.5 1.1-1.1 1.1H3.1c-.6 0-1.1-.5-1.1-1.1V4.6Z" fill="currentColor"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="5.6"/><path d="M8 5v3.2l2 1.3"/></g></symbol>
+    <symbol id="i-chart" viewBox="0 0 16 16"><g fill="currentColor"><rect x="2.5" y="8" width="2.6" height="5.5" rx=".9"/><rect x="6.7" y="4.5" width="2.6" height="9" rx=".9"/><rect x="10.9" y="2.5" width="2.6" height="11" rx=".9"/></g></symbol>
+    <symbol id="i-gear" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.8v1.6M8 12.6v1.6M1.8 8h1.6M12.6 8h1.6M3.6 3.6l1.1 1.1M11.3 11.3l1.1 1.1M3.6 12.4l1.1-1.1M11.3 4.7l1.1-1.1" stroke-linecap="round"/></g></symbol>
+    <symbol id="i-eye" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="5.6"/><path d="M5.2 8.6c.8 1.3 1.7 1.9 2.8 1.9s2-.6 2.8-1.9" stroke-linecap="round"/></g></symbol>
+    <symbol id="i-layers" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M8 2.5 14 5.6 8 8.7 2 5.6 8 2.5Z"/><path d="m2 9.2 6 3.1 6-3.1"/></g></symbol>
+    <symbol id="i-type" viewBox="0 0 16 16"><path d="M3 4V2.8h10V4M8 2.8V13.5M6 13.5h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-wave" viewBox="0 0 16 16"><path d="M1.5 8c1.6 0 1.6-4.5 3.2-4.5S6.3 12.5 8 12.5s1.6-9 3.3-9 1.6 4.5 3.2 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-key" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.8" y="4" width="12.4" height="8" rx="2"/><path d="M4.5 7h.01M7 7h.01M9.5 7h.01M11.5 7h.01M5 9.5h6" stroke-linecap="round"/></g></symbol>
+  </defs>
+</svg>
+
+<nav class="top">
+  <div class="wrap">
+    <b>taskghost · Apple</b>
+    <a href="#resumen">Resumen</a>
+    <a href="#principios">Principios</a>
+    <a href="#limites">Límites</a>
+    <a href="#auditoria">Auditoría</a>
+    <a href="#mejoras">Mejoras</a>
+    <a href="#plan">Plan</a>
+    <a href="#fuentes">Fuentes</a>
+    <span class="sp"></span>
+    <div class="seg" id="themeSeg"><button data-t="auto" class="on">Auto</button><button data-t="light">Claro</button><button data-t="dark">Oscuro</button></div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <header class="hero" id="resumen">
+    <div class="eyebrow">Auditoría de diseño · 1 de octubre de 2026</div>
+    <h1>Cómo hacer que taskghost se sienta un producto de Apple.</h1>
+    <p class="lead">Revisé el widget y el dashboard (30 capturas del modo smoke), leí la documentación de diseño de Apple (HIG, Liquid Glass, tipografía, springs) y verifiqué qué se puede hacer en Electron&nbsp;44 sobre Windows. El veredicto: la base ya es limpia, pero hoy se ve <b style="color:var(--label)">plana y web</b>, no <b style="color:var(--label)">física y nativa</b>. Lo que la acerca a Apple no es un color ni una fuente. Es la suma de material, jerarquía tipográfica, geometría concéntrica y movimiento con física.</p>
+  </header>
+
+  <div class="grid g3">
+    <div class="card"><div class="k">Hallazgos</div><div class="big">21</div><p class="k" style="margin-top:6px">3 son bugs visibles: botón cortado, swatch duplicado y una curva del gráfico que dibuja un pico que no existe.</p></div>
+    <div class="card"><div class="k">Mejoras propuestas</div><div class="big">22</div><p class="k" style="margin-top:6px">Agrupadas en 6 frentes. Cada una explica en qué consiste, qué busca y cómo hacerla paso a paso.</p></div>
+    <div class="card"><div class="k">Esfuerzo total estimado</div><div class="big">8–11<small>días</small></div><p class="k" style="margin-top:6px">En 6 fases. Las fases 1 y 2 (≈3 días) ya cambian la percepción por completo.</p></div>
+  </div>
+
+  <!-- ================= PRINCIPIOS ================= -->
+  <h2 id="principios">Qué hace que algo “se sienta Apple”</h2>
+  <p class="sub">Los tres principios clásicos de la HIG (claridad, deferencia y profundidad) bajados a reglas que se pueden aplicar en el código de taskghost.</p>
+  <div class="grid g2 pr">
+    <div class="card"><h3><span class="ico" style="background:#0088ff"><svg><use href="#i-eye"/></svg></span>Deferencia: la interfaz no compite con el contenido</h3><p>Un solo color de acción, el acento, y solo en lo accionable o lo vivo. Sin bordes gruesos, sin mayúsculas gritonas ni subrayados de color por todos lados. Los textos secundarios bajan de jerarquía con transparencia (label 2/3/4), no con otro gris inventado.</p></div>
+    <div class="card"><h3><span class="ico" style="background:#6155f5"><svg><use href="#i-layers"/></svg></span>Profundidad: capas con material, no cajas con borde</h3><p>Apple separa una capa funcional que flota (controles, navegación, el widget) de la capa de contenido. La que flota tiene material: translucidez, un borde especular arriba y una sombra que la despega del fondo. Nunca se apila vidrio sobre vidrio.</p></div>
+    <div class="card"><h3><span class="ico" style="background:#34c759"><svg><use href="#i-type"/></svg></span>Claridad: tipografía con escala, peso y tracking</h3><p>Pocos tamaños con roles fijos (Large Title, Headline, Body, Caption). El tracking se ajusta según el tamaño: más apretado en lo grande y más abierto en lo chico. Los números van tabulares y los tiempos se escriben como los escribe una persona (“42 min”, no “00:42:00”).</p></div>
+    <div class="card"><h3><span class="ico" style="background:#ff8d28"><svg><use href="#i-wave"/></svg></span>Movimiento con física y con propósito</h3><p>Springs definidos por duración y rebote. Las animaciones se pueden interrumpir y conservan la velocidad. Las formas se transforman en vez de aparecer de golpe. Lo que pasa cien veces por día no se anima (mover la selección con las flechas). Lo que pasa pocas veces (completar una tarea) se festeja.</p></div>
+  </div>
+
+  <!-- ================= LÍMITES ================= -->
+  <h2 id="limites">Restricciones reales (Windows + Electron 44)</h2>
+  <p class="sub">Antes de proponer, verifiqué qué se puede hacer de verdad. Varias ideas “obvias” no se pueden aplicar tal cual.</p>
+  <div class="list">
+    <div class="row hd"><span></span><span>Tema</span><span>Qué implica</span><span>Estado</span></div>
+    <div class="row"><span class="n">1</span><b>SF Pro no se puede usar</b><span class="w">Su licencia la limita a maquetas y apps para plataformas Apple. Se queda <b>Inter</b> (OFL), que ya está empaquetada con eje óptico. Es la alternativa correcta y la tipografía que más se le parece.</span><span class="m">Se queda</span></div>
+    <div class="row"><span class="n">2</span><b>SF Symbols tampoco</b><span class="w">Misma restricción. Se usa un set SVG propio dibujado con la gramática de SF: trazo de 1,5 px, terminaciones redondeadas y glifos rellenos para lo activo (ver M9). Lucide (ISC) sirve como punto de partida.</span><span class="m"><a href="#m9">M9</a></span></div>
+    <div class="row"><span class="n">3</span><b>backdrop-filter no desenfoca el escritorio</b><span class="w">En una ventana transparente solo desenfoca el contenido de la propia página. El “vidrio” del widget tiene que ser material simulado (gradiente, borde especular, sombra) o un material real de DWM.</span><span class="m"><a href="#m4">M4</a></span></div>
+    <div class="row"><span class="n">4</span><b>Mica / Acrylic de Windows</b><span class="w">Electron tiene <code>backgroundMaterial</code> desde Windows 11 22H2. Para el dashboard (ventana con foco y duradera) Mica es ideal. Para el widget es dudoso: nunca toma foco y DWM suele pintar el color sólido de reserva en ventanas inactivas. También fuerza las esquinas de 8 px de Windows. Hay que hacer una prueba corta (spike) antes de decidir.</span><span class="m"><a href="#m5">M5</a></span></div>
+    <div class="row"><span class="n">5</span><b>Squircles nativos</b><span class="w">Electron 44 trae Chromium 152, que soporta <code>corner-shape: superellipse()</code> desde la versión 139. Las esquinas continuas tipo Apple salen con CSS, sin SVG.</span><span class="m"><a href="#m3">M3</a></span></div>
+    <div class="row"><span class="n">6</span><b>Springs en CSS</b><span class="w"><code>linear()</code> permite muestrear un spring real (duración + rebote, el modelo de Apple) sin JS en tiempo de ejecución. En esta página ya generé tres: smooth, snappy y bouncy.</span><span class="m"><a href="#m19">M19</a></span></div>
+    <div class="row"><span class="n">7</span><b>Sombra del widget</b><span class="w">La ventana mide exactamente 320 px y es transparente, así que cualquier sombra exterior se recorta. Para que el widget “flote” hay que darle a la ventana un margen transparente.</span><span class="m"><a href="#m6">M6</a></span></div>
+    <div class="row"><span class="n">8</span><b>Render de fuentes en Windows</b><span class="w">ClearType y DirectWrite dibujan más fino que macOS, y <code>-webkit-font-smoothing</code> no hace nada en Windows. Inter es variable: subir el cuerpo a peso <b>450</b> compensa y le da la densidad del texto de Mac.</span><span class="m"><a href="#m7">M7</a></span></div>
+  </div>
+
+  <!-- ================= AUDITORÍA ================= -->
+  <h2 id="auditoria">Auditoría: estado actual</h2>
+  <p class="sub">Capturas reales del modo smoke y, abajo, cada hallazgo con por qué no se siente Apple y qué mejora lo resuelve. <span class="sev s3"></span>alto · <span class="sev s2"></span>medio · <span class="sev s1"></span>bajo.</p>
+  <div class="shots">
+    <figure class="shot"><img src="auditoria/widget-ghost-pill.png" alt="Widget en reposo"><figcaption>Reposo (píldora): una caja plana con borde gris.</figcaption></figure>
+    <figure class="shot"><img src="auditoria/widget-active.png" alt="Widget activo"><figcaption>Panel: “Dashboard” cortado, aviso naranja en el medio, barra de pistas cargada.</figcaption></figure>
+    <figure class="shot"><img src="auditoria/widget-active-light-green.png" alt="Widget claro con verde"><figcaption>Claro + verde: el ajuste de contraste deja el botón verde musgo.</figcaption></figure>
+    <figure class="shot"><img src="auditoria/widget-leader.png" alt="Modo líder"><figcaption>Líder: leyenda densa, todas las letras con subrayado de color.</figcaption></figure>
+    <figure class="shot wide"><img src="auditoria/dash-hoy.png" alt="Dashboard hoy"><figcaption>Hoy: 4 tarjetas con el mismo peso visual y media pantalla vacía.</figcaption></figure>
+    <figure class="shot wide"><img src="auditoria/dash-tareas.png" alt="Dashboard tareas"><figcaption>Tareas: encabezados en MAYÚSCULAS, checkboxes y selects nativos, acciones siempre visibles.</figcaption></figure>
+    <figure class="shot wide"><img src="auditoria/dash-graficos.png" alt="Dashboard gráficos"><figcaption>Gráficos: Chart.js por defecto, con grilla completa, etiquetas a 45° y una curva que inventa un pico.</figcaption></figure>
+    <figure class="shot wide"><img src="auditoria/dash-ajustes.png" alt="Dashboard ajustes"><figcaption>Ajustes: la mejor pantalla. Falta un switch en lugar de “Sí/No” y sobra un índigo repetido al final.</figcaption></figure>
+  </div>
+
+  <div class="list" style="margin-top:18px">
+    <div class="row hd"><span>#</span><span>Hallazgo</span><span>Por qué no se siente Apple</span><span>Mejora</span></div>
+    <div class="row"><span class="n">1</span><span><span class="sev s3"></span>El botón “Dashboard” se corta en la barra del panel</span><span class="w">El texto se sale del ancho de 320 px. Un producto premium no tiene ni un píxel fuera de lugar.</span><span class="m"><a href="#m10">M10</a></span></div>
+    <div class="row"><span class="n">2</span><span><span class="sev s3"></span>Píldora y panel son dos cajas pegadas, con borde gris de 1 px</span><span class="w">Se nota la costura. No hay material ni profundidad, y el widget no parece un objeto que flota sobre el escritorio.</span><span class="m"><a href="#m4">M4</a> <a href="#m6">M6</a></span></div>
+    <div class="row"><span class="n">3</span><span><span class="sev s3"></span>Ninguna transición entre reposo y panel</span><span class="w">La ventana cambia de alto de golpe. En Apple las superficies se transforman, como la Dynamic Island.</span><span class="m"><a href="#m20">M20</a></span></div>
+    <div class="row"><span class="n">4</span><span><span class="sev s2"></span>Glifos Unicode: ▶ ☾ ☀ ✕ ↑ ↓ ·</span><span class="w">Cada uno trae su propio peso, tamaño y línea base según la fuente de reserva. Apple usa símbolos que acompañan el peso del texto.</span><span class="m"><a href="#m9">M9</a></span></div>
+    <div class="row"><span class="n">5</span><span><span class="sev s2"></span>Subrayados en acento, de 1,5 px y en negrita, en cada pista</span><span class="w">Decenas de marcas de color compiten con el contenido. Rompe la deferencia.</span><span class="m"><a href="#m12">M12</a></span></div>
+    <div class="row"><span class="n">6</span><span><span class="sev s2"></span>Selección con barra izquierda de 3 px y tinte</span><span class="w">Es el idioma de VS Code y Material. En macOS la fila seleccionada es un rectángulo redondeado relleno de acento con texto blanco, y gris cuando la lista no tiene foco.</span><span class="m"><a href="#m11">M11</a></span></div>
+    <div class="row"><span class="n">7</span><span><span class="sev s2"></span>Reloj “00:42:05 · 00:42:05”</span><span class="w">Ceros a la izquierda que no informan nada, dos relojes casi iguales y un separador “·” casi invisible. El Reloj de Apple muestra “42:05”.</span><span class="m"><a href="#m8">M8</a></span></div>
+    <div class="row"><span class="n">8</span><span><span class="sev s2"></span>Aviso de sesión descartada: un párrafo naranja en el medio del panel</span><span class="w">Apple usa un aviso compacto con ícono y fondo teñido, o un HUD efímero.</span><span class="m"><a href="#m14">M14</a></span></div>
+    <div class="row"><span class="n">9</span><span><span class="sev s2"></span>Acento oscurecido en los rellenos (verde musgo en claro)</span><span class="w">El ajuste de contraste está pensado para texto y se aplica también al fondo de los botones. Apple usa el color de sistema vivo como relleno, con texto blanco.</span><span class="m"><a href="#m2">M2</a></span></div>
+    <div class="row"><span class="n">10</span><span><span class="sev s2"></span>Barra de título nativa de Windows sobre el dashboard</span><span class="w">Las apps de Mac unifican la barra de título con la toolbar. Hoy hay dos bandas: la del sistema y la de la app.</span><span class="m"><a href="#m5">M5</a></span></div>
+    <div class="row"><span class="n">11</span><span><span class="sev s2"></span>Navegación arriba con F1–F6 dentro de cada pestaña y etiquetas en minúscula</span><span class="w">Las apps de Mac de este tipo (Things, Recordatorios, Música) usan una barra lateral con íconos de color. Los atajos se muestran alineados a la derecha y en tono terciario, como en los menús.</span><span class="m"><a href="#m15">M15</a></span></div>
+    <div class="row"><span class="n">12</span><span><span class="sev s2"></span>Encabezados en MAYÚSCULAS con tracking (LÍNEA DE TIEMPO, TAREA…)</span><span class="w">Es un estilo web de 2015. macOS usa títulos de sección en minúscula, semibold y del color del texto.</span><span class="m"><a href="#m7">M7</a></span></div>
+    <div class="row"><span class="n">13</span><span><span class="sev s2"></span>“Hoy”: 4 tarjetas con el mismo peso y media pantalla vacía</span><span class="w">No hay jerarquía ni un dato protagonista. Fitness y Tiempo en pantalla resuelven esto con un número héroe y un anillo.</span><span class="m"><a href="#m16">M16</a></span></div>
+    <div class="row"><span class="n">14</span><span><span class="sev s2"></span>Tabla de tareas: checkbox cuadrado nativo y botones ▶↑↓✕ siempre visibles</span><span class="w">Mucho ruido en cada fila. En Apple, las acciones aparecen al pasar el mouse o con la selección, y los checks son círculos.</span><span class="m"><a href="#m18">M18</a></span></div>
+    <div class="row"><span class="n">15</span><span><span class="sev s2"></span>Selects y slider nativos de Windows</span><span class="w">Rompen la ilusión: son el único control con estética de Windows.</span><span class="m"><a href="#m13">M13</a></span></div>
+    <div class="row"><span class="n">16</span><span><span class="sev s3"></span>Gráficos de Chart.js por defecto, con una curva que inventa un pico</span><span class="w">Grilla completa, etiquetas a 45°, barras cuadradas y una dona gruesa con borde. El suavizado (<code>tension</code>) dibuja valores que no existen.</span><span class="m"><a href="#m17">M17</a></span></div>
+    <div class="row"><span class="n">17</span><span><span class="sev s1"></span>“Sí/No” como control segmentado y un índigo repetido entre los swatches</span><span class="w">En Apple, un booleano es un switch. El selector propio se ve igual que el primer preset y confunde.</span><span class="m"><a href="#m13">M13</a></span></div>
+    <div class="row"><span class="n">18</span><span><span class="sev s2"></span>Completar, borrar y reordenar no tienen transición</span><span class="w">Las filas saltan. Se pierde el momento de satisfacción de cerrar una tarea, que en Recordatorios es lo mejor de la app.</span><span class="m"><a href="#m21">M21</a></span></div>
+    <div class="row"><span class="n">19</span><span><span class="sev s2"></span>Ícono: buena personalidad, ejecución de 2015</span><span class="w">Ocupa todo el lienzo, sin aire ni retícula. Los anteojos se pierden a 16 px en la bandeja. El widget mete el PNG entero en un círculo.</span><span class="m"><a href="#m22">M22</a></span></div>
+    <div class="row"><span class="n">20</span><span><span class="sev s1"></span>Espaciados irregulares y radios no concéntricos</span><span class="w">Paddings de 9/14/10, 7/10, 5/8 y 3/9 px. Radios de 14 (tarjeta), 9 (fila), 10 (input) y 8 (botón) sin relación entre sí. Apple usa una retícula de 4 pt y esquinas concéntricas.</span><span class="m"><a href="#m1">M1</a> <a href="#m3">M3</a></span></div>
+    <div class="row"><span class="n">21</span><span><span class="sev s1"></span>Neutros “zinc” con un tinte azul y grises inventados por componente</span><span class="w">Apple usa grises neutros y jerarquía con alpha (label/secondary/tertiary), que además funciona sobre materiales.</span><span class="m"><a href="#m1">M1</a></span></div>
+  </div>
+
+  <!-- ================= MEJORAS ================= -->
+  <h2 id="mejoras">Mejoras</h2>
+  <p class="sub">Cada mejora dice <b style="color:var(--label)">en qué consiste</b>, <b style="color:var(--label)">qué se busca</b> y <b style="color:var(--label)">cómo hacerla paso a paso</b>, con los archivos que toca. Las marcadas <span class="tag ask">confirmar</span> cambian algo que hoy decidiste vos (alcance o comportamiento), así que no se hacen sin tu ok.</p>
+
+  <!-- DEMO principal -->
+  <div class="card" style="padding:18px">
+    <h3 style="margin-bottom:4px">Antes / después del widget</h3>
+    <p class="k">A la derecha, una demo funcional que junta M1–M4, M8–M12, M19–M21. Hacé click en la píldora o enfocala y usá <span class="kbd">Enter</span> para abrir, <span class="kbd">↑</span><span class="kbd">↓</span> para elegir, <span class="kbd">h</span> o <span class="kbd">Espacio</span> para completar, <span class="kbd">Esc</span> para cerrar y <span class="kbd">c</span> para cambiar el tema.</p>
+    <div class="stage" style="margin-top:14px">
+      <div class="side before"><span class="lbl">Hoy</span><img src="auditoria/widget-active.png" alt="Widget actual"></div>
+      <div class="side after"><span class="lbl">Propuesta</span>
+        <div class="gw" id="gw" tabindex="0" aria-label="Demo del widget propuesto">
+          <div class="gw-card" id="gwCard">
+            <div class="gw-pill" id="gwPill">
+              <div class="gw-st"><span>taskghost · sin proyecto</span><span class="live">En curso</span></div>
+              <div class="gw-time"><span class="clock" id="clock"></span><span class="sess" id="sess">sesión 1:12:40</span></div>
+              <div class="gw-cur"><svg><use href="#i-play"/></svg><b id="curTitle">Comprar café</b></div>
+            </div>
+            <div class="gw-panel">
+              <div class="gw-bar">
+                <button class="btn tint"><svg><use href="#i-pause"/></svg>Pausar</button>
+                <button class="btn"><svg><use href="#i-stop"/></svg>Terminar</button>
+                <span class="grow"></span>
+                <button class="ibtn" id="gwTheme" title="Claro / oscuro (c)"><svg><use href="#i-moon"/></svg></button>
+                <button class="ibtn" title="Dashboard (d)"><svg><use href="#i-grid"/></svg></button>
+              </div>
+              <ul class="gw-list" id="gwList"></ul>
+              <div class="gw-new"><svg><use href="#i-plus"/></svg>Nueva tarea</div>
+              <div class="gw-foot"><span class="mode">NORMAL</span><span style="flex:1"><u>h</u>echa · <u>n</u>ueva · <u>p</u>ausa · <u>t</u>erminar</span><span class="kc">?</span></div>
+            </div>
+          </div>
+          <div class="toast" id="toast"><span id="toastTxt">Tarea hecha</span><span class="kc">Ctrl Z</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FRENTE 1 ===== -->
+  <div class="frente"><h3>1 · Fundamentos</h3><span>El sistema de diseño en el que se apoya todo lo demás.</span></div>
+
+  <article class="mj" id="m1">
+    <div class="mj-h"><span class="mj-id">M1</span><div><h3>Tokens de color, superficie y espacio al estilo Apple</h3>
+      <div class="tags"><span class="tag hi">Impacto alto</span><span class="tag">Esfuerzo: medio día</span><span class="tag">Base de todo</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Reemplazar los hex sueltos de <code>widget.css</code> y <code>dashboard.css</code> por un único <code>tokens.css</code> con la semántica de Apple: fondos <i>base / elevado</i>, etiquetas con alpha (<i>label, secondary, tertiary, quaternary</i>), rellenos con alpha (<i>fill 1–4</i>), separador hairline translúcido y una retícula de 4 pt.</p>
+      <p><b>Qué se busca.</b> Que la jerarquía salga de la transparencia y no de grises inventados. Así todo funciona sobre cualquier material, y el claro y el oscuro quedan coherentes entre widget y dashboard. Es el requisito para que M2–M4 queden bien.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>Crear <code>src/ui/tokens.css</code> (cargarlo antes de <code>widget.css</code> y <code>dashboard.css</code>; la CSP <code>'self'</code> ya lo permite).</li>
+          <li>Definir neutros puros (sin tinte azul). Oscuro: base <code>#1c1c1e</code>, elevado <code>#2c2c2e</code>, elevado 2 <code>#3a3a3c</code>. Claro: base <code>#f2f2f7</code>, elevado <code>#ffffff</code>.</li>
+          <li>Etiquetas. Oscuro: <code>rgba(235,235,245, 1 / .60 / .30 / .16)</code>. Claro: <code>rgba(60,60,67, 1 / .72 / .36 / .18)</code>. Apple usa .60 para el secundario en claro, pero da 3,4:1. Lo subimos a .72 para cumplir el 4,5:1 que ya exige <code>theme.js</code>.</li>
+          <li>Rellenos <code>rgba(120,120,128, .36/.32/.24/.18)</code> en oscuro y <code>(.20/.16/.12/.08)</code> en claro. Separador: <code>rgba(84,84,88,.6)</code> en oscuro y <code>rgba(60,60,67,.18)</code> en claro, a <b>0,5 px</b> (en pantallas de 100 % Chromium lo redondea a 1 px, que está bien).</li>
+          <li>Espacios: <code>--s1:4px --s2:8px --s3:12px --s4:16px --s5:20px --s6:24px --s8:32px</code>. Reemplazar cada padding suelto (9/14/10 → 12/16, 7/10 → 8/12, etc.).</li>
+          <li>Renombrar los usos actuales: <code>--fg → --label</code>, <code>--dim → --label-2</code>, <code>--soft → --fill-3</code>, <code>--line → --sep</code>, <code>--panel → --bg-raised</code>.</li>
+          <li>Actualizar <code>BG</code> en <code>theme.js</code> (<code>#1c1c1e</code> / <code>#ffffff</code>) y agregar un test en <code>theme.test.js</code> que verifique label-2 ≥ 4,5:1 en ambos temas.</li>
+        </ol>
+      </div>
+    </div>
+    <pre>/* src/ui/tokens.css (extracto) */
+:root[data-theme="dark"] {
+  --bg: #1c1c1e;  --bg-raised: #2c2c2e;  --bg-raised-2: #3a3a3c;
+  --label: #fff;  --label-2: rgba(235,235,245,.60);  --label-3: rgba(235,235,245,.30);  --label-4: rgba(235,235,245,.16);
+  --fill-1: rgba(120,120,128,.36); --fill-2: rgba(120,120,128,.32); --fill-3: rgba(120,120,128,.24); --fill-4: rgba(120,120,128,.18);
+  --sep: rgba(84,84,88,.60);
+}</pre>
+    <p class="files">Archivos: <code>src/ui/tokens.css</code> (nuevo), <code>widget.css</code>, <code>dashboard.css</code>, <code>index.html</code>, <code>dashboard.html</code>, <code>theme.js</code>, <code>test/theme.test.js</code></p>
+  </article>
+
+  <article class="mj" id="m2">
+    <div class="mj-h"><span class="mj-id">M2</span><div><h3>Acentos = colores de sistema de Apple, vivos en los rellenos</h3>
+      <div class="tags"><span class="tag hi">Impacto alto</span><span class="tag">Esfuerzo: 2–3 h</span><span class="tag ask">Confirmar: acento por defecto</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Cambiar los presets por la paleta de sistema de Apple (valores de la HIG de 2025, con variante clara y oscura): Azul, Índigo, Morado, Rosa, Naranja, Verde y Grafito. Separar dos usos del acento: <b>relleno</b> (botón primario, selección, check), que usa el color vivo con texto blanco, y <b>texto/ícono</b> sobre fondo neutro, que es lo único que pasa por el ajuste de contraste.</p>
+      <p><b>Qué se busca.</b> Que el botón primario y la selección tengan el “azul Apple” saturado y luminoso, no un verde musgo. Además, el color de marca se reconoce enseguida. Sugiero <b>Azul</b> como predeterminado, porque es el acento de macOS.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>En <code>theme.js</code>, cambiar <code>PRESETS</code> a pares <code>[nombre, claro, oscuro]</code>: azul <code>#0088ff/#0091ff</code>, índigo <code>#6155f5/#6d7cff</code>, morado <code>#cb30e0/#db34f2</code>, rosa <code>#ff2d55/#ff375f</code>, naranja <code>#ff8d28/#ff9230</code>, verde <code>#34c759/#30d158</code>, grafito <code>#8e8e93/#98989d</code>.</li>
+          <li>Exponer dos variables: <code>--accent</code> (relleno, el color tal cual) y <code>--accent-text</code> (el resultado de <code>accentFor()</code>, solo para texto e íconos sobre neutro).</li>
+          <li>Recorrer los CSS: <code>button.primary</code>, <code>.sel</code>, checks, el anillo y las barras usan <code>--accent</code>; links, <code>#ttl-r.run</code> y <code>.pend</code> usan <code>--accent-text</code>.</li>
+          <li><code>onAccent()</code>: para etiquetas semibold de 13 px o más, preferir blanco si el contraste es ≥ 3:1 (criterio WCAG de “texto grande o negrita”), como hace Apple. Dejarlo documentado en un test.</li>
+          <li>Si el acento guardado es uno de los presets viejos, migrarlo al preset nuevo equivalente en <code>store.js</code>. Un hex propio se respeta tal cual.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>theme.js</code>, <code>store.js</code>, <code>widget.css</code>, <code>dashboard.css</code>, <code>dashboard.js</code> (swatches), <code>test/theme.test.js</code></p>
+  </article>
+
+  <article class="mj" id="m3">
+    <div class="mj-h"><span class="mj-id">M3</span><div><h3>Esquinas continuas (squircle) y radios concéntricos</h3>
+      <div class="tags"><span class="tag hi">Impacto alto</span><span class="tag">Esfuerzo: 2 h</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Usar <code>corner-shape: superellipse()</code> (Chromium 152 lo soporta) para que las esquinas tengan la curvatura continua del hardware de Apple. Además, aplicar la regla de concentricidad de Liquid Glass: <b>radio interior = radio exterior − padding</b>.</p>
+      <p><b>Qué se busca.</b> Es el detalle “invisible” que más delata a una interfaz no Apple: el radio circular deja un quiebre donde termina el lado recto. Con esquinas concéntricas, todo parece tallado en una sola pieza.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>Tokens: <code>--r-card: 22px</code> (widget), <code>--r-inner: calc(var(--r-card) - 8px)</code> = 14 (filas e input), <code>--r-ctl: 999px</code> (botones en cápsula), <code>--r-tile: 14px</code> (tarjetas del dashboard) y <code>--r-cell: 8px</code>.</li>
+          <li>Aplicar <code>corner-shape: superellipse(1.6)</code> a tarjetas, filas e input. Con superellipse hay que <b>subir el radio un ~20–30 %</b> para que se vea igual de redondeado (la curva “come” menos).</li>
+          <li>El <code>clip-path: inset(... round R)</code> del morph sigue siendo circular. Usar el mismo R y verificar que no se note diferencia en el borde.</li>
+          <li>No aplicarlo a cápsulas ni círculos (con 999px no cambia nada).</li>
+        </ol>
+      </div>
+    </div>
+    <div class="demo">
+      <div class="corners">
+        <figure><div class="sq r"></div>Radio circular (hoy)</figure>
+        <figure><div class="sq s"></div>superellipse(2)</figure>
+        <figure class="o"><div class="wrap2"><div class="sq s"></div><div class="sq r"></div></div>Superpuestas (rojo = hoy)</figure>
+      </div>
+      <p class="demo-cap">Si tu navegador no soporta <code>corner-shape</code>, las dos se ven iguales. En Electron 44 se ven distintas.</p>
+    </div>
+  </article>
+
+  <!-- ===== FRENTE 2 ===== -->
+  <div class="frente"><h3>2 · Material y profundidad</h3><span>Que el widget sea un objeto físico que flota.</span></div>
+
+  <article class="mj" id="m4">
+    <div class="mj-h"><span class="mj-id">M4</span><div><h3>El widget como Live Activity: una sola cápsula de material</h3>
+      <div class="tags"><span class="tag hi">Impacto muy alto</span><span class="tag">Esfuerzo: medio día</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Rediseñar <code>#pill</code> + <code>#panel</code> como <b>una sola superficie</b> (como la Dynamic Island o una Live Activity) con un material simulado: gradiente vertical sutil, borde especular superior de 1 px, contorno de 0,5 px y opacidad alta. Sin costura entre la píldora y el panel: el panel es la misma superficie que se estira.</p>
+      <p><b>Qué se busca.</b> Que el widget deje de ser “un div con borde” y pase a ser un objeto con luz propia, que se lea sobre cualquier fondo de escritorio. Es el cambio que más acerca la estética a iOS y macOS Tahoe.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>Envolver <code>#pill</code> y <code>#panel</code> en un <code>.surface</code> único. El fondo, el radio y la sombra van ahí, y se sacan los bordes de cada parte (incluido el truco de <code>border-bottom: 0</code>).</li>
+          <li>Material: <code>background: linear-gradient(180deg, rgba(46,46,50,a), rgba(28,28,30,a))</code>, donde <code>a</code> sale de <code>--ghost-a</code> (se mantiene la opción de opacidad).</li>
+          <li>Luz: <code>box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 .5px rgba(255,255,255,.08), 0 0 0 .5px rgba(0,0,0,.35)</code>. El brillo superior es el “specular highlight” de Liquid Glass.</li>
+          <li>Separar visualmente la cabecera del panel solo con espacio. Si hace falta, un separador hairline con sangría, nunca un borde de lado a lado.</li>
+          <li>Opcional: una textura de ruido al 2–3 % (PNG de 64 px en <code>assets/</code>) que evita el banding del gradiente en monitores de 8 bits y da sensación de material.</li>
+          <li>Claro: el mismo esquema con blancos (<code>#fff → #f6f6f8</code>) y el especular en blanco puro.</li>
+          <li>Accesibilidad: si Windows tiene “Efectos de transparencia” desactivados (se puede leer con <code>nativeTheme</code> o el registro), forzar <code>a = 1</code>.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>index.html</code>, <code>widget.css</code>, <code>widget.js</code> (alto de la ventana)</p>
+  </article>
+
+  <article class="mj" id="m5">
+    <div class="mj-h"><span class="mj-id">M5</span><div><h3>Materiales reales de Windows: Mica en el dashboard y prueba de Acrylic en el widget</h3>
+      <div class="tags"><span class="tag">Impacto alto</span><span class="tag">Esfuerzo: 1 día (incluye spike)</span><span class="tag">Windows 11 22H2+</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> En el dashboard: <code>backgroundMaterial: 'mica'</code> y barra de título oculta con <code>titleBarOverlay</code>, para que la barra lateral sea translúcida de verdad y la toolbar quede unificada con la barra de título, como en Mac. En el widget: un spike acotado para probar <code>'acrylic'</code>.</p>
+      <p><b>Qué se busca.</b> Material verdadero del sistema donde aporta (ventana grande, con foco y duradera), sin pelear con DWM donde no conviene. La barra de título unificada sola ya cambia la sensación de “app web” a “app nativa”.</p>
+      <div class="full">
+        <h4>Paso a paso (dashboard)</h4>
+        <ol>
+          <li>En <code>main.js</code>, crear el dashboard con <code>titleBarStyle: 'hidden'</code>, <code>titleBarOverlay: { color: '#00000000', symbolColor, height: 44 }</code>, <code>backgroundMaterial: 'mica'</code> y <code>backgroundColor: '#00000000'</code>.</li>
+          <li>En <code>dashboard.css</code>, poner <code>body</code> transparente, la barra lateral con un relleno muy leve (deja ver Mica) y el área de contenido opaca (<code>--bg-raised</code>).</li>
+          <li>Hacer arrastrable la toolbar (<code>-webkit-app-region: drag</code>) y dejar los botones en <code>no-drag</code>. Reservar 140 px a la derecha para los controles de ventana.</li>
+          <li>Al cambiar de tema, llamar a <code>win.setTitleBarOverlay({ symbolColor })</code> por IPC.</li>
+          <li>Reserva: en Windows 10 o Linux, sin material, con colores sólidos de M1. Detectarlo con <code>os.release()</code> (build ≥ 22621).</li>
+        </ol>
+        <h4>Spike del widget (máx. 2 h; criterio de aceptación claro)</h4>
+        <ol>
+          <li>Probar <code>transparent: false</code> + <code>backgroundMaterial: 'acrylic'</code> + <code>focusable: false</code>.</li>
+          <li>Medir tres cosas: (a) si se ve el desenfoque <b>sin foco</b>, que es como vive el widget; (b) si las esquinas de 8 px de DWM se pueden combinar con el radio de 22; (c) si <code>setContentSize</code> y el esquive (dodge) siguen fluidos.</li>
+          <li>Si falla cualquiera, se descarta y queda M4. Mi pronóstico: falla (a), porque DWM pinta el color de reserva en ventanas inactivas.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>main.js</code>, <code>preload.js</code>, <code>dashboard.css</code>, <code>dashboard.html</code></p>
+  </article>
+
+  <article class="mj" id="m6">
+    <div class="mj-h"><span class="mj-id">M6</span><div><h3>Sombra real: margen transparente alrededor del widget</h3>
+      <div class="tags"><span class="tag">Impacto medio-alto</span><span class="tag">Esfuerzo: medio día</span><span class="tag">Toca el esquive</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Agrandar la ventana del widget 24 px por lado (transparentes) para que la sombra de dos capas (<code>0 2px 4px</code> de contacto + <code>0 14px 36px</code> ambiental) no se recorte. Los clicks en ese margen tienen que atravesar la ventana.</p>
+      <p><b>Qué se busca.</b> La elevación. Hoy el widget parece pegado al escritorio. Con sombra flota por encima de todo, que es justamente su rol de “capa funcional”.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li><code>main.js</code>: <code>WIDTH = 320 + 2*M</code> con <code>M = 24</code>. En <code>widget:height</code>, sumar <code>2*M</code>.</li>
+          <li>Guardar la posición de la <b>tarjeta</b>, no de la ventana: restar y sumar <code>M</code> en <code>savedPos</code>, <code>defaultPosition()</code> y <code>validPosition()</code>. Así las posiciones guardadas siguen sirviendo.</li>
+          <li>Esquive: la zona (<code>zone</code>) se calcula con los límites de la tarjeta (ventana menos <code>M</code>), no con los de la ventana entera.</li>
+          <li>Modo activo: la ventana recibe clicks. Usar <code>setIgnoreMouseEvents(true, { forward: true })</code> mientras el puntero esté en el margen, y alternarlo desde el renderer con <code>mouseenter</code>/<code>mouseleave</code> de <code>.surface</code> por IPC.</li>
+          <li>Sombra adaptativa: un poco más fuerte en modo activo (la superficie “sube”) y más suave en reposo. Se transiciona con <code>opacity</code> de un pseudo-elemento, no con <code>box-shadow</code>, que es caro.</li>
+          <li>Ampliar el smoke: capturar con un fondo de color detrás para verificar que la sombra no se corta.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>main.js</code>, <code>dodge.js</code> (si la zona vive ahí), <code>preload.js</code>, <code>widget.js</code>, <code>widget.css</code>, <code>smoke.js</code>, <code>test/dodge.test.js</code></p>
+  </article>
+
+  <!-- ===== FRENTE 3 ===== -->
+  <div class="frente"><h3>3 · Tipografía y números</h3><span>Donde Apple es más estricta y donde más se nota.</span></div>
+
+  <article class="mj" id="m7">
+    <div class="mj-h"><span class="mj-id">M7</span><div><h3>Escala tipográfica de macOS con tracking según el tamaño</h3>
+      <div class="tags"><span class="tag hi">Impacto alto</span><span class="tag">Esfuerzo: medio día</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Adoptar los estilos de texto de macOS (Large Title, Title, Headline, Body, Callout, Subheadline, Caption) como tokens. Activar <code>font-optical-sizing: auto</code> (Inter tiene el eje <i>opsz</i>, como SF Text/Display). Aplicar tracking negativo en lo grande y levemente positivo en lo chico. Sacar todas las MAYÚSCULAS con tracking.</p>
+      <p><b>Qué se busca.</b> La cadencia “apretada” de Apple en títulos y números, y legibilidad en los tamaños chicos. Menos tamaños y roles claros: cada texto sabe qué es.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>Tokens (tamaño/interlineado · peso · tracking): <b>Large Title</b> 26/32 · 700 · −0,021em (título de cada vista) · <b>Title 2</b> 17/22 · 650 · −0,012em (secciones, antes en mayúscula) · <b>Title 3</b> 15/20 · 600 · −0,009em (títulos de tarjeta) · <b>Headline</b> 13/18 · 600 · −0,003em (tarea activa) · <b>Body</b> 13/18 · 450 · −0,003em · <b>Callout</b> 12/16 · 450 · 0 · <b>Subheadline</b> 11/14 · 500 · +0,005em (metadatos, pistas) · <b>Caption</b> 10/13 · 500 · +0,01em (ejes). Display del reloj: 34/38 · 620 · −0,026em.</li>
+          <li>Base del tracking: la fórmula de “dynamic metrics” de Inter, <code>a + b·e^(c·tamaño)</code> con a = −0,0223, b = 0,185, c = −0,1745. Con <i>opsz</i> activo, ajustar a ojo y bajar la corrección a la mitad si queda demasiado apretado.</li>
+          <li>Pesos con el eje variable: cuerpo en 450 (compensa el render más fino de Windows), títulos en 600–700 y nunca menos de 400 (la HIG desaconseja Light/Thin en UI).</li>
+          <li><code>h2</code>, <code>th</code>, <code>#mode-tag</code> y <code>.lead</code>: <code>text-transform: none</code>, sentence case, sin <code>letter-spacing</code> positivo.</li>
+          <li>Navegación: “Hoy, Tareas, Proyectos…” con mayúscula inicial, consistente con los títulos.</li>
+          <li>Unificar el cuerpo del dashboard en 13 px (hoy es 13,5) para que widget y dashboard compartan escala.</li>
+          <li><code>font-feature-settings: "cv11"</code> (a de un piso, más cercana a SF) y <code>"tnum"</code> solo en números. Evaluar <code>"ss03"</code> si mejora la lectura de la <i>l</i>. Probarlo en las capturas.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>tokens.css</code>, <code>widget.css</code>, <code>dashboard.css</code>, <code>dashboard.html</code></p>
+  </article>
+
+  <article class="mj" id="m8">
+    <div class="mj-h"><span class="mj-id">M8</span><div><h3>Tiempos y números como los escribe Apple, con transición numérica</h3>
+      <div class="tags"><span class="tag hi">Impacto alto</span><span class="tag">Esfuerzo: 3–4 h</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> (1) El reloj principal sin horas en cero: <code>42:05</code> y <code>1:02:05</code>. (2) El reloj de sesión como dato secundario y con su etiqueta (“sesión 1:12:40”), no como un segundo reloj casi igual. (3) Duraciones en el dashboard escritas en lenguaje natural: “42 min”, “1 h 12 min”, con la unidad más chica y en color secundario. (4) Las cifras de horas y minutos “ruedan” al cambiar, como <code>.contentTransition(.numericText())</code> de SwiftUI.</p>
+      <p><b>Qué se busca.</b> Que el número protagonista se lea de un vistazo, sin ceros que no informan nada. El rodar de cifras le da vida al reloj sin distraer, porque los segundos no se animan (regla de frecuencia).</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li><code>widget.js</code>: <code>fmt()</code> → <code>h ? h:mm:ss : m:ss</code>. Agregar <code>fmtHuman()</code> en <code>stats.js</code> (“42 min”, “1 h 12 min”, “3 h”) y usarlo en los KPIs, las tablas y los totales de la línea de tiempo.</li>
+          <li>Renderizar el reloj como un <code>&lt;span class="dg"&gt;</code> por cifra. Al cambiar una cifra de minutos u horas, insertar la nueva con <code>translateY(70%)+blur(3px)</code> → 0 (spring snappy, 380 ms) y sacar la vieja hacia arriba (240 ms, ease-out). Los segundos cambian sin animar.</li>
+          <li>Inter con <code>calt</code> sube los dos puntos entre cifras: verificar que esté activo (lo está por defecto).</li>
+          <li>Unidades: <code>&lt;b&gt;42&lt;/b&gt;&lt;small&gt;min&lt;/small&gt;</code>, con la unidad en peso 600, 60 % del tamaño y <code>--label-2</code>.</li>
+          <li>Reducir movimiento: sin rodar, cambio directo.</li>
+          <li>Tests: casos de <code>fmtHuman</code> (0, 59 s, 1 min, 59 min, 60 min, 1 h 5 min, 10 h) en <code>stats.test.js</code>.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="demo-cap" style="margin-top:12px">En la demo de arriba, el reloj arranca en 42:57: a los 3 segundos vas a ver rodar los minutos.</p>
+    <p class="files">Archivos: <code>widget.js</code>, <code>widget.css</code>, <code>stats.js</code>, <code>dashboard.js</code>, <code>test/stats.test.js</code></p>
+  </article>
+
+  <!-- ===== FRENTE 4 ===== -->
+  <div class="frente"><h3>4 · Componentes</h3><span>Cada control con su versión “de sistema”.</span></div>
+
+  <article class="mj" id="m9">
+    <div class="mj-h"><span class="mj-id">M9</span><div><h3>Set de íconos SVG con la gramática de SF Symbols</h3>
+      <div class="tags"><span class="tag hi">Impacto alto</span><span class="tag">Esfuerzo: medio día</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Reemplazar los glifos Unicode (▶ ☾ ☀ ✕ ↑ ↓ + ·) por un sprite SVG propio de unos 18 íconos: play, pausa, stop, luna, sol, grilla, más, check, xmark, flechas, reloj, carpeta, gráfico, engranaje, aviso y chevrons. Trazo de 1,5 px en una caja de 16, terminaciones redondeadas, versión rellena para estados activos. Esta misma página los usa.</p>
+      <p><b>Qué se busca.</b> Íconos que acompañan el peso y la línea base del texto, con <code>currentColor</code> para que hereden la jerarquía de color. Además, liberan espacio en la barra del panel (ver M10).</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>Crear <code>src/ui/icons.svg</code> con <code>&lt;symbol id="play" viewBox="0 0 16 16"&gt;…</code>. Se puede partir de Lucide (licencia ISC: copiar el aviso en <code>assets/</code>) y ajustarlo a 16 px y trazo de 1,5.</li>
+          <li>Uso: <code>&lt;svg class="i"&gt;&lt;use href="icons.svg#play"/&gt;&lt;/svg&gt;</code>, permitido por la CSP <code>'self'</code>. Tamaño en <code>em</code> (<code>1.1em</code>) para que escale con el texto.</li>
+          <li>Alineación óptica: <code>vertical-align: -0.15em</code>. El play va corrido 0,5 px a la derecha (su centro visual no es el geométrico).</li>
+          <li>Reemplazar uno por uno en <code>index.html</code>, <code>widget.js</code> (ítems de lista), <code>dashboard.html</code> y <code>dashboard.js</code> (acciones de fila y tema).</li>
+          <li>Íconos de sección del dashboard (M15) en “cuadraditos” de color de 22 px con el glifo en blanco, como en Ajustes del Sistema.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>src/ui/icons.svg</code> (nuevo), <code>index.html</code>, <code>widget.js</code>, <code>widget.css</code>, <code>dashboard.*</code></p>
+  </article>
+
+  <article class="mj" id="m10">
+    <div class="mj-h"><span class="mj-id">M10</span><div><h3>Jerarquía de botones Apple y feedback al presionar</h3>
+      <div class="tags"><span class="tag hi">Impacto alto</span><span class="tag">Esfuerzo: 3 h</span><span class="tag">Arregla el bug de “Dashboard”</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Tres estilos y nada más: <b>relleno</b> (acento + blanco, una sola acción primaria por vista), <b>teñido</b> (acento al 18 % + texto en acento, como los botones de iOS 15+) y <b>plano</b> (relleno 4 + texto). Botones en cápsula y acciones secundarias como íconos circulares de 28 px con tooltip. Al presionar: <code>scale(.96)</code> en 120 ms.</p>
+      <p><b>Qué se busca.</b> Que se entienda enseguida qué es lo principal (Iniciar/Pausar). La barra del panel entra en 320 px sin cortarse, y cada click se siente “físico”.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>Barra del panel: <code>[Pausar (teñido)] [Terminar (plano)] [chip proyecto] ··· [luna] [grilla]</code>. Tema y Dashboard pasan a íconos. La letra subrayada sigue en el <code>title</code> y en la barra de estado.</li>
+          <li>Cuando no hay sesión, “Iniciar” va con relleno. Pausado: “Reanudar” con relleno.</li>
+          <li><code>button:active { transform: scale(.96) }</code> con <code>transition: transform 120ms var(--ease-out)</code>. En íconos circulares, <code>.92</code>.</li>
+          <li>Hover solo en <code>@media (hover: hover)</code>, como relleno 4. Foco de teclado: <code>outline: 3px solid rgba(acento,.45); outline-offset: 1px</code>, solo con <code>:focus-visible</code>.</li>
+          <li>Deshabilitado: <code>opacity: .35</code>, sin cursor “prohibido” (Apple no lo usa).</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>index.html</code>, <code>widget.css</code>, <code>widget.js</code>, <code>dashboard.css</code></p>
+  </article>
+
+  <article class="mj" id="m11">
+    <div class="mj-h"><span class="mj-id">M11</span><div><h3>Listas y selección al estilo macOS; checks de Recordatorios</h3>
+      <div class="tags"><span class="tag hi">Impacto alto</span><span class="tag">Esfuerzo: 3 h</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> La fila seleccionada pasa a ser un rectángulo redondeado relleno de acento con texto blanco cuando el panel tiene foco, y relleno gris (fill 3) cuando no lo tiene. Sin barra izquierda. Filas de 34 px, con hover en relleno 4. El check es un anillo de 18 px que al completarse se llena de acento con un check blanco.</p>
+      <p><b>Qué se busca.</b> El idioma de selección de Finder y Recordatorios: inequívoco, limpio y reconocible. La tarea activa se marca con un punto de acento y peso 600, sin competir con la selección.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li><code>.task.sel</code>: <code>background: var(--accent); color: var(--on-accent)</code>, con los metadatos al 75 % de blanco. Quitar el <code>box-shadow</code> inset.</li>
+          <li>Sin foco (<code>body:not(.active)</code> o cuando se ve el dashboard): <code>background: var(--fill-3); color: var(--label)</code>.</li>
+          <li><b>La selección no se anima</b> al moverla con ↑/↓ (pasa cientos de veces por día). Cambio instantáneo.</li>
+          <li>Check: anillo de 1,5 px en <code>--label-3</code>. Hecho: un pseudo-elemento que escala de .4 a 1 con spring bouncy + el trazo del check que se dibuja (<code>stroke-dashoffset</code>) en 220 ms con 90 ms de retraso.</li>
+          <li>El número de fila (1–9) en <code>--label-3</code> y solo en NORMAL. En INSERT desaparece.</li>
+          <li>La “×” de borrar aparece solo con hover o selección, como ícono de 14 px.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>widget.css</code>, <code>widget.js</code></p>
+  </article>
+
+  <article class="mj" id="m12">
+    <div class="mj-h"><span class="mj-id">M12</span><div><h3>Pistas de teclado más calladas (se mantiene la regla de la letra subrayada)</h3>
+      <div class="tags"><span class="tag">Impacto medio</span><span class="tag">Esfuerzo: 2 h</span><span class="tag ask">Confirmar</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Se mantiene tu regla: cada acción con su letra subrayada. Cambia el tratamiento: subrayado de 1 px en <code>--label-3</code>, sin negrita ni color de acento, y la letra en <code>--label</code>. Las teclas especiales pasan a ser keycaps sans de 10,5 px con una sombra inferior de 1 px (<i>se sienten teclas</i>). Las pistas largas se agrupan con “·” en <code>--label-3</code>.</p>
+      <p><b>Qué se busca.</b> Que la interfaz siga siendo hotkey-first pero deje de gritar. En macOS los atajos están siempre visibles en los menús, pero en gris terciario. La pista orienta sin protagonismo.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li><code>u { text-decoration-color: var(--label-3); text-decoration-thickness: 1px }</code> y quitar el <code>font-weight: 700</code> de <code>#hint u</code> y <code>#legend u</code>.</li>
+          <li><code>kbd</code>: <code>font: 550 10.5px var(--sans)</code>, <code>background: var(--fill-3)</code>, <code>box-shadow: inset 0 -1px 0 rgba(0,0,0,.25)</code>, sin borde.</li>
+          <li>Glifos en las keycaps: <code>↑↓</code>, <code>⏎</code> Enter, <code>⎋</code> Esc, <code>⌫</code> Supr. “Ctrl” y “Alt” van como texto (en Windows se espera eso).</li>
+          <li>Píldora del modo: “NORMAL”/“INSERT” se queda (es identidad vim), pero en 10 px, peso 650, tracking de .02em y radio de 6 px. En INSERT se tiñe de acento.</li>
+          <li>Modo líder: la leyenda aparece con un fundido escalonado (30 ms por grupo) y el anillo de acento se enciende una vez (no late).</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>widget.css</code>, <code>dashboard.css</code>, <code>widget.js</code> (glifos), <code>dashboard.js</code></p>
+  </article>
+
+  <article class="mj" id="m13">
+    <div class="mj-h"><span class="mj-id">M13</span><div><h3>Controles de formulario propios: switch, menú desplegable, slider y selector de color</h3>
+      <div class="tags"><span class="tag">Impacto medio-alto</span><span class="tag">Esfuerzo: 1 día</span><span class="tag">Arregla el swatch duplicado</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Reemplazar los controles nativos de Windows por los equivalentes de macOS: <b>switch</b> (38×22, perilla blanca con sombra, spring al deslizar) para booleanos; <b>menú desplegable</b> (botón con ⌃⌄ y menú flotante con material, check en la opción actual y navegación con flechas) en lugar de <code>&lt;select&gt;</code>; <b>slider</b> con pista de 4 px y perilla de 20 px; <b>selector de acento</b> con círculos de 18 px y anillo de selección, y el color propio como un círculo multicolor (conic-gradient).</p>
+      <p><b>Qué se busca.</b> Que no quede ni un control con estética de Windows. Que Ajustes se parezca a Ajustes del Sistema de macOS Tahoe.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>Switch: <code>&lt;button role="switch" aria-checked&gt;</code> con pista en <code>--fill-1</code> (apagado) o <code>--accent</code> (encendido). La perilla se mueve con <code>translateX</code> + spring snappy. Usarlo en “Exigir una tarea completada”.</li>
+          <li>Menú desplegable: un componente en <code>dashboard.js</code> que abre un <code>&lt;div role="listbox"&gt;</code> anclado al botón, con <code>transform-origin</code> en el disparador, escala .96 → 1 + opacity en 180 ms, <code>backdrop-filter: blur(30px) saturate(180%)</code> y fondo al 80 %. Cierre con Esc o click afuera. Usarlo en los filtros de Tareas.</li>
+          <li>Slider: <code>input[type=range]</code> con <code>appearance: none</code> y estilos de <code>::-webkit-slider-runnable-track</code> y <code>::-webkit-slider-thumb</code>. Perilla blanca con <code>0 0 0 .5px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.2)</code>.</li>
+          <li>Selector de color: el último círculo es multicolor y abre el <code>input type=color</code> oculto. Cuando el acento es propio, ese círculo muestra el color elegido con un anillo blanco interno. Esto elimina el índigo duplicado.</li>
+          <li>Control segmentado (tema, estilo de reposo): la “perilla” es un elemento que se desliza entre opciones (<code>translateX</code>, spring smooth de 300 ms) en lugar de saltar.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>dashboard.js</code>, <code>dashboard.css</code></p>
+  </article>
+
+  <article class="mj" id="m14">
+    <div class="mj-h"><span class="mj-id">M14</span><div><h3>Avisos con ícono y HUD efímero para deshacer</h3>
+      <div class="tags"><span class="tag">Impacto medio</span><span class="tag">Esfuerzo: 3 h</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Avisos persistentes (sesión que no se guardaría, proyecto bloqueado) como un aviso compacto: ícono de triángulo, fondo naranja al 14 %, texto en <code>--label</code> y radio interior. Acciones con deshacer (borrar, completar, limpiar) con un <b>HUD</b>: una cápsula oscura que aparece abajo durante 3 s con “Tarea borrada · Ctrl Z”.</p>
+      <p><b>Qué se busca.</b> Que los avisos se distingan por la forma y el ícono, no por un párrafo de color. El HUD hace visible el deshacer, que hoy existe pero no se ve, y es un patrón muy de iOS/macOS.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li><code>#warn</code>: <code>display:flex; gap:8px; padding:8px 10px; border-radius: var(--r-inner); background: var(--orange-fill)</code>, ícono de 14 px en naranja y texto de 12 px.</li>
+          <li>Acortar los textos: “No se guardará: ninguna tarea completada” en lugar de la frase entera.</li>
+          <li>HUD: un <code>.toast</code> absoluto en el widget (debajo de la superficie, dentro del margen de M6) y en el dashboard (abajo al centro). Entra con translateY(8px) + scale(.96) → 0 y spring snappy. Sale con fade de 200 ms. Si llega otro, reemplaza al anterior sin apilarse.</li>
+          <li>En el widget sin M6, el HUD reemplaza temporalmente la línea de la barra de estado.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>widget.js</code>, <code>widget.css</code>, <code>dashboard.js</code>, <code>dashboard.css</code></p>
+  </article>
+
+  <!-- ===== FRENTE 5 ===== -->
+  <div class="frente"><h3>5 · Dashboard</h3><span>De página web a app de Mac.</span></div>
+
+  <div class="card" style="padding:18px;margin-bottom:14px">
+    <h3 style="margin-bottom:4px">Cómo quedaría el dashboard (M15–M17)</h3>
+    <p class="k" style="margin-bottom:14px">Barra lateral con material, título grande con fecha, un dato héroe con anillo, lista agrupada y gráfico al estilo Swift Charts.</p>
+    <div class="dash" id="dash">
+      <aside class="sb">
+        <div class="tl"><i></i><i></i><i></i></div>
+        <div class="it on"><span class="ico" style="background:#0088ff"><svg><use href="#i-sun"/></svg></span><span>Hoy</span><em>F1</em></div>
+        <div class="it"><span class="ico" style="background:#ff8d28"><svg><use href="#i-list"/></svg></span><span>Tareas</span><em>F2</em></div>
+        <div class="it"><span class="ico" style="background:#6155f5"><svg><use href="#i-folder"/></svg></span><span>Proyectos</span><em>F3</em></div>
+        <div class="it"><span class="ico" style="background:#34c759"><svg><use href="#i-clock"/></svg></span><span>Sesiones</span><em>F4</em></div>
+        <div class="it"><span class="ico" style="background:#ff2d55"><svg><use href="#i-chart"/></svg></span><span>Gráficos</span><em>F5</em></div>
+        <div class="sec">General</div>
+        <div class="it"><span class="ico" style="background:#8e8e93"><svg><use href="#i-gear"/></svg></span><span>Ajustes</span><em>F6</em></div>
+      </aside>
+      <div class="mainv">
+        <div class="tbar"><span class="grow"></span><span class="liv">En curso <b>42:13</b></span></div>
+        <div class="content">
+          <h5>Hoy</h5>
+          <div class="date">Miércoles 1 de octubre</div>
+          <div class="hrow">
+            <div class="tile">
+              <div class="ringwrap">
+                <svg class="ring" viewBox="0 0 76 76"><circle class="bgc" cx="38" cy="38" r="32"/><circle class="fg" cx="38" cy="38" r="32"/></svg>
+                <div><div class="k">En tareas hoy</div><div class="big" style="font-size:30px">2 h 54<small>min</small></div><div class="k">69 % de tu promedio</div></div>
+              </div>
+            </div>
+            <div class="tile">
+              <div class="k">Últimos 7 días</div>
+              <div class="bars"><span class="avg" style="bottom:52%"><span>promedio 4 h 12</span></span><i style="height:46%"></i><i style="height:80%"></i><i style="height:62%"></i><i style="height:30%"></i><i style="height:92%"></i><i style="height:55%"></i><i class="t" style="height:38%"></i></div>
+              <div class="days"><span>J</span><span>V</span><span>S</span><span>D</span><span>L</span><span>M</span><span>X</span></div>
+            </div>
+          </div>
+          <div class="glist">
+            <div><b style="font-weight:500">Tarea activa</b><span>Comprar café · 42 min</span></div>
+            <div><b style="font-weight:500">Sesiones</b><span>1 en curso</span></div>
+            <div><b style="font-weight:500">Tareas cerradas</b><span>0</span></div>
+          </div>
+        </div>
+        <div class="sbar"><span class="mode">NORMAL</span><span>F1–F6 vistas · ↑↓ desplazar · c claro/oscuro</span></div>
+      </div>
+    </div>
+  </div>
+
+  <article class="mj" id="m15">
+    <div class="mj-h"><span class="mj-id">M15</span><div><h3>Barra lateral de app de Mac y títulos grandes</h3>
+      <div class="tags"><span class="tag hi">Impacto muy alto</span><span class="tag">Esfuerzo: 1 día</span><span class="tag ask">Confirmar: cambia la navegación</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Pasar las 6 vistas de las pestañas superiores a una <b>barra lateral</b> de 200 px (material Mica de M5 o relleno leve), con íconos en cuadraditos de color, nombres con mayúscula inicial y el atajo F1–F6 a la derecha en <code>--label-3</code>. Cada vista abre con un <b>Large Title</b> + un subtítulo de contexto (“Miércoles 1 de octubre”, “4 abiertas · sin proyecto”). El contenido queda centrado con un ancho máximo de 880 px.</p>
+      <p><b>Qué se busca.</b> El idioma de Things 3, Recordatorios y Ajustes del Sistema: navegación estable a la izquierda y contenido con aire. Los atajos siguen igual (F1–F6 y 1–6), solo cambia dónde se muestran.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li><code>dashboard.html</code>: <code>body</code> pasa a una grilla de <code>200px 1fr</code>, con <code>&lt;aside id="nav"&gt;</code> y <code>&lt;main&gt;</code> (toolbar de 44 px arrastrable + vista + barra de estado).</li>
+          <li><code>dashboard.js</code>: se reutiliza <code>data-view</code>, cambia solo el marcado (ícono + nombre + <code>&lt;em&gt;F1&lt;/em&gt;</code>).</li>
+          <li>Ítem activo: relleno 3 + peso 600 (con la ventana enfocada se podría usar el acento, como en Finder; con gris queda más sobrio).</li>
+          <li>Toolbar: a la derecha el estado en vivo (“● En curso 42:13”) y el botón de tema. Con M5, se integra con los controles de la ventana.</li>
+          <li>Cambio de vista: crossfade de 180 ms + translateY(4px) → 0 con la View Transitions API (<code>document.startViewTransition</code>, disponible en Chromium 152).</li>
+          <li>Ventana mínima: con menos de 900 px, la barra lateral se colapsa a solo íconos (56 px).</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>dashboard.html</code>, <code>dashboard.css</code>, <code>dashboard.js</code></p>
+  </article>
+
+  <article class="mj" id="m16">
+    <div class="mj-h"><span class="mj-id">M16</span><div><h3>“Hoy” con un dato héroe, un anillo y una lista agrupada</h3>
+      <div class="tags"><span class="tag">Impacto alto</span><span class="tag">Esfuerzo: medio día</span><span class="tag ask">Confirmar: referencia del anillo</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Reemplazar las 4 tarjetas iguales por una jerarquía: (1) <b>héroe</b> con el tiempo en tareas hoy en grande y un anillo de progreso al estilo Fitness, (2) un mini gráfico de 7 días con la barra de hoy en acento y una línea de promedio, (3) el resto como lista agrupada (inset grouped) con separadores con sangría. Debajo, la línea de tiempo existente con el estilo de M17.</p>
+      <p><b>Qué se busca.</b> Que la pantalla responda en un segundo “¿cómo voy hoy?”, como Tiempo en pantalla. El anillo es el elemento más reconocible del lenguaje visual de Apple para el progreso.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>Decidir contra qué se mide el anillo <b>(confirmar)</b>: (a) el promedio diario de los últimos 7 días, sin ajustes nuevos, o (b) un objetivo diario configurable. Recomiendo (a) para no sumar alcance.</li>
+          <li>Anillo SVG: dos <code>circle</code> de r = 32 y trazo de 10 con <code>stroke-linecap: round</code>. El progreso sale de <code>stroke-dashoffset</code>, animado una sola vez al entrar (spring smooth, 1,1 s). Si supera el 100 %, se dibuja una segunda vuelta más oscura, como en Fitness.</li>
+          <li>Mini barras: divs con <code>transform: scaleY()</code> desde abajo y escalonado de 30 ms. Barras con radio arriba de 5 px. Hoy en acento y el resto en <code>--fill-1</code>.</li>
+          <li>Lista agrupada: <code>.glist</code> con filas de 36 px y separador de 0,5 px que arranca en el texto (<code>left: 16px</code>), no en el borde. Es un detalle muy Apple.</li>
+          <li>Línea de tiempo: segmentos con radio completo y la línea de “ahora” en acento con una etiqueta en cápsula. Sin grilla punteada, solo marcas de hora en <code>--label-3</code>.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>dashboard.js</code>, <code>dashboard.css</code>, <code>stats.js</code></p>
+  </article>
+
+  <article class="mj" id="m17">
+    <div class="mj-h"><span class="mj-id">M17</span><div><h3>Gráficos al estilo Swift Charts</h3>
+      <div class="tags"><span class="tag">Impacto alto</span><span class="tag">Esfuerzo: medio día</span><span class="tag">Arregla la curva falsa</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Configurar Chart.js para que se parezca a Swift Charts: barras con radio arriba, sin grilla vertical, grilla horizontal tenue en 3–4 niveles, etiquetas de eje horizontales y abreviadas (“L 22”), leyenda propia en HTML con puntos, tooltip propio con material, dona fina (cutout del 72 %) sin borde y con separación entre segmentos, y la tendencia como línea recta entre puntos (<code>tension: 0</code>) con un área de gradiente.</p>
+      <p><b>Qué se busca.</b> Gráficos que informan sin ruido y que no mienten: el suavizado actual dibuja un pico de ~27 h que no está en los datos.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li><code>Chart.defaults</code>: <code>font.family</code> = Inter, <code>font.size</code> = 11, <code>color</code> = <code>--label-2</code>. Leer los tokens con <code>getComputedStyle</code> y volver a aplicarlos al cambiar de tema.</li>
+          <li>Barras: <code>borderRadius: {topLeft: 5, topRight: 5}</code>, <code>borderSkipped: 'bottom'</code>, <code>categoryPercentage: .7</code>, <code>barPercentage: .9</code>. En barras apiladas, radio solo en el segmento de arriba (con <code>borderRadius</code> como función por dataset).</li>
+          <li>Ejes: <code>grid: {display: false}</code> en x; en y, <code>grid.color = --sep</code>, <code>border.display = false</code>, <code>ticks.maxTicksLimit = 4</code>. Etiquetas de x con <code>maxRotation: 0</code> y <code>autoSkip</code>.</li>
+          <li>Tendencia: <code>tension: 0</code>, puntos de 3 px solo en hover y relleno con un gradiente del acento de 20 % a 0 %.</li>
+          <li>Dona: <code>cutout: '72%'</code>, <code>borderWidth: 0</code>, <code>spacing: 2</code>, <code>borderRadius: 4</code>, y el total en el centro con un plugin de texto.</li>
+          <li>Tooltip externo (<code>external</code>): un div con <code>backdrop-filter</code>, radio de 10, título en 600 y valores en <code>fmtHuman</code>.</li>
+          <li>Animación: solo la primera vez, 600 ms con <code>easeOutQuart</code> desde la base. Ninguna al cambiar de tema (<code>update('none')</code>).</li>
+          <li>Colores de proyecto: si el usuario no eligió uno, asignarlos de la paleta de sistema de M2, en orden.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>dashboard.js</code>, <code>stats.js</code>, <code>dashboard.css</code></p>
+  </article>
+
+  <article class="mj" id="m18">
+    <div class="mj-h"><span class="mj-id">M18</span><div><h3>Tablas convertidas en listas agrupadas</h3>
+      <div class="tags"><span class="tag">Impacto medio-alto</span><span class="tag">Esfuerzo: medio día</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Las tablas de Tareas, Proyectos y Sesiones pasan a ser listas agrupadas: encabezados de columna en sentence case de 11 px y <code>--label-2</code> (o directamente sin encabezado donde el contenido se explica solo), separadores con sangría, checks circulares de M11, y acciones (▶ activar, ↑↓, ×) visibles solo en hover o en la fila del cursor, como íconos sin caja. Las tareas de otros proyectos van en <code>--label-3</code> en lugar de bajar toda la fila al 45 % de opacidad.</p>
+      <p><b>Qué se busca.</b> Bajar el ruido visual de cada fila a la mitad. La información queda y las herramientas aparecen cuando se necesitan.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>CSS: <code>th</code> sin mayúsculas, <code>td</code> con <code>padding: 8px 14px</code> (filas de 36 px) y un separador como <code>::after</code> que arranca en la columna del título.</li>
+          <li>Reemplazar <code>input[type=checkbox]</code> por el check circular (botón con <code>role="checkbox"</code>).</li>
+          <li><code>.row-actions</code>: <code>opacity: 0</code>, que pasa a 1 con <code>tr:hover</code> y <code>tr.cur</code>, en 120 ms. Íconos de 14 px en <code>--label-2</code>.</li>
+          <li>Fila del cursor (<code>tr.cur</code>): mismo tratamiento que M11 (relleno de acento o gris según el foco, radio interior). Para redondear filas de tabla, aplicar el radio a la primera y la última celda.</li>
+          <li>Edición en el lugar (<code>input.cell</code>): sin borde hasta el foco, y con foco un anillo de 3 px de acento al 35 %.</li>
+          <li>Formularios de “Nueva tarea” y “Agregar varias”: campos con <code>--fill-4</code>, sin borde, radio de 10, y los chips de proyecto con M2.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>dashboard.js</code>, <code>dashboard.css</code></p>
+  </article>
+
+  <!-- ===== FRENTE 6 ===== -->
+  <div class="frente"><h3>6 · Movimiento y marca</h3><span>La física y la identidad.</span></div>
+
+  <article class="mj" id="m19">
+    <div class="mj-h"><span class="mj-id">M19</span><div><h3>Sistema de movimiento: springs, curvas y regla de frecuencia</h3>
+      <div class="tags"><span class="tag hi">Impacto alto</span><span class="tag">Esfuerzo: 2 h</span><span class="tag">Base de M20–M21</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Tokens de movimiento con el modelo de Apple (duración + rebote) convertido a <code>linear()</code>, más una curva ease-out fuerte para micro-transiciones, una tabla de duraciones por tipo de elemento y una regla escrita sobre qué se anima y qué no.</p>
+      <p><b>Qué se busca.</b> Que todo se mueva con la misma física. Esa es la diferencia entre “tiene animaciones” y “se siente Apple”. Y que nada que pase cien veces por día te haga esperar.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>En <code>tokens.css</code>: <code>--ease-out: cubic-bezier(.23,1,.32,1)</code> y <code>--spring-smooth</code> (rebote 0), <code>--spring-snappy</code> (0,15) y <code>--spring-bouncy</code> (0,3) como <code>linear(...)</code>. Los valores están en el código de esta página y se generaron muestreando el spring de Apple.</li>
+          <li>Duraciones: press 120 ms · hover 150 ms · tooltip/menú 180 ms · cambio de vista 200 ms · check 380 ms (bouncy) · panel 460 ms (snappy) · cierre del panel 260 ms (ease-out: <b>salir siempre más rápido que entrar</b>).</li>
+          <li>Solo se animan <code>transform</code>, <code>opacity</code>, <code>filter</code> y <code>clip-path</code>. Nunca <code>height</code>, <code>top</code> ni <code>padding</code>. Para colapsar filas se usa <code>grid-template-rows: 1fr → 0fr</code>.</li>
+          <li>Regla de frecuencia (comentada en el CSS): <b>no se animan</b> la selección con flechas, el tic de segundos ni el cambio de modo NORMAL/INSERT. <b>Sí se animan</b> abrir/cerrar, completar, agregar, borrar, reordenar y el cambio de vista.</li>
+          <li>Nunca <code>ease-in</code> en la interfaz. Nunca <code>scale(0)</code>: entrar desde .96–.98.</li>
+          <li>Interrumpibles: todo con <code>transition</code> (no <code>animation</code>) donde se pueda, para que al revertir a mitad de camino se retome desde el punto actual.</li>
+          <li><code>prefers-reduced-motion</code>: sacar desplazamientos y escalas, mantener fundidos de 150 ms (“menos y más suave”, no cero).</li>
+        </ol>
+      </div>
+    </div>
+    <div class="demo">
+      <div class="curves" id="curves">
+        <div class="curve"><span class="name"><b>CSS ease</b>hoy, 300 ms</span><div class="track"><span class="ball" style="transition:left 300ms ease"></span></div></div>
+        <div class="curve"><span class="name"><b>ease-out fuerte</b>260 ms</span><div class="track"><span class="ball" style="transition:left 260ms var(--ease-out)"></span></div></div>
+        <div class="curve"><span class="name"><b>Spring smooth</b>rebote 0</span><div class="track"><span class="ball" style="transition:left 520ms var(--spring-smooth)"></span></div></div>
+        <div class="curve"><span class="name"><b>Spring snappy</b>rebote 0,15</span><div class="track"><span class="ball" style="transition:left 520ms var(--spring-snappy)"></span></div></div>
+        <div class="curve"><span class="name"><b>Spring bouncy</b>rebote 0,3</span><div class="track"><span class="ball" style="transition:left 580ms var(--spring-bouncy)"></span></div></div>
+      </div>
+      <p class="demo-cap"><button class="btn tint" id="playCurves" style="--w-acc:var(--accent);--w-acc-rgb:var(--accent-rgb)"><svg><use href="#i-play"/></svg>Reproducir</button> &nbsp;Tocalo de nuevo a mitad de camino: el spring se revierte desde donde está.</p>
+    </div>
+  </article>
+
+  <article class="mj" id="m20">
+    <div class="mj-h"><span class="mj-id">M20</span><div><h3>Morph píldora → panel (Dynamic Island)</h3>
+      <div class="tags"><span class="tag hi">Impacto muy alto</span><span class="tag">Esfuerzo: 1 día</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Al abrir el panel, la píldora <b>se estira</b> hasta convertirse en el panel (un <code>clip-path: inset(... round R)</code> que crece con el spring snappy). El contenido entra escalonado: fundido + translateY(−6px) + blur(3px) → 0, con 30 ms entre grupos. Al cerrar, todo vuelve en 260 ms. Es el mismo truco que ya usa el estilo círculo, generalizado.</p>
+      <p><b>Qué se busca.</b> La sensación más característica de Apple hoy: una superficie que cambia de forma en lugar de aparecer y desaparecer. Además, se ve dónde vive el panel: sale de la píldora.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>Al abrir: <code>main.js</code> agranda la ventana <b>primero</b> a la altura final (es transparente, no se ve), y recién después el renderer agrega <code>.open</code> para animar el recorte. Así no se redimensiona la ventana en cada frame.</li>
+          <li>Al cerrar: quitar <code>.open</code>, esperar <code>transitionend</code> del clip-path (o 280 ms) y recién ahí pedir <code>widget:height</code> con la altura de la píldora. Así la zona del esquive vuelve a ser la correcta.</li>
+          <li>La altura de la píldora se mide una vez y va en <code>--pill-h</code>. El recorte cerrado es <code>inset(0 0 calc(100% - var(--pill-h)) 0 round 22px)</code>.</li>
+          <li>Contenido del panel: los hijos directos con la transición escalonada de M19 (máx. 4 grupos, 120 ms en total).</li>
+          <li>Captura rápida (<code>Ctrl+Alt+N</code>): la misma técnica, pero el recorte crece solo hasta el input.</li>
+          <li>Si el usuario cierra a mitad de la apertura, la transición se revierte desde el punto actual (gracias a <code>transition</code>).</li>
+          <li>Smoke: capturas a 0, 120 y 460 ms para verificar que no hay saltos.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="files">Archivos: <code>widget.css</code>, <code>widget.js</code>, <code>main.js</code> (orden de redimensionado), <code>smoke.js</code></p>
+  </article>
+
+  <article class="mj" id="m21">
+    <div class="mj-h"><span class="mj-id">M21</span><div><h3>Microinteracciones de tareas: completar, agregar, borrar, reordenar y tema</h3>
+      <div class="tags"><span class="tag hi">Impacto alto</span><span class="tag">Esfuerzo: 1 día</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> <b>Completar:</b> el check se llena (spring bouncy), el check se dibuja, la tachadura se traza de izquierda a derecha y, a los 700 ms, la fila se colapsa y aparece el HUD de deshacer. <b>Agregar:</b> la fila nueva entra desde el input (translateY(6px) + fade). <b>Borrar:</b> colapso + fade de 220 ms. <b>Reordenar</b> (Alt+↑/↓): FLIP, las filas se deslizan 200 ms. <b>Tema:</b> crossfade de 250 ms con View Transitions.</p>
+      <p><b>Qué se busca.</b> Completar una tarea es <i>el</i> momento de la app: tiene que dar satisfacción, como en Recordatorios o Things. El resto de las animaciones sirven para no perder de vista dónde quedó cada cosa.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>Hoy <code>widget.js</code> repinta la lista entera en cada <code>state</code>. Pasar a reconciliar por <code>data-id</code> (reusar nodos existentes) para que las transiciones tengan un antes y un después.</li>
+          <li>Completar: agregar <code>.done</code> en el acto (feedback inmediato) y diferir 700 ms la salida de la fila. Si llega Ctrl+Z antes, se cancela.</li>
+          <li>Colapso: envolver cada fila en un contenedor <code>display:grid; grid-template-rows:1fr</code> → <code>.gone</code> = <code>0fr</code> + <code>opacity:0</code>, y sacarlo del DOM en <code>transitionend</code>.</li>
+          <li>FLIP de reordenar: medir <code>getBoundingClientRect</code> antes, aplicar el cambio, invertir con <code>translateY</code> y soltar con una transición de 200 ms ease-out.</li>
+          <li>Tema (widget y dashboard): <code>document.startViewTransition(() =&gt; apply(theme))</code>, con 250 ms en <code>::view-transition-old/new(root)</code>.</li>
+          <li>Opcional <span class="tag ask">confirmar</span>: un sonido suave al completar, apagado por defecto.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="demo-cap" style="margin-top:12px">Probalo en la demo del principio: click en el círculo de una tarea, o <span class="kbd">h</span> con la demo enfocada.</p>
+    <p class="files">Archivos: <code>widget.js</code>, <code>widget.css</code>, <code>dashboard.js</code>, <code>dashboard.css</code></p>
+  </article>
+
+  <article class="mj" id="m22">
+    <div class="mj-h"><span class="mj-id">M22</span><div><h3>Ícono y marca: rejilla de macOS, capas, luz y versión para la bandeja</h3>
+      <div class="tags"><span class="tag hi">Impacto alto</span><span class="tag">Esfuerzo: 1 día</span><span class="tag ask">Confirmar: frontal o con movimiento</span></div></div></div>
+    <div class="mj-b">
+      <p><b>En qué consiste.</b> Rehacer el ícono como <b>SVG fuente</b> con la gramática de los íconos de macOS: squircle de 824 px en un lienzo de 1024 (margen de 100 px), fondo con gradiente vertical (más claro arriba, la luz viene de arriba), fantasma en capa propia con un gradiente blanco sutil y un brillo superior, sombra de contacto debajo, y anteojos simplificados (dos aros y un puente). Más un <b>ícono de bandeja monocromo</b> dibujado aparte para 16 y 32 px, y un logotipo “taskghost” en Inter 650 con −0,02em.</p>
+      <p><b>Qué se busca.</b> Que el ícono se vea de la misma familia que los de Apple. Mantiene la personalidad del fantasma con anteojos, pero con forma, aire y luz consistentes. La versión de bandeja se lee a 16 px, cosa que la actual no logra.</p>
+      <div class="full">
+        <h4>Paso a paso</h4>
+        <ol>
+          <li>Crear <code>assets/logo.svg</code> con capas separadas (fondo, fantasma, anteojos, sombra), como pide Icon Composer, aunque acá se rasterice.</li>
+          <li>Elegir la variante <b>(confirmar)</b>: A frontal, que es lo que pide la HIG (“front-facing, level”), o B que conserva la inclinación y el movimiento actuales, más sutiles.</li>
+          <li>Reescribir <code>make_icon.py</code> para que rasterice el SVG (cairosvg o resvg) a 16/24/32/48/64/128/256/512/1024 y arme <code>icon.ico</code> y <code>icon.png</code>. Así hay una sola fuente de verdad.</li>
+          <li>Para Windows: los íconos de Windows llenan más el lienzo. Exportar el .ico con el squircle a 920 px (margen de 52) para que no se vea chico en la barra de tareas, y el .png de Linux con la rejilla de Mac.</li>
+          <li>Bandeja: <code>assets/tray-light.png</code> y <code>tray-dark.png</code> (silueta + anteojos calados), elegidos con <code>nativeTheme.shouldUseDarkColors</code>.</li>
+          <li>Widget estilo círculo: usar solo el glifo del fantasma (SVG) sobre el material, no el PNG con su fondo.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="demo">
+      <div class="icons">
+        <figure>
+          <svg class="app" viewBox="0 0 1024 1024" aria-label="Variante A">
+            <defs>
+              <linearGradient id="bgA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a4052"/><stop offset=".55" stop-color="#1b1e28"/><stop offset="1" stop-color="#0d0f15"/></linearGradient>
+              <linearGradient id="rimA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".25" stop-color="#fff" stop-opacity="0"/></linearGradient>
+              <linearGradient id="ghA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfe4f0"/></linearGradient>
+              <filter id="blurA" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>
+              <clipPath id="sqA"><path id="sqP" d="M924.0,512.0L923.6,650.4L922.6,694.5L920.8,726.3L918.3,751.9L915.1,773.7L911.2,792.6L906.4,809.3L901.0,824.2L894.7,837.7L887.6,849.8L879.6,860.8L870.7,870.7L860.8,879.6L849.8,887.6L837.7,894.7L824.2,901.0L809.3,906.4L792.6,911.2L773.7,915.1L751.9,918.3L726.3,920.8L694.5,922.6L650.4,923.6L512.0,924.0L373.6,923.6L329.5,922.6L297.7,920.8L272.1,918.3L250.3,915.1L231.4,911.2L214.7,906.4L199.8,901.0L186.3,894.7L174.2,887.6L163.2,879.6L153.3,870.7L144.4,860.8L136.4,849.8L129.3,837.7L123.0,824.2L117.6,809.3L112.8,792.6L108.9,773.7L105.7,751.9L103.2,726.3L101.4,694.5L100.4,650.4L100.0,512.0L100.4,373.6L101.4,329.5L103.2,297.7L105.7,272.1L108.9,250.3L112.8,231.4L117.6,214.7L123.0,199.8L129.3,186.3L136.4,174.2L144.4,163.2L153.3,153.3L163.2,144.4L174.2,136.4L186.3,129.3L199.8,123.0L214.7,117.6L231.4,112.8L250.3,108.9L272.1,105.7L297.7,103.2L329.5,101.4L373.6,100.4L512.0,100.0L650.4,100.4L694.5,101.4L726.3,103.2L751.9,105.7L773.7,108.9L792.6,112.8L809.3,117.6L824.2,123.0L837.7,129.3L849.8,136.4L860.8,144.4L870.7,153.3L879.6,163.2L887.6,174.2L894.7,186.3L901.0,199.8L906.4,214.7L911.2,231.4L915.1,250.3L918.3,272.1L920.8,297.7L922.6,329.5L923.6,373.6Z"/></clipPath>
+              <path id="ghost" d="M302,452 A210,210 0 0 1 722,452 L722,746 A70,70 0 0 1 582,746 A70,70 0 0 1 442,746 A70,70 0 0 1 302,746 Z"/>
+            </defs>
+            <g clip-path="url(#sqA)">
+              <rect width="1024" height="1024" fill="url(#bgA)"/>
+              <ellipse cx="512" cy="842" rx="190" ry="26" fill="#000" opacity=".45" filter="url(#blurA)"/>
+              <use href="#ghost" fill="url(#ghA)"/>
+              <use href="#ghost" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="3"/>
+              <g><circle cx="440" cy="452" r="50" fill="#e3e9fa" stroke="#141721" stroke-width="18"/><circle cx="584" cy="452" r="50" fill="#e3e9fa" stroke="#141721" stroke-width="18"/><path d="M490,446 Q512,430 534,446" fill="none" stroke="#141721" stroke-width="16" stroke-linecap="round"/><circle cx="448" cy="460" r="16" fill="#141721"/><circle cx="592" cy="460" r="16" fill="#141721"/></g>
+              <use href="#sqP" fill="none" stroke="url(#rimA)" stroke-width="6"/>
+            </g>
+          </svg>A · frontal (Tahoe)
+        </figure>
+        <figure>
+          <svg class="app" viewBox="0 0 1024 1024" aria-label="Variante B">
+            <g clip-path="url(#sqA)">
+              <rect width="1024" height="1024" fill="url(#bgA)"/>
+              <ellipse cx="540" cy="842" rx="170" ry="24" fill="#000" opacity=".4" filter="url(#blurA)"/>
+              <g stroke="#fff" stroke-opacity=".22" stroke-width="22" stroke-linecap="round"><path d="M770,520 H850"/><path d="M780,610 H880"/><path d="M770,700 H830"/></g>
+              <g transform="rotate(-9 512 560) translate(-22 0)">
+                <use href="#ghost" fill="url(#ghA)"/>
+                <g><circle cx="432" cy="452" r="50" fill="#e3e9fa" stroke="#141721" stroke-width="18"/><circle cx="576" cy="452" r="50" fill="#e3e9fa" stroke="#141721" stroke-width="18"/><path d="M482,446 Q504,430 526,446" fill="none" stroke="#141721" stroke-width="16" stroke-linecap="round"/><circle cx="436" cy="460" r="16" fill="#141721"/><circle cx="580" cy="460" r="16" fill="#141721"/></g>
+              </g>
+              <use href="#sqP" fill="none" stroke="url(#rimA)" stroke-width="6"/>
+            </g>
+          </svg>B · con movimiento
+        </figure>
+        <figure>
+          <svg class="app" viewBox="0 0 1024 1024" aria-label="Variante clara">
+            <defs><linearGradient id="bgL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e6e9f0"/></linearGradient></defs>
+            <g clip-path="url(#sqA)">
+              <rect width="1024" height="1024" fill="url(#bgL)"/>
+              <ellipse cx="512" cy="842" rx="190" ry="26" fill="#1b1e28" opacity=".25" filter="url(#blurA)"/>
+              <use href="#ghost" fill="#1d2130"/>
+              <g><circle cx="440" cy="452" r="50" fill="#e3e9fa" stroke="#e3e9fa" stroke-width="0"/><circle cx="584" cy="452" r="50" fill="#e3e9fa"/><path d="M490,446 Q512,430 534,446" fill="none" stroke="#e3e9fa" stroke-width="16" stroke-linecap="round"/><circle cx="448" cy="460" r="16" fill="#1d2130"/><circle cx="592" cy="460" r="16" fill="#1d2130"/></g>
+            </g>
+          </svg>Variante clara
+        </figure>
+        <figure>
+          <div class="tray">
+            <div class="d"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 7.2a5 5 0 0 1 10 0V13a1.33 1.33 0 0 1-2.67 0 1.33 1.33 0 0 1-2.66 0 1.33 1.33 0 0 1-2.67 0 1.33 1.33 0 0 1-2 0Z" fill="currentColor"/><circle cx="6.3" cy="7" r="1.3" fill="#202020"/><circle cx="9.7" cy="7" r="1.3" fill="#202020"/></svg><svg width="32" height="32" viewBox="0 0 16 16"><path d="M3 7.2a5 5 0 0 1 10 0V13a1.33 1.33 0 0 1-2.67 0 1.33 1.33 0 0 1-2.66 0 1.33 1.33 0 0 1-2.67 0 1.33 1.33 0 0 1-2 0Z" fill="currentColor"/><circle cx="6.3" cy="7" r="1.3" fill="#202020"/><circle cx="9.7" cy="7" r="1.3" fill="#202020"/></svg></div>
+            <div class="l"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 7.2a5 5 0 0 1 10 0V13a1.33 1.33 0 0 1-2.67 0 1.33 1.33 0 0 1-2.66 0 1.33 1.33 0 0 1-2.67 0 1.33 1.33 0 0 1-2 0Z" fill="currentColor"/><circle cx="6.3" cy="7" r="1.3" fill="#f3f3f3"/><circle cx="9.7" cy="7" r="1.3" fill="#f3f3f3"/></svg><svg width="32" height="32" viewBox="0 0 16 16"><path d="M3 7.2a5 5 0 0 1 10 0V13a1.33 1.33 0 0 1-2.67 0 1.33 1.33 0 0 1-2.66 0 1.33 1.33 0 0 1-2.67 0 1.33 1.33 0 0 1-2 0Z" fill="currentColor"/><circle cx="6.3" cy="7" r="1.3" fill="#f3f3f3"/><circle cx="9.7" cy="7" r="1.3" fill="#f3f3f3"/></svg></div>
+          </div>
+          <div style="margin-top:8px">Bandeja 16 / 32 px, oscura y clara</div>
+        </figure>
+      </div>
+      <p class="demo-cap">Bocetos para elegir la dirección, no el arte final. El final se dibuja con más cuidado (curvas del fantasma y grosor de los anteojos según el tamaño).</p>
+    </div>
+    <p class="files">Archivos: <code>assets/logo.svg</code> (nuevo), <code>assets/make_icon.py</code>, <code>assets/tray-*.png</code>, <code>main.js</code> (bandeja), <code>index.html</code> (glifo del círculo)</p>
+  </article>
+
+  <!-- ================= PLAN ================= -->
+  <h2 id="plan">Plan por fases</h2>
+  <p class="sub">Ordenado para que cada fase ya se note sola y no rompa los atajos. Cada fase cierra con <code>npm test</code> + smoke y una comparación de capturas antes/después.</p>
+  <div class="list">
+    <div class="phase"><div><b>Fase 1</b><div class="k">≈ 1,5 días</div></div><p><b style="color:var(--label)">Fundamentos.</b> <a href="#m1">M1</a> tokens · <a href="#m2">M2</a> acentos · <a href="#m3">M3</a> esquinas · <a href="#m7">M7</a> tipografía · <a href="#m19">M19</a> tokens de movimiento. Solo CSS y <code>theme.js</code>: cero riesgo funcional y el cambio visual más grande por hora invertida.</p></div>
+    <div class="phase"><div><b>Fase 2</b><div class="k">≈ 1,5 días</div></div><p><b style="color:var(--label)">Widget premium.</b> <a href="#m4">M4</a> cápsula de material · <a href="#m8">M8</a> reloj · <a href="#m9">M9</a> íconos · <a href="#m10">M10</a> botones · <a href="#m11">M11</a> selección y checks · <a href="#m12">M12</a> pistas · <a href="#m14">M14</a> avisos. Arregla el botón cortado.</p></div>
+    <div class="phase"><div><b>Fase 3</b><div class="k">≈ 2 días</div></div><p><b style="color:var(--label)">Movimiento.</b> <a href="#m20">M20</a> morph · <a href="#m21">M21</a> microinteracciones (incluye reconciliar la lista por id) · <a href="#m6">M6</a> sombra real. Es la fase con más riesgo (ventana y esquive): va con capturas del smoke en cada paso.</p></div>
+    <div class="phase"><div><b>Fase 4</b><div class="k">≈ 2,5 días</div></div><p><b style="color:var(--label)">Dashboard.</b> <a href="#m5">M5</a> Mica y barra de título unificada · <a href="#m15">M15</a> barra lateral · <a href="#m16">M16</a> Hoy · <a href="#m17">M17</a> gráficos · <a href="#m18">M18</a> listas · <a href="#m13">M13</a> controles.</p></div>
+    <div class="phase"><div><b>Fase 5</b><div class="k">≈ 1 día</div></div><p><b style="color:var(--label)">Marca.</b> <a href="#m22">M22</a> ícono, bandeja y logotipo.</p></div>
+    <div class="phase"><div><b>Fase 6</b><div class="k">≈ 0,5 día</div></div><p><b style="color:var(--label)">QA visual.</b> Capturas en claro y oscuro, escalado de Windows al 100/125/150 % (hairlines y nitidez de Inter), contraste (tests), reducir movimiento, transparencia desactivada y fondos de escritorio claros y oscuros detrás del widget.</p></div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h3 style="margin-bottom:6px">Decisiones que necesito de vos</h3>
+    <ol style="padding-left:20px;color:var(--label-2);font-size:14px;display:grid;gap:5px">
+      <li><b style="color:var(--label)">Acento por defecto:</b> ¿pasamos de índigo a Azul de sistema? (M2)</li>
+      <li><b style="color:var(--label)">Pistas de teclado:</b> ¿te parece bien bajar el subrayado a gris y sin negrita, manteniendo la regla? (M12)</li>
+      <li><b style="color:var(--label)">Navegación del dashboard:</b> ¿barra lateral en lugar de pestañas arriba? (M15)</li>
+      <li><b style="color:var(--label)">Anillo de “Hoy”:</b> ¿contra tu promedio de 7 días o contra un objetivo diario nuevo? (M16)</li>
+      <li><b style="color:var(--label)">Ícono:</b> ¿variante A (frontal) o B (con movimiento)? (M22)</li>
+      <li><b style="color:var(--label)">Sonido al completar:</b> ¿lo querés, apagado por defecto, o no? (M21)</li>
+    </ol>
+  </div>
+
+  <!-- ================= FUENTES ================= -->
+  <h2 id="fuentes">Fuentes</h2>
+  <p class="sub">Lo que consulté para esta auditoría.</p>
+  <ul class="src">
+    <li><a href="https://developer.apple.com/design/human-interface-guidelines/materials">HIG · Materials</a>: Liquid Glass vs. materiales estándar, capa funcional, vibrancy.</li>
+    <li><a href="https://developer.apple.com/design/human-interface-guidelines/color">HIG · Color</a>: paleta de sistema 2025 (valores de M2) y color sobre vidrio.</li>
+    <li><a href="https://developer.apple.com/design/human-interface-guidelines/typography">HIG · Typography</a>: estilos de texto de macOS (13 pt cuerpo, 10 pt mínimo).</li>
+    <li><a href="https://developer.apple.com/design/human-interface-guidelines/motion">HIG · Motion</a>: movimiento con propósito, breve y cancelable.</li>
+    <li><a href="https://developer.apple.com/design/human-interface-guidelines/dark-mode">HIG · Dark Mode</a>: base vs. elevado, contraste 4,5:1 / 7:1.</li>
+    <li><a href="https://developer.apple.com/design/human-interface-guidelines/app-icons">HIG · App icons</a>: capas, simplicidad, apariencias, 1024 px.</li>
+    <li><a href="https://developer.apple.com/videos/play/wwdc2025/219/">WWDC25 · Meet Liquid Glass</a>: lensing, especular, sin vidrio sobre vidrio, concentricidad.</li>
+    <li><a href="https://developer.apple.com/videos/play/wwdc2025/356/">WWDC25 · Get to know the new design system</a></li>
+    <li><a href="https://developer.apple.com/videos/play/wwdc2023/10158/">WWDC23 · Animate with springs</a>: el modelo duración + rebote. <a href="https://wwdcnotes.com/documentation/wwdc23-10158-animate-with-springs/">Notas</a>.</li>
+    <li><a href="https://developer.apple.com/videos/play/wwdc2020/10175/">WWDC20 · The details of UI typography</a>: tamaños ópticos y tracking por tamaño.</li>
+    <li><a href="https://github.com/VoltAgent/awesome-design-md/blob/main/design-md/apple/DESIGN.md">Apple DESIGN.md (VoltAgent)</a>: tokens extraídos de apple.com.</li>
+    <li><a href="https://github.com/emilkowalski/skills/blob/main/skills/review-animations/STANDARDS.md">Emil Kowalski · estándares de animación</a>: curvas, duraciones y regla de frecuencia.</li>
+    <li><a href="https://every.to/p/invisible-details-of-interaction-design">Rauno Freiberg · Invisible Details of Interaction Design</a></li>
+    <li><a href="https://www.joshwcomeau.com/animation/linear-timing-function/">Josh Comeau · Springs and bounces in native CSS</a> y <a href="https://developer.chrome.com/docs/css-ui/css-linear-easing-function">Chrome · linear()</a></li>
+    <li><a href="https://squircle.js.org/blog/squircles-in-css">Squircles in CSS: corner-shape y superellipse()</a></li>
+    <li><a href="https://www.electronjs.org/docs/latest/api/browser-window">Electron · BrowserWindow</a> (<code>backgroundMaterial</code>, <code>titleBarOverlay</code>) e <a href="https://github.com/electron/electron/issues/46753">issue #46753</a>.</li>
+    <li><a href="https://developer.apple.com/forums/thread/127350">Apple Developer Forums · licencia de SF</a>: por qué se queda Inter.</li>
+    <li><a href="https://culturedcode.com/things/">Things 3</a>: referencia de app de tareas con dos Apple Design Awards.</li>
+  </ul>
+  <footer class="end">taskghost · auditoría de estilo · generado para decidir el rediseño. Las capturas de “hoy” están en <code>design/auditoria/</code>.</footer>
+</main>
+
+<script>
+// tema de la página
+(function () {
+  const seg = document.getElementById('themeSeg');
+  seg.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    seg.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+    const t = b.dataset.t;
+    if (t === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.dataset.theme = t;
+  });
+})();
+
+// demo del widget
+(function () {
+  const gw = document.getElementById('gw');
+  const card = document.getElementById('gwCard');
+  const pill = document.getElementById('gwPill');
+  const list = document.getElementById('gwList');
+  const clock = document.getElementById('clock');
+  const sessEl = document.getElementById('sess');
+  const toast = document.getElementById('toast');
+  const toastTxt = document.getElementById('toastTxt');
+  let tasks = [
+    { id: 1, t: 'Comprar café', m: '42m', act: true },
+    { id: 2, t: 'Revisar PR del login', m: '' },
+    { id: 3, t: 'Escribir tests de sesión', m: '12m' },
+    { id: 4, t: 'Deploy a staging', m: '' },
+  ];
+  let sel = 0;
+  let secs = 42 * 60 + 57, sess = 72 * 60 + 40;
+
+  function setPillH() { card.style.setProperty('--pill-h', pill.offsetHeight + 'px'); }
+
+  // reloj con cifras que ruedan (solo minutos/horas)
+  const fmt = (s) => { const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : String(m)) + ':' + String(x).padStart(2, '0'); };
+  let prev = '';
+  function renderClock() {
+    const str = fmt(secs);
+    if (str.length !== prev.length) { clock.innerHTML = ''; prev = ''; }
+    const colonIdx = str.lastIndexOf(':');
+    [...str].forEach((ch, i) => {
+      let slot = clock.children[i];
+      if (!slot) { slot = document.createElement('span'); slot.className = ch === ':' ? 'colon' : 'dg'; slot.innerHTML = ch === ':' ? ':' : '<i>' + ch + '</i>'; clock.appendChild(slot); return; }
+      if (ch === prev[i] || ch === ':') return;
+      if (i > colonIdx) { slot.innerHTML = '<i>' + ch + '</i>'; return; } // segundos: sin animar
+      const old = slot.querySelector('i:not(.out)');
+      if (old) { old.classList.add('out'); setTimeout(() => old.remove(), 260); }
+      const n = document.createElement('i'); n.className = 'in'; n.textContent = ch; slot.appendChild(n);
+    });
+    prev = str;
+    sessEl.textContent = 'sesión ' + fmt(sess);
+  }
+  setInterval(() => { secs++; sess++; renderClock(); }, 1000);
+  renderClock();
+
+  function renderList() {
+    list.innerHTML = '';
+    tasks.forEach((t, i) => {
+      const li = document.createElement('li'); li.className = 'gw-row'; li.dataset.id = t.id;
+      li.innerHTML = '<div><div class="gw-it' + (i === sel ? ' sel' : '') + (t.act ? ' act' : '') + '">' +
+        '<button class="chk" aria-label="Completar"><svg viewBox="0 0 12 12"><path d="M2.5 6.3 5 8.6l4.6-5.2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+        '<span class="title">' + t.t + '</span>' + (t.act ? '<span class="now"></span>' : '') + '<span class="meta">' + t.m + '</span></div></div>';
+      li.querySelector('.chk').addEventListener('click', (e) => { e.stopPropagation(); complete(t.id); });
+      li.querySelector('.gw-it').addEventListener('click', () => { sel = tasks.indexOf(t); paintSel(); gw.focus(); });
+      list.appendChild(li);
+    });
+  }
+  function paintSel() { [...list.querySelectorAll('.gw-it')].forEach((el, i) => el.classList.toggle('sel', i === sel)); }
+
+  let toastTimer;
+  function showToast(txt) {
+    toastTxt.textContent = txt; toast.classList.add('on');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('on'), 2600);
+  }
+  let lastDone = null;
+  function complete(id) {
+    const li = list.querySelector('[data-id="' + id + '"]'); if (!li) return;
+    const it = li.querySelector('.gw-it'); if (it.classList.contains('done')) return;
+    it.classList.add('done');
+    setTimeout(() => {
+      li.classList.add('gone');
+      li.addEventListener('transitionend', function h(e) {
+        if (e.propertyName !== 'grid-template-rows') return; li.removeEventListener('transitionend', h);
+        const idx = tasks.findIndex((x) => x.id === id); lastDone = { t: tasks[idx], idx };
+        tasks.splice(idx, 1); if (sel >= tasks.length) sel = Math.max(0, tasks.length - 1);
+        if (!tasks.length) tasks = [{ id: 9, t: 'Comprar café', m: '42m', act: true }, { id: 10, t: 'Revisar PR del login', m: '' }, { id: 11, t: 'Escribir tests de sesión', m: '12m' }, { id: 12, t: 'Deploy a staging', m: '' }];
+        renderList();
+      });
+      showToast('Tarea hecha');
+    }, 700);
+  }
+
+  function open() { setPillH(); gw.classList.add('open'); }
+  function close() { setPillH(); gw.classList.remove('open'); }
+  pill.addEventListener('click', () => { gw.classList.contains('open') ? close() : open(); gw.focus(); });
+  document.getElementById('gwTheme').addEventListener('click', () => gw.classList.toggle('light'));
+  gw.addEventListener('keydown', (e) => {
+    const isOpen = gw.classList.contains('open');
+    if (e.key === 'Enter') { e.preventDefault(); isOpen ? close() : open(); }
+    else if (e.key === 'Escape') close();
+    else if (e.key === 'c') gw.classList.toggle('light');
+    else if (!isOpen) return;
+    else if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(tasks.length - 1, sel + 1); paintSel(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(0, sel - 1); paintSel(); }
+    else if (e.key === 'h' || e.key === ' ') { e.preventDefault(); if (tasks[sel]) complete(tasks[sel].id); }
+    else if (e.key === 'z' && e.ctrlKey && lastDone) { tasks.splice(lastDone.idx, 0, lastDone.t); lastDone = null; renderList(); toast.classList.remove('on'); }
+  });
+  renderList();
+  requestAnimationFrame(setPillH);
+  document.fonts && document.fonts.ready.then(setPillH);
+  setTimeout(open, 900);
+})();
+
+// demo de curvas
+(function () {
+  const c = document.getElementById('curves');
+  document.getElementById('playCurves').addEventListener('click', () => c.classList.toggle('go'));
+})();
+
+// dashboard: animar al entrar en pantalla
+(function () {
+  const d = document.getElementById('dash');
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { d.classList.add('in'); io.disconnect(); } }), { threshold: .4 });
+  io.observe(d);
+})();
+</script>
+</body>
+</html>

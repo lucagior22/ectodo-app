@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self'">
+  <title>taskghost</title>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="widget.css">
+</head>
+<body class="ghost">
+  <div id="app">
+    <!-- superficie única (píldora + panel): lleva el material, el recorte del morph y el contorno; la sombra va en #app -->
+    <div id="surface">
+      <div id="dot" title="taskghost">
+        <svg viewBox="270 230 530 610" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M300,450 A212,212 0 0 1 724,450 C724,610 700,700 770,806 C660,826 576,776 528,712 C484,780 410,812 316,800 C344,712 300,640 300,450 Z M415,458 a31,45 0 1 0 62,0 a31,45 0 1 0 -62,0 Z M549,458 a31,45 0 1 0 62,0 a31,45 0 1 0 -62,0 Z"/></svg>
+      </div>
+      <header id="pill">
+        <div class="ttl"><span id="ttl-l">taskghost</span><span id="ttl-r"></span></div>
+        <div class="times">
+          <span id="t-task" class="clock" title="Tiempo en la tarea actual"></span>
+          <span id="t-sess" title="Tiempo de sesión"></span>
+        </div>
+        <div id="cur" class="cur"></div>
+        <div id="legend"></div>
+      </header>
+      <section id="panel">
+        <div class="bar" style="--i:0">
+          <button id="btn-session" class="btn fill"></button>
+          <button id="btn-end" class="btn"></button>
+          <span id="proj-chip" class="tag"></span>
+          <span class="grow"></span>
+          <button id="btn-theme" class="ibtn" title="Cambiar tema claro/oscuro (c)"></button>
+          <button id="btn-dash" class="ibtn" title="Abrir dashboard (d)"><span data-icon="grid"></span></button>
+        </div>
+        <div id="warn" style="--i:0"></div>
+        <div id="hidden-note" style="--i:0"></div>
+        <ul id="list" style="--i:1"></ul>
+        <div id="help" style="--i:1"></div>
+        <label class="nw" style="--i:2"><span data-icon="plus"></span><input id="new" placeholder="Nueva tarea…  (#proyecto)" autocomplete="off" spellcheck="false"></label>
+        <footer id="status" style="--i:3">
+          <span id="mode-tag">NORMAL</span>
+          <span id="hint"></span>
+          <button id="btn-clear" title="Archivar las tareas hechas (l)"><u>l</u>impiar</button>
+          <div id="hud" role="status"><span id="hud-t"></span><kbd>Ctrl Z</kbd></div>
+        </footer>
+      </section>
+    </div>
+  </div>
+  <script src="theme.js"></script>
+  <script src="icons.js"></script>
+  <script src="widget.js"></script>
+</body>
+</html>

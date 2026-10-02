@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>taskghost · 5 propuestas de estilo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Share+Tech+Mono&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============ PAGINA (neutra, no compite con las propuestas) ============ */
+:root{--pg:#0f1115;--pg2:#171a21;--pgline:#262a34;--pgfg:#e7e9ee;--pgmut:#9aa1b0;--pgacc:#8ab4ff}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--pg);color:var(--pgfg);font:15px/1.55 Inter,system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.top{position:sticky;top:0;z-index:50;background:rgba(15,17,21,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--pgline)}
+.top .wrap{display:flex;align-items:center;gap:14px;height:54px;overflow-x:auto;white-space:nowrap}
+.top b{font-weight:600;margin-right:6px}
+.top a{color:var(--pgmut);text-decoration:none;font-size:13px;padding:5px 10px;border-radius:7px}
+.top a:hover{background:var(--pg2);color:var(--pgfg)}
+.top .sp{flex:1}
+.wall{display:flex;gap:4px;align-items:center;font-size:12px;color:var(--pgmut)}
+.wall button{font:inherit;font-size:12px;color:var(--pgmut);background:var(--pg2);border:1px solid var(--pgline);padding:4px 10px;border-radius:7px;cursor:pointer}
+.wall button.on{color:#0f1115;background:var(--pgacc);border-color:transparent;font-weight:600}
+h1{font-size:34px;line-height:1.15;margin:44px 0 10px;letter-spacing:-.01em}
+.lead{color:var(--pgmut);max-width:760px;font-size:16px;margin:0 0 26px}
+.lead b{color:var(--pgfg);font-weight:500}
+.find{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:0 0 18px}
+.find div{background:var(--pg2);border:1px solid var(--pgline);border-radius:12px;padding:14px 16px;font-size:13.5px;color:var(--pgmut)}
+.find h4{margin:0 0 4px;color:var(--pgfg);font-size:13.5px;font-weight:600}
+.find code,.spec code,td code{font:12px ui-monospace,Consolas,monospace;background:#0b0d11;border:1px solid var(--pgline);padding:1px 6px;border-radius:5px;color:#c9d3ea}
+.prop{margin-top:70px}
+.phead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.phead .num{font:600 13px 'JetBrains Mono',monospace;color:var(--pgacc);border:1px solid var(--pgline);padding:2px 9px;border-radius:99px}
+.phead h2{margin:0;font-size:26px;letter-spacing:-.01em}
+.ptag{color:var(--pgmut);margin:0 0 6px;max-width:820px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 18px}
+.chips span{font-size:12px;color:var(--pgmut);border:1px solid var(--pgline);border-radius:99px;padding:2px 10px}
+.lbl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--pgmut);margin:22px 0 8px;display:flex;justify-content:space-between;gap:12px}
+.lbl i{font-style:normal;text-transform:none;letter-spacing:0}
+/* escritorio simulado */
+.desk{position:relative;border-radius:14px;padding:26px;display:flex;gap:34px;flex-wrap:wrap;justify-content:center;overflow:hidden;border:1px solid var(--pgline);min-height:470px;align-items:flex-start}
+.desk .fake{position:absolute;inset:0;padding:22px 26px;display:flex;flex-direction:column;gap:9px;pointer-events:none}
+.desk .ln{height:8px;border-radius:4px;background:var(--ln)}
+.desk .ln.a{background:var(--ln2)}.desk .ln.b{background:var(--ln3)}
+.frame{position:relative;z-index:1}
+.frame>em{display:block;font:normal 11px Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--cap);margin:0 0 8px;text-shadow:var(--capsh)}
+body[data-wall=dark] .desk{background:#1b1d25;--ln:rgba(255,255,255,.13);--ln2:rgba(122,162,255,.3);--ln3:rgba(255,190,110,.26);--cap:#9aa1b0;--capsh:none}
+body[data-wall=light] .desk{background:#f6f6f8;--ln:rgba(0,0,0,.13);--ln2:rgba(40,90,220,.28);--ln3:rgba(220,120,20,.28);--cap:#555;--capsh:none}
+body[data-wall=vivid] .desk{background:linear-gradient(130deg,#ff7a59 0%,#ffd166 32%,#2ec4b6 62%,#7b2ff7 100%);--ln:rgba(255,255,255,.4);--ln2:rgba(255,255,255,.55);--ln3:rgba(0,0,0,.22);--cap:#fff;--capsh:0 1px 3px rgba(0,0,0,.55)}
+.dwrap{position:relative;width:100%;aspect-ratio:1000/580;overflow:hidden;border-radius:14px;border:1px solid var(--pgline)}
+.d *{box-sizing:border-box;margin:0;padding:0}
+.dwrap .d{position:absolute;left:0;top:0;width:1000px;height:580px;transform-origin:0 0;overflow:hidden}
+/* ficha */
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:18px}
+.spec>div{background:var(--pg2);border:1px solid var(--pgline);border-radius:12px;padding:14px 16px}
+.spec h4{margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--pgacc);font-weight:600}
+.spec p,.spec li{font-size:13.5px;color:#c4c9d4;margin:0 0 6px}
+.spec ul{margin:0;padding-left:17px}
+.spec b{color:var(--pgfg);font-weight:500}
+.sw{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.sw span{display:flex;align-items:center;gap:7px;font:11.5px 'JetBrains Mono',monospace;color:var(--pgmut)}
+.sw i{width:22px;height:22px;border-radius:6px;border:1px solid rgba(255,255,255,.2);display:block}
+.ok{color:#7ee0a3}.bad{color:#ffb454}
+.cmp{overflow-x:auto;margin-top:16px;border:1px solid var(--pgline);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:900px;font-size:13px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--pgline);text-align:left;vertical-align:top}
+th{background:var(--pg2);font-weight:600;position:sticky;top:0}
+td:first-child{color:var(--pgmut);width:150px}
+tr:last-child td{border-bottom:0}
+.rec{background:var(--pg2);border:1px solid var(--pgacc);border-radius:14px;padding:18px 20px;margin-top:22px}
+.rec h3{margin:0 0 6px}.rec p{margin:0 0 8px;color:#c4c9d4}
+footer.pg{margin:60px 0 80px;color:var(--pgmut);font-size:13px}
+footer.pg a{color:var(--pgacc)}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ============ WIDGET: base compartida (320px, igual que la app) ============ */
+.w{width:320px;font-size:13px;line-height:1.4;user-select:none;position:relative}
+.w *{box-sizing:border-box;margin:0;padding:0}
+.w button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;white-space:nowrap}
+.w ul{list-style:none}
+.w .grow{flex:1}
+.w .bar{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.w .nw{display:flex;align-items:center}
+.w .nw input{flex:1;min-width:0;font:inherit;color:inherit;outline:none;user-select:text;background:transparent;border:0}
+.w .pr{display:none}
+.w .task{display:flex;align-items:center;gap:7px}
+.w .task .n,.w .task .x{display:none}
+.w .title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.w .ms{flex:none;font-variant-numeric:tabular-nums;font-size:11px;min-width:30px;text-align:right}
+.w footer{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-top:8px;font-size:10.5px}
+.w .panel{display:none}
+.w.active .panel{display:block}
+.w.ghost .ts,.w.ghost .sep{display:none}
+.w .tag{flex:none}
+
+/* el chip de proyecto de la barra se omite en 1-3 por ancho (320 px); sigue en cada fila */
+.p1 .bar .tag,.p2 .bar .tag,.p3 .bar .tag{display:none}
+/* ============ 1 · CRISTAL (glass / acrylic) ============ */
+.p1{--tint:rgba(24,26,38,.80);--fg:#f4f6fb;--mut:#b4bacb;--acc:#8ab4ff;--ok:#7ee0a3;--edge:rgba(255,255,255,.22);--c-web:#8ab4ff;--c-api:#ffb86b;--c-docs:#b79cff}
+.p1 .w{font-family:Inter,'Segoe UI Variable',system-ui,sans-serif;color:var(--fg)}
+.p1 .pill,.p1 .panel{background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,0) 40%),var(--tint);border:1px solid var(--edge);border-radius:20px;backdrop-filter:blur(24px) saturate(160%);box-shadow:0 10px 34px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.28);transition:background .3s,transform .3s cubic-bezier(.2,.9,.3,1.2)}
+.p1 .pill{padding:11px 16px}
+.p1 .w.ghost .pill{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 40%),rgba(24,26,38,.72)}
+.p1 .panel{margin-top:8px;padding:10px;animation:glassIn .42s cubic-bezier(.2,.9,.3,1.2) both}
+.p1 .times{display:flex;align-items:center;font-size:24px;font-weight:300;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.p1 .sep{width:1px;height:20px;background:var(--edge);margin:0 12px}
+.p1 .tt{color:var(--acc);font-weight:400;text-shadow:0 0 18px rgba(138,180,255,.45)}
+.p1 .cur{color:var(--mut);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p1 .cur b{color:var(--fg);font-weight:500}
+.p1 .bar{gap:4px}.p1 button{border-radius:99px;padding:3px 9px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);transition:transform .2s cubic-bezier(.2,.9,.3,1.4),background .2s,border-color .2s}
+.p1 button:hover{background:rgba(255,255,255,.18);transform:translateY(-1px)}
+.p1 button.primary{background:linear-gradient(180deg,#a9c8ff,#7aa6f5);color:#0c1530;font-weight:600;border-color:transparent;box-shadow:0 4px 14px rgba(122,166,245,.45)}
+.p1 .tag{font-size:11px;padding:0 8px;border-radius:99px;color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
+.p1 .task{padding:6px 8px;border-radius:14px;border:1px solid transparent;transition:background .2s,transform .2s cubic-bezier(.2,.9,.3,1.3)}
+.p1 .task:hover{transform:translateX(2px)}
+.p1 .task.sel{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14)}
+.p1 .task.active{background:rgba(138,180,255,.16);border-color:rgba(138,180,255,.38)}
+.p1 .task.active .title{font-weight:600;color:#fff}
+.p1 .chk{width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);padding:0;flex:none;display:grid;place-items:center;font-size:10px;background:none}
+.p1 .task.done .chk{background:var(--ok);border-color:transparent;color:#07200f}.p1 .task.done .chk::after{content:"✓"}
+.p1 .task.done .title{color:var(--mut);text-decoration:line-through}
+.p1 .ms{color:var(--mut)}
+.p1 .task.enter{animation:glassIn .42s cubic-bezier(.2,.9,.3,1.3) both}
+.p1 .list{margin-bottom:8px}
+.p1 .nw input{padding:8px 13px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:14px;transition:border-color .2s,box-shadow .2s}
+.p1 .nw input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(138,180,255,.25)}
+.p1 .nw input::placeholder{color:var(--mut)}
+.p1 footer{color:var(--mut)}
+@keyframes glassIn{from{opacity:0;transform:translateY(10px) scale(.97);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+/* dashboard 1 (ventana opaca => el blur SI funciona: tiene su propio fondo) */
+.p1 .d{background:#0d1020;color:var(--fg);font:14px/1.45 Inter,sans-serif}
+.p1 .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.75}
+.p1 .b1{width:380px;height:380px;background:#5b6cff;left:-60px;top:-80px}.p1 .b2{width:340px;height:340px;background:#b14bff;right:40px;top:120px;opacity:.5}.p1 .b3{width:360px;height:260px;background:#19c6b7;left:300px;bottom:-110px;opacity:.45}
+.p1 .glass{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.18);border-radius:22px;backdrop-filter:blur(22px) saturate(150%);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 12px 30px rgba(0,0,0,.25)}
+.p1 .side{position:absolute;left:14px;top:14px;bottom:14px;width:176px;padding:18px 12px;display:flex;flex-direction:column;gap:16px}
+.p1 .brand{font-weight:600;font-size:16px;padding:0 8px;letter-spacing:.01em}
+.p1 nav{display:flex;flex-direction:column;gap:3px}
+.p1 nav span{padding:8px 12px;border-radius:12px;color:var(--mut);transition:.2s}
+.p1 nav span.on{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+.p1 .sf{margin-top:auto;padding:12px;border-radius:14px;background:rgba(255,255,255,.07);font-size:12px;color:var(--mut)}.p1 .sf b{display:block;color:#fff;font-size:18px;font-weight:400;font-variant-numeric:tabular-nums}
+.p1 main{position:absolute;left:204px;right:14px;top:14px;bottom:14px;display:flex;flex-direction:column;gap:12px}
+.p1 h1{font-size:22px;font-weight:600;padding:2px 4px}
+.p1 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.p1 .kpi{padding:14px 16px}.p1 .kpi .v{font-size:28px;font-weight:300;font-variant-numeric:tabular-nums}.p1 .kpi .l{color:var(--mut);font-size:12px}
+.p1 .card{padding:14px 16px}.p1 .card h2{font-size:12px;color:var(--mut);font-weight:500;margin-bottom:10px}
+.p1 .tl{position:relative;height:30px;border-radius:10px;background:rgba(255,255,255,.07);overflow:hidden}.p1 .tl i{position:absolute;top:4px;bottom:4px;border-radius:7px;background:var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 70%,transparent)}
+.p1 .ax{position:relative;height:16px;font-size:11px;color:var(--mut);margin-top:4px}.p1 .ax span{position:absolute;transform:translateX(-50%)}
+.p1 .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;min-height:0}
+.p1 .pb{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px}.p1 .pb u{text-decoration:none;width:44px;color:var(--c)}.p1 .pb .t{flex:1;height:10px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.p1 .pb .t i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 60%,#fff 0%),var(--c));animation:grow .9s cubic-bezier(.2,.9,.3,1) both}.p1 .pb span{color:var(--mut);width:52px;text-align:right;font-variant-numeric:tabular-nums}
+.p1 .wk{display:flex;align-items:flex-end;gap:10px;height:96px}.p1 .wk div{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;justify-content:flex-end;height:100%;font-size:11px;color:var(--mut)}.p1 .wk i{width:100%;border-radius:10px 10px 6px 6px;background:linear-gradient(180deg,rgba(255,255,255,.38),rgba(255,255,255,.12));animation:rise .8s cubic-bezier(.2,.9,.3,1) both;transform-origin:bottom}.p1 .wk div:last-child i{background:linear-gradient(180deg,#a9c8ff,#6c8cff)}
+@keyframes grow{from{width:0!important}}@keyframes rise{from{transform:scaleY(0)}}
+
+/* ============ 2 · CONSOLA (terminal) ============ */
+.p2{--bg:#0b0f0c;--fg:#c9f7d0;--g:#3dff7a;--dim:#7d9d85;--am:#ffb454;--rd:#ff6b6b;--ln:#2a3b2f;--c-web:#5cd6ff;--c-api:#ffb454;--c-docs:#d79bff}
+.p2 .w,.p2 .d{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;color:var(--fg)}
+.p2 .w{font-size:12.5px;line-height:1.5}
+.p2 .pill,.p2 .panel{background:rgba(11,15,12,.88);border:1px solid var(--ln);border-radius:2px;position:relative;padding:14px 12px 10px}
+.p2 .w.active .pill{border-color:var(--g);border-bottom:0;padding-bottom:4px}
+.p2 .w.active .panel{border:1px solid var(--g);border-top:1px dashed var(--ln);padding-top:10px}
+.p2 .pill::before{content:"taskghost ─ sesión";position:absolute;top:-9px;left:10px;background:#0b0f0c;padding:0 6px;color:var(--dim);font-size:11px}
+.p2 .w.active .pill::before{color:var(--g)}
+.p2 .times{font-size:24px;font-weight:700;letter-spacing:-.02em;display:flex;align-items:baseline}
+.p2 .times::before{content:"> ";color:var(--g);font-weight:400}
+.p2 .tt::after{content:"▌";color:var(--g);animation:blink 1.06s steps(1) infinite;margin-left:2px}
+.p2 .sep{color:var(--dim);margin:0 8px;font-style:normal}.p2 .ts{color:var(--dim);font-weight:400;font-size:16px}
+.p2 .cur{color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p2 .cur b{color:var(--fg);font-weight:500}
+.p2 button{padding:0 2px;color:var(--fg)}.p2 .bar{gap:4px}.p2 button::before{content:"["}.p2 button::after{content:"]"}
+.p2 button:hover{background:var(--g);color:#04130a}
+.p2 button.primary{color:var(--g)}.p2 button.primary:hover{color:#04130a}
+.p2 .bar .ic::before,.p2 .bar .ic::after{content:""}.p2 .bar .ic{color:var(--dim)}
+.p2 .tag{color:var(--c);font-size:12px}
+.p2 .task{padding:1px 6px;gap:8px}
+.p2 .task.sel{background:var(--g);color:#04130a}.p2 .task.sel .tag,.p2 .task.sel .ms,.p2 .task.sel .chk{color:#04130a}
+.p2 .chk{padding:0;background:none;color:var(--dim);white-space:pre;flex:none}.p2 .chk::before{content:"[ ]"}
+.p2 .task.active .chk{color:var(--g)}.p2 .task.active .chk::before{content:"[>]"}
+.p2 .task.done .chk::before{content:"[x]"}.p2 .task.done .title{color:var(--dim);text-decoration:line-through}
+.p2 .task.active:not(.sel) .title{color:var(--g);font-weight:700}
+.p2 .ms{color:var(--dim)}
+.p2 .list{margin-bottom:8px}
+.p2 .nw{border-top:1px solid var(--ln);padding-top:7px}.p2 .pr{display:inline;color:var(--g);margin-right:8px}.p2 .pr::before{content:">"}
+.p2 .nw input{caret-color:var(--g)}.p2 .nw input::placeholder{color:var(--dim)}
+.p2 footer{background:var(--ln);margin:8px -12px -10px;padding:2px 12px;color:var(--fg);font-size:10.5px}.p2 footer button{font-size:10.5px}
+.p2 .task.enter{animation:flash .9s ease-out}.p2 .task.enter .title{animation:type .5s steps(18) both}
+@keyframes blink{50%{opacity:0}}@keyframes type{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}@keyframes flash{from{background:rgba(61,255,122,.35)}to{background:transparent}}
+/* dashboard 2: tmux */
+.p2 .d{background:#070a08;font-size:12.5px;line-height:1.5;display:flex;flex-direction:column}
+.p2 .tb{display:flex;gap:16px;padding:5px 14px;background:#111a14;border-bottom:1px solid var(--ln);color:var(--dim)}.p2 .tb b{color:var(--g);font-weight:700}.p2 .tb .on{background:var(--g);color:#04130a;padding:0 6px}
+.p2 .grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:min-content;gap:18px 16px;padding:18px 14px;align-content:start}
+.p2 .pane{position:relative;border:1px solid var(--ln);padding:14px 14px 10px}.p2 .pane>h3{position:absolute;top:-9px;left:10px;background:#070a08;padding:0 6px;color:var(--g);font-weight:500;font-size:12px}
+.p2 .wide{grid-column:1/-1}
+.p2 .kv{display:flex;gap:6px}.p2 .kv i{flex:1;border-bottom:1px dotted var(--ln);transform:translateY(-5px);min-width:10px}.p2 .kv span{color:var(--dim)}.p2 .kv b{color:var(--g);font-weight:500}
+.p2 pre{font:inherit;white-space:pre;overflow:hidden}
+.p2 .c-web{color:var(--c-web)}.p2 .c-api{color:var(--c-api)}.p2 .c-docs{color:var(--c-docs)}.p2 .dm{color:#2f4636}
+.p2 .ft{margin-top:auto;padding:4px 14px;background:#111a14;border-top:1px solid var(--ln);display:flex;justify-content:space-between;color:var(--dim)}.p2 .ft b{color:var(--g)}
+
+/* ============ 3 · STICKER (neo-brutalismo) ============ */
+.p3{--bg:#fff6e0;--ink:#111;--y:#ffd93d;--pk:#ff7ab8;--bl:#6aa8ff;--gr:#5ce08a;--mut:#4a4a4a;--c-web:#6aa8ff;--c-api:#ff7ab8;--c-docs:#5ce08a}
+.p3 .w,.p3 .d{font-family:'Space Grotesk',system-ui,sans-serif;color:var(--ink);font-weight:500}
+.p3 .pill,.p3 .panel{background:var(--bg);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink)}
+.p3 .pill{padding:8px 12px}
+.p3 .w.ghost .pill{box-shadow:3px 3px 0 var(--ink)}
+.p3 .w.active .pill{border-bottom:0;box-shadow:5px 0 0 var(--ink)}.p3 .w.active .panel{border-top:3px solid var(--ink);padding:10px}
+.p3 .times{font:700 22px 'Space Mono',monospace;display:flex;align-items:center;letter-spacing:-.04em}
+.p3 .tt{background:var(--y);border:3px solid var(--ink);padding:0 7px;transform:rotate(-1.5deg);box-shadow:2px 2px 0 var(--ink)}
+.p3 .sep{margin:0 10px;font-style:normal}
+.p3 .cur{margin-top:6px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p3 .cur b{font-weight:700;text-decoration:underline;text-decoration-thickness:3px;text-decoration-color:var(--pk);text-underline-offset:3px}
+.p3 button{background:#fff;border:3px solid var(--ink);padding:1px 9px;font-weight:700;box-shadow:3px 3px 0 var(--ink);transition:transform .08s steps(2),box-shadow .08s steps(2)}
+.p3 button:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
+.p3 button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+.p3 button.primary{background:var(--y)}
+.p3 .tag{background:var(--c);border:2px solid var(--ink);color:var(--ink);font-size:10.5px;font-weight:700;text-transform:uppercase;padding:0 6px;transform:rotate(-2deg)}
+.p3 .task{background:#fff;border:3px solid var(--ink);padding:4px 8px;margin-bottom:6px;transition:transform .08s steps(2)}
+.p3 .task:hover{transform:translate(-2px,-2px);box-shadow:3px 3px 0 var(--ink)}
+.p3 .task.sel{box-shadow:4px 4px 0 var(--ink)}
+.p3 .task.active{background:var(--y)}.p3 .task.active .title{font-weight:700}
+.p3 .chk{width:20px;height:20px;border:3px solid var(--ink);background:#fff;flex:none;padding:0;box-shadow:none;display:grid;place-items:center;font-weight:700;font-size:13px}
+.p3 .task.done{background:#e9e2cf}.p3 .task.done .chk{background:var(--gr)}.p3 .task.done .chk::after{content:"✓"}.p3 .task.done .title{text-decoration:line-through;text-decoration-thickness:3px;color:var(--mut)}
+.p3 .ms{font:700 11px 'Space Mono',monospace}
+.p3 .nw input{background:#fff;border:3px solid var(--ink);padding:6px 9px;font-weight:500;transition:box-shadow .08s steps(2),transform .08s steps(2)}
+.p3 .nw input:focus{box-shadow:4px 4px 0 var(--pk);transform:translate(-2px,-2px)}
+.p3 footer{font-weight:500;color:var(--mut)}.p3 footer button{font-size:11px;padding:0 6px;box-shadow:2px 2px 0 var(--ink)}
+.p3 .task.enter{animation:pop .3s cubic-bezier(.3,1.7,.5,1) both}
+@keyframes pop{0%{transform:scale(.5) rotate(-5deg);opacity:0}100%{transform:none;opacity:1}}
+/* dashboard 3 */
+.p3 .d{background:var(--bg) radial-gradient(rgba(17,17,17,.16) 1.3px,transparent 1.4px) 0 0/18px 18px}
+.p3 .mq{position:absolute;left:0;right:0;top:0;height:30px;background:var(--ink);color:var(--y);font:700 13px 'Space Mono',monospace;overflow:hidden;white-space:nowrap;display:flex;align-items:center}.p3 .mq div{display:inline-block;animation:mq 22s linear infinite;padding-left:0}@keyframes mq{to{transform:translateX(-50%)}}
+.p3 .side{position:absolute;left:0;top:30px;bottom:0;width:184px;background:var(--y);border-right:3px solid var(--ink);padding:16px 12px;display:flex;flex-direction:column;gap:14px}
+.p3 .brand{font-weight:700;font-size:24px;letter-spacing:-.03em;line-height:1}.p3 .brand small{display:block;font:700 10px 'Space Mono',monospace;margin-top:4px;background:var(--ink);color:var(--y);padding:0 5px;width:max-content}
+.p3 nav{display:flex;flex-direction:column;gap:8px}.p3 nav span{border:3px solid var(--ink);background:#fff;padding:5px 10px;font-weight:700;box-shadow:3px 3px 0 var(--ink)}.p3 nav span.on{background:var(--pk);transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+.p3 .sf{margin-top:auto;border:3px solid var(--ink);background:#fff;padding:8px 10px;font-size:12px;font-weight:700}.p3 .sf b{display:block;font:700 18px 'Space Mono',monospace}
+.p3 main{position:absolute;left:184px;right:0;top:30px;bottom:0;padding:16px 22px;display:flex;flex-direction:column;gap:14px}
+.p3 h1{font-size:40px;line-height:.95;font-weight:700;letter-spacing:-.04em;text-transform:uppercase}.p3 h1 span{background:var(--pk);padding:0 8px;border:3px solid var(--ink);display:inline-block;transform:rotate(-1.5deg)}
+.p3 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.p3 .kpi{border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:8px 12px;transition:transform .1s steps(2)}.p3 .kpi:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 var(--ink)}
+.p3 .k1{background:var(--y)}.p3 .k2{background:var(--pk)}.p3 .k3{background:var(--bl)}.p3 .k4{background:var(--gr)}
+.p3 .kpi .v{font:700 34px/1 'Space Mono',monospace;letter-spacing:-.06em}.p3 .kpi .l{font-weight:700;font-size:12px;text-transform:uppercase;margin-top:2px}
+.p3 .card{background:#fff;border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:10px 14px}.p3 .card h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;display:inline-block;background:var(--ink);color:#fff;padding:0 7px}
+.p3 .tl{position:relative;height:30px;border:3px solid var(--ink);background:var(--bg)}.p3 .tl i{position:absolute;top:-3px;bottom:-3px;background:var(--c);border:3px solid var(--ink)}
+.p3 .ax{position:relative;height:16px;font:700 11px 'Space Mono',monospace;margin-top:3px}.p3 .ax span{position:absolute;transform:translateX(-50%)}
+.p3 .row{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;min-height:0}
+.p3 .pb{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-weight:700}.p3 .pb u{text-decoration:none;width:48px;text-transform:uppercase;font-size:12px}.p3 .pb .t{flex:1;height:18px;border:3px solid var(--ink);background:var(--bg)}.p3 .pb .t i{display:block;height:100%;background:var(--c);border-right:3px solid var(--ink);animation:grow .5s steps(8) both}.p3 .pb span{font:700 12px 'Space Mono',monospace;width:54px;text-align:right}
+.p3 .wk{display:flex;align-items:flex-end;gap:10px;height:84px}.p3 .wk div{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font:700 11px 'Space Mono',monospace;gap:3px}.p3 .wk i{width:100%;background:var(--bl);border:3px solid var(--ink);animation:rise .5s steps(6) both;transform-origin:bottom}.p3 .wk div:last-child i{background:var(--y)}
+
+/* ============ 4 · PAPEL (editorial) ============ */
+.p4{--bg:#f6f1e7;--bg2:#efe8da;--ink:#1d1b16;--mut:#5f584e;--rule:rgba(29,27,22,.24);--v:#b53a08;--ok:#3f6b3a;--c-web:#1f5f99;--c-api:#b53a08;--c-docs:#5b6b2a}
+.p4 .w,.p4 .d{font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+.p4 .serif{font-family:'Source Serif 4',Georgia,serif}
+.p4 .pill,.p4 .panel{background:rgba(246,241,231,.88);border-top:3px solid var(--ink);border-bottom:1px solid var(--rule);backdrop-filter:blur(2px)}
+.p4 .pill{padding:8px 14px 10px;transition:background .3s}.p4 .w.active .pill,.p4 .w.active .panel{background:var(--bg)}
+.p4 .w.active .pill{border-bottom:0}
+.p4 .eyebrow{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:500}
+.p4 .eyebrow .tg{color:var(--c-web)}
+.p4 .cur{font:italic 400 17px/1.25 'Source Serif 4',Georgia,serif;margin:3px 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p4 .cur b{font-weight:400}
+.p4 .times{display:flex;align-items:baseline;justify-content:space-between;font-variant-numeric:tabular-nums lining-nums}
+.p4 .tt{font:400 34px/1 'Source Serif 4',Georgia,serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums lining-nums}
+.p4 .sep{display:none}.p4 .ts{font-size:11px;color:var(--mut);letter-spacing:.06em}.p4 .ts::before{content:"SESIÓN  "}
+.p4 .w.ghost .times{justify-content:flex-start}
+.p4 .panel{border-top:1px solid var(--rule);padding:10px 14px 12px}
+.p4 .panel{animation:fadeUp .22s ease-out both}
+.p4 button{position:relative;padding:0;font-size:12px;letter-spacing:.04em}
+.p4 button::after{content:"";position:absolute;left:0;bottom:-1px;height:1px;width:100%;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .22s ease-out}.p4 button:hover::after{transform:scaleX(1)}
+.p4 button.primary{background:var(--ink);color:var(--bg);padding:2px 10px;letter-spacing:.08em;text-transform:uppercase;font-size:10.5px;font-weight:500}.p4 button.primary::after{display:none}
+.p4 .bar{gap:12px}.p4 .bar .tag{font-size:10px}
+.p4 .tag{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--c);font-weight:600}.p4 .tag::before{content:"— "}
+.p4 .list{border-top:1px solid var(--rule)}
+.p4 .task{padding:7px 4px;border-bottom:1px solid var(--rule);gap:9px;transition:background .2s}
+.p4 .task .n{display:block;white-space:nowrap;font:400 13px 'Source Serif 4',serif;color:var(--mut);width:26px;font-variant-numeric:lining-nums tabular-nums;font-style:italic}
+.p4 .chk{display:none}
+.p4 .task.sel{background:var(--bg2)}
+.p4 .task.active .title{font-weight:600}.p4 .task.active .n{color:var(--v);font-style:normal;font-weight:600}.p4 .task.active .n::after{content:" ●";font-size:7px;vertical-align:2px}
+.p4 .task.done .title{color:var(--mut);text-decoration:line-through;text-decoration-color:var(--rule)}
+.p4 .ms{color:var(--mut)}
+.p4 .nw{margin-top:10px}.p4 .nw input{border-bottom:1px solid var(--ink);padding:5px 0;font:italic 15px 'Source Serif 4',serif;transition:border-color .2s,box-shadow .2s}.p4 .nw input:focus{box-shadow:0 1px 0 var(--ink)}.p4 .nw input::placeholder{color:var(--mut)}
+.p4 footer{color:var(--mut);margin-top:10px}.p4 footer button{font-size:10.5px}
+.p4 .task.enter{animation:fadeUp .32s ease-out both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* dashboard 4 */
+.p4 .d{background:var(--bg);padding:20px 40px;display:flex;flex-direction:column}
+.p4 .mast{text-align:center;border-bottom:3px double var(--ink);padding-bottom:10px}
+.p4 .mast .wm{font:600 34px/1 'Source Serif 4',serif;letter-spacing:-.02em}.p4 .mast .dt{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-top:5px}
+.p4 nav{display:flex;justify-content:center;gap:26px;padding:8px 0;border-bottom:1px solid var(--rule);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}.p4 nav span{padding-bottom:3px;border-bottom:2px solid transparent;transition:.2s}.p4 nav span.on{color:var(--ink);border-color:var(--v)}
+.p4 .cols{display:grid;grid-template-columns:1.7fr 1fr;gap:38px;margin-top:16px}
+.p4 .lede{font:300 31px/1.18 'Source Serif 4',serif;letter-spacing:-.015em}.p4 .lede b{font-weight:600}.p4 .lede em{color:var(--c-web);font-style:italic}
+.p4 .stats{border-left:1px solid var(--rule);padding-left:26px;display:flex;flex-direction:column;gap:12px}
+.p4 .stat .l{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}.p4 .stat .v{font:400 28px/1.1 'Source Serif 4',serif;font-variant-numeric:lining-nums}.p4 .stat .s{font-size:11.5px;color:var(--mut)}
+.p4 .h{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:16px 0 6px;border-top:1px solid var(--ink);padding-top:5px;display:flex;justify-content:space-between}
+.p4 .tl{position:relative;height:16px;border-bottom:1px solid var(--ink)}.p4 .tl i{position:absolute;bottom:0;height:12px;background:var(--c)}
+.p4 .ax{position:relative;height:16px;font-size:10px;color:var(--mut);margin-top:3px}.p4 .ax span{position:absolute;transform:translateX(-50%)}
+.p4 .two{display:grid;grid-template-columns:1fr 1fr;gap:38px}
+.p4 .pb{display:grid;grid-template-columns:54px 1fr 56px;align-items:center;gap:10px;padding:4px 0;border-bottom:1px solid var(--rule);font-size:13px}.p4 .pb u{text-decoration:none;color:var(--c);font-weight:600}.p4 .pb .t{height:5px;background:var(--bg2)}.p4 .pb .t i{display:block;height:100%;background:var(--c);animation:grow .7s ease-out both}.p4 .pb span{text-align:right;font-variant-numeric:tabular-nums;color:var(--mut)}
+.p4 .wk{display:flex;align-items:flex-end;gap:14px;height:78px;border-bottom:1px solid var(--ink)}.p4 .wk div{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:10px;color:var(--mut);gap:3px;position:relative}.p4 .wk i{width:12px;background:var(--ink);animation:rise .6s ease-out both;transform-origin:bottom}.p4 .wk div:last-child i{background:var(--v)}
+
+/* ============ 5 · ESPECTRO (HUD fantasma) ============ */
+.p5{--void:#0a0d1a;--fg:#e6ecff;--mut:#9aa3c7;--cy:#5cf2ff;--vi:#b9a4ff;--ok:#6dffb3;--ln:rgba(120,140,255,.3);--c-web:#5cf2ff;--c-api:#ffb454;--c-docs:#b9a4ff}
+.p5 .w,.p5 .d{font-family:'Chakra Petch',system-ui,sans-serif;color:var(--fg)}
+.p5 .pill,.p5 .panel{background:rgba(10,13,26,.86);border:1px solid var(--ln);position:relative;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));backdrop-filter:blur(6px)}
+.p5 .pill{padding:10px 14px 10px 12px;display:flex;align-items:center;gap:12px;animation:breathe 4s ease-in-out infinite}
+.p5 .w.active .pill{border-bottom:0}.p5 .panel{padding:10px;border-top:1px solid var(--ln);clip-path:polygon(0 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%);animation:scanIn .4s ease-out both}
+.p5 .ringbox{position:relative;width:46px;height:46px;flex:none}.p5 .ringbox svg{position:absolute;inset:0;width:46px;height:46px;transform:rotate(-90deg)}.p5 .ringbox .spin{animation:spin 18s linear infinite;transform-origin:center}
+.p5 .ringbox .core{position:absolute;inset:0;display:grid;place-items:center}.p5 .ringbox .core i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok);animation:pulse 2s ease-in-out infinite}
+.p5 .info{flex:1;min-width:0}
+.p5 .times{font:400 21px/1.1 'Share Tech Mono',monospace;display:flex;align-items:center;letter-spacing:.02em}
+.p5 .tt{color:var(--cy);text-shadow:0 0 14px rgba(92,242,255,.6)}.p5 .ts{color:var(--vi)}.p5 .sep{margin:0 5px;color:var(--mut);font-style:normal}
+.p5 .cur{font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.03em}.p5 .cur b{color:var(--fg);font-weight:500}
+.p5 .bar{gap:4px}.p5 button{border:1px solid var(--ln);padding:2px 7px;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));transition:background .2s,color .2s,border-color .2s,text-shadow .2s}
+.p5 button:hover{border-color:var(--cy);color:var(--cy);background:rgba(92,242,255,.08)}
+.p5 button.primary{border-color:var(--cy);color:var(--cy);background:rgba(92,242,255,.1);text-shadow:0 0 10px rgba(92,242,255,.7)}
+.p5 .tag{font:400 11px 'Share Tech Mono',monospace;color:var(--c);text-transform:uppercase;letter-spacing:.06em}.p5 .tag::before{content:"‹"}.p5 .tag::after{content:"›"}
+.p5 .task{padding:5px 8px;position:relative;border-left:2px solid transparent;transition:background .2s,padding-left .2s}.p5 .task:hover{padding-left:12px}
+.p5 .chk{width:12px;height:12px;flex:none;transform:rotate(45deg);border:1px solid var(--mut);padding:0}.p5 .task.done .chk{background:var(--ok);border-color:var(--ok);box-shadow:0 0 8px var(--ok)}
+.p5 .task.sel{background:rgba(120,140,255,.1)}
+.p5 .task.active{border-left-color:var(--cy);background:linear-gradient(90deg,rgba(92,242,255,.16),transparent 80%)}.p5 .task.active .chk{border-color:var(--cy);background:var(--cy);box-shadow:0 0 10px var(--cy);animation:pulse 2s ease-in-out infinite}
+.p5 .task.active .title{color:#fff;font-weight:600}
+.p5 .task.done .title{color:var(--mut);text-decoration:line-through}
+.p5 .ms{font-family:'Share Tech Mono',monospace;color:var(--mut)}
+.p5 .list{margin-bottom:8px}
+.p5 .nw{border-bottom:1px solid var(--ln);transition:border-color .2s,box-shadow .2s}.p5 .nw:focus-within{border-color:var(--cy);box-shadow:0 1px 0 var(--cy),0 6px 14px -8px var(--cy)}.p5 .pr{display:inline;color:var(--cy);margin:0 8px}.p5 .pr::before{content:"›"}
+.p5 .nw input{padding:7px 0;letter-spacing:.02em}.p5 .nw input::placeholder{color:var(--mut)}
+.p5 footer{color:var(--mut);font-size:10px;letter-spacing:.03em}.p5 footer button{font-size:10px;padding:0 7px}
+.p5 .task.enter{animation:scanIn .45s ease-out both}
+@keyframes scanIn{0%{clip-path:inset(0 0 100% 0);opacity:0}20%{opacity:.9}30%{opacity:.3}45%{opacity:1}100%{clip-path:inset(0);opacity:1}}
+@keyframes pulse{50%{opacity:.35;transform:scale(.8)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes breathe{50%{box-shadow:0 0 18px -4px rgba(92,242,255,.35)}}
+/* dashboard 5 */
+.p5 .d{background:#070914;background-image:linear-gradient(rgba(120,140,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(120,140,255,.07) 1px,transparent 1px);background-size:40px 40px}
+.p5 .d::before{content:"";position:absolute;inset:0;background:radial-gradient(500px 300px at 10% 0%,rgba(150,120,255,.22),transparent),radial-gradient(520px 320px at 100% 100%,rgba(92,242,255,.16),transparent)}
+.p5 .rail{position:absolute;left:0;top:0;bottom:0;width:64px;border-right:1px solid var(--ln);background:rgba(10,13,26,.8);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:8px}
+.p5 .rail .lg{font:600 10px 'Chakra Petch';letter-spacing:.14em;color:var(--cy);writing-mode:vertical-rl;margin:auto 0 4px;text-shadow:0 0 10px rgba(92,242,255,.6)}
+.p5 .rail span{width:40px;height:40px;display:grid;place-items:center;color:var(--mut);font-size:18px;border:1px solid transparent;transition:.2s}.p5 .rail span.on{color:var(--cy);border-color:var(--ln);background:rgba(92,242,255,.08);box-shadow:inset 2px 0 0 var(--cy),0 0 16px -6px var(--cy)}
+.p5 .hd{position:absolute;left:64px;right:0;top:0;height:44px;border-bottom:1px solid var(--ln);display:flex;align-items:center;padding:0 22px;gap:16px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}.p5 .hd b{color:var(--fg);font-weight:600}.p5 .hd .grow{flex:1}.p5 .hd .live{color:var(--ok)}.p5 .hd .live::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);margin-right:7px;animation:pulse 2s infinite}
+.p5 main{position:absolute;left:64px;right:0;top:44px;bottom:0;padding:16px 22px;display:flex;flex-direction:column;gap:14px}
+.p5 .frm{position:relative;border:1px solid var(--ln);background:rgba(10,13,26,.72);padding:12px 16px}
+.p5 .frm::before,.p5 .frm::after{content:"";position:absolute;width:10px;height:10px;border:2px solid var(--cy)}.p5 .frm::before{left:-1px;top:-1px;border-right:0;border-bottom:0}.p5 .frm::after{right:-1px;bottom:-1px;border-left:0;border-top:0}
+.p5 .frm h2{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);font-weight:500;margin-bottom:9px}
+.p5 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.p5 .kpi{display:flex;align-items:center;gap:14px}
+.p5 .rg{position:relative;width:70px;height:70px;flex:none}.p5 .rg svg{width:70px;height:70px;transform:rotate(-90deg)}.p5 .rg circle{fill:none;stroke-width:5}.p5 .rg .tr{stroke:rgba(120,140,255,.18)}.p5 .rg .pg{stroke:var(--k,var(--cy));stroke-linecap:butt;filter:drop-shadow(0 0 5px var(--k,var(--cy)));stroke-dasharray:176;animation:ringIn 1.2s ease-out both}
+.p5 .rg b{position:absolute;inset:0;display:grid;place-items:center;font:400 15px 'Share Tech Mono'}
+.p5 .kpi .v{font:400 22px 'Share Tech Mono';line-height:1.1}.p5 .kpi .l{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+@keyframes ringIn{from{stroke-dashoffset:176}}
+.p5 .tl{position:relative;height:28px;background:repeating-linear-gradient(90deg,rgba(120,140,255,.14) 0 1px,transparent 1px 8.333%)}.p5 .tl i{position:absolute;top:4px;bottom:4px;background:var(--c);box-shadow:0 0 14px var(--c);opacity:.92}
+.p5 .ax{position:relative;height:16px;font:11px 'Share Tech Mono';color:var(--mut);margin-top:3px}.p5 .ax span{position:absolute;transform:translateX(-50%)}
+.p5 .row{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;min-height:0}
+.p5 .pb{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12px}.p5 .pb u{text-decoration:none;width:44px;color:var(--c);text-transform:uppercase;letter-spacing:.08em}.p5 .pb .t{flex:1;display:grid;grid-template-columns:repeat(20,1fr);gap:2px;height:12px}.p5 .pb .t i{background:rgba(120,140,255,.16)}.p5 .pb .t i.f{background:var(--c);box-shadow:0 0 6px var(--c);animation:cell .5s ease-out both;animation-delay:calc(var(--i)*30ms)}.p5 .pb span{font:13px 'Share Tech Mono';width:54px;text-align:right}
+@keyframes cell{from{opacity:0}}
+.p5 .wk{display:flex;gap:12px;height:88px}.p5 .wk div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;align-items:stretch;font:11px 'Share Tech Mono';color:var(--mut);text-align:center}.p5 .wk i{height:8px;background:rgba(120,140,255,.14)}.p5 .wk i.f{background:var(--vi);box-shadow:0 0 6px var(--vi);animation:cell .4s ease-out both;animation-delay:calc(var(--i)*40ms)}.p5 .wk div:last-child i.f{background:var(--cy);box-shadow:0 0 6px var(--cy)}
+</style>
+</head>
+<body data-wall="dark">
+
+<div class="top"><div class="wrap">
+  <b>taskghost · estilos</b>
+  <a href="#p1">1 Cristal</a><a href="#p2">2 Consola</a><a href="#p3">3 Sticker</a><a href="#p4">4 Papel</a><a href="#p5">5 Espectro</a><a href="#cmp">Comparativa</a>
+  <span class="sp"></span>
+  <div class="wall">Fondo de prueba:
+    <button data-w="dark" class="on">Oscuro</button><button data-w="light">Claro</button><button data-w="vivid">Colorido</button>
+  </div>
+</div></div>
+
+<div class="wrap">
+  <h1>5 direcciones de estilo para taskghost</h1>
+  <p class="lead">No son 5 paletas: cada una cambia <b>estructura, tipografía, movimiento, contraste y uso de transparencia</b>. Los widgets y dashboards de abajo son <b>funcionales</b> (los timers corren, podés escribir una tarea nueva + Enter para ver la animación de entrada). Cambiá el <b>fondo de prueba</b> arriba a la derecha: el widget fantasma vive sobre cualquier ventana, así que tiene que leerse sobre todas.</p>
+
+  <div class="lbl">Lo que encontré en el código y en Electron (condiciona las 5 propuestas)</div>
+  <div class="find">
+    <div><h4>La transparencia del fantasma hoy baja el contraste</h4>Ahora el modo fantasma usa <code>opacity: .55</code> sobre toda la píldora: eso también atenúa el <b>texto</b>. En todas las propuestas el fantasma baja el <b>alpha del fondo</b> y deja el texto opaco.</div>
+    <div><h4><code>backdrop-filter</code> no desenfoca el escritorio</h4>La ventana del widget es <code>transparent: true</code>: el blur de CSS solo ve el contenido de <i>su propia</i> ventana. Un “vidrio” real (Acrylic/Mica) sale de <code>backgroundMaterial</code> de Electron (Win 11 22H2+), que exige <b>no</b> usar <code>transparent: true</code> (<a style="color:#8ab4ff" href="https://github.com/electron/electron/issues/38466">issue #38466</a>). El dashboard es una ventana opaca: ahí el blur sí funciona.</div>
+    <div><h4>Offline + CSP: las fuentes se empaquetan</h4>La CSP es <code>default-src 'self'</code> y la app es 100% local: no hay Google Fonts. Las fuentes de abajo se cargan de la web <b>solo para esta vista previa</b>; en la app van como <code>.woff2</code> en <code>assets/</code> con <code>@font-face</code>.</div>
+    <div><h4>Restricciones fijas</h4>Widget de 320 px de ancho, arrastrable desde la píldora, click-through en fantasma, modo “círculo” de 34 px, tema claro/oscuro, dashboard con sidebar + tablas + Chart.js. Cada ficha dice cómo se adapta.</div>
+  </div>
+
+  <div id="sections"></div>
+
+  <section id="cmp" class="prop">
+    <div class="phead"><h2>Comparativa</h2></div>
+    <div class="cmp"><table>
+      <thead><tr><th></th><th>1 Cristal</th><th>2 Consola</th><th>3 Sticker</th><th>4 Papel</th><th>5 Espectro</th></tr></thead>
+      <tbody>
+      <tr><td>Sensación</td><td>Premium, suave, SO moderno</td><td>Herramienta de dev, cero ruido</td><td>Lúdico, gráfico, con carácter</td><td>Calmo, de lectura, sobrio</td><td>Sci‑fi, identidad “ghost”</td></tr>
+      <tr><td>Estructura</td><td>Tarjetas flotantes separadas, sidebar “isla”</td><td>Paneles tipo tmux, nav por teclas F1–F6, barra de estado</td><td>Bloques con borde grueso, sidebar sólido, marquee</td><td>Sin cajas: reglas finas, nav superior, “titular + texto”</td><td>Rail de íconos, marcos con esquinas, anillos y LEDs</td></tr>
+      <tr><td>Tipografía</td><td>Inter (light 300 en timers)</td><td>JetBrains Mono en todo</td><td>Space Grotesk + Space Mono</td><td>Source Serif 4 + Inter</td><td>Chakra Petch + Share Tech Mono</td></tr>
+      <tr><td>Transparencia</td><td><b>Alta</b> (alpha .80 piso)</td><td>Baja (alpha .88)</td><td><b>Ninguna</b> (todo opaco)</td><td>Mínima (alpha .88)</td><td>Media (alpha .86 + glow)</td></tr>
+      <tr><td>Peor contraste de texto secundario</td><td class="bad">4.7 : 1 (sobre blanco)</td><td class="ok">4.7 : 1</td><td class="ok">8.2 : 1</td><td class="ok">4.7 : 1</td><td class="ok">5.4 : 1</td></tr>
+      <tr><td>Legible en cualquier fondo</td><td class="bad">Depende del alpha; con .62 falla</td><td class="ok">Sí</td><td class="ok">Sí, el mejor</td><td class="ok">Sí</td><td class="ok">Sí</td></tr>
+      <tr><td>Movimiento</td><td>Resorte + blur‑in, hover elástico</td><td>Cursor parpadeante, tipeo, <code>steps()</code></td><td>Pop, press con sombra dura, marquee</td><td>Fade + subida 6 px, subrayado que se dibuja</td><td>Anillo, pulso, glow, scan‑in</td></tr>
+      <tr><td>Esfuerzo</td><td>Medio‑alto (acrylic en <code>main.js</code> o alpha alto)</td><td class="ok">Bajo (casi todo CSS)</td><td>Medio (CSS + dashboard)</td><td>Medio (markup de píldora + nav)</td><td class="bad">Alto (SVG de anillos, animaciones)</td></tr>
+      <tr><td>Riesgo</td><td>Legibilidad; bugs de acrylic en frameless</td><td>Se siente “frío”</td><td>Cansa si está siempre a la vista</td><td>Poco “dashboard”, menos densidad</td><td>Glow/animación = distracción constante</td></tr>
+      </tbody></table></div>
+    <div class="rec">
+      <h3>Mi recomendación</h3>
+      <p><b>Widget:</b> 2 (Consola) o 5 (Espectro). Son los que mejor sobreviven a estar siempre encima de cualquier cosa: oscuros, contraste alto, y el fantasma ya se ve “fantasma”. 2 es lo más barato y menos distractivo; 5 es el que le da identidad al nombre <i>taskghost</i>.</p>
+      <p><b>Dashboard:</b> 4 (Papel) es el más cómodo para estar mirando gráficos y tablas largo rato; 1 (Cristal) luce más pero solo vale la pena si te gusta ese look. <b>Se pueden mezclar</b>: widget Consola + dashboard Papel comparten solo las variables de color de proyecto.</p>
+      <p><b>Descartadas por ahora:</b> Neumorfismo (contraste bajo por diseño), Bento/Material You (muy cercano a lo que ya hay, solo más redondo), Retro Win95/Mac clásico (divertido pero ocupa mucho y es difícil de hacer legible a 320 px).</p>
+    </div>
+  </section>
+
+  <footer class="pg">Archivo generado para evaluar direcciones; no toca el código de la app. Elegida una, el siguiente paso es portar <code>widget.css</code>, <code>dashboard.css</code> y el markup de <code>index.html</code>/<code>dashboard.js</code>.</footer>
+</div>
+
+<script>
+/* ============ datos y helpers ============ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const pad=n=>String(n).padStart(2,'0');
+const fmt=s=>`${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`;
+const TASKS=[{t:'Arreglar login',p:'web',ms:'18m',act:1},{t:'Revisar PR de pagos',p:'api',ms:''},{t:'Escribir changelog',p:'docs',ms:'7m'},{t:'Migrar tests a node:test',p:'web',ms:'40m',done:1}];
+const PROJ=[['web','2h 00m',63],['api','0h 45m',23],['docs','0h 27m',14]];
+const WEEK=[['J',5.0],['V',3.2],['S',0.8],['D',0],['L',4.1],['M',2.5],['X',3.2]];
+const SEG=[[9,10,'web'],[11,11.75,'api'],[14,14.75,'web'],[16,16.45,'docs'],[18,18.25,'web']];
+const pc=h=>((h-8)/12*100);
+const AX=[8,10,12,14,16,18,20];
+const NAV=['Hoy','Tareas','Proyectos','Sesiones','Gráficos','Ajustes'];
+const li=(t,i)=>`<li class="task${t.act?' active':''}${t.done?' done':''}${i==1?' sel':''}"><span class="n">${pad(i+1)}</span><button class="chk"></button><span class="title">${t.t}</span><span class="tag" style="--c:var(--c-${t.p})">#${t.p}</span><span class="ms">${t.ms}</span></li>`;
+const tl=(n)=>SEG.map(s=>`<i style="left:${pc(s[0])}%;width:${pc(s[1])-pc(s[0])}%;--c:var(--c-${s[2]})"></i>`).join('');
+const ax=()=>AX.map(h=>`<span style="left:${pc(h)}%">${pad(h)}</span>`).join('');
+const pbars=()=>PROJ.map(p=>`<div class="pb" style="--c:var(--c-${p[0]})"><u>#${p[0]}</u><div class="t"><i style="width:${p[2]}%"></i></div><span>${p[1]}</span></div>`).join('');
+const wk=()=>WEEK.map((w,i)=>`<div><i style="height:${w[1]/5*100*0.72}%;animation-delay:${i*60}ms"></i>${w[0]}</div>`).join('');
+const nav=(cls='')=>NAV.map((n,i)=>`<span${i==0?' class="on"':''}>${n}</span>`).join('');
+
+/* ============ widget (estructura distinta por estilo) ============ */
+function widget(n,active){
+  const list=TASKS.map(li).join('');
+  const bar=`<div class="bar"><button class="primary">Pausar</button><button>Terminar</button><span class="tag" style="--c:var(--c-web)">#web</span><span class="grow"></span><button class="ic" title="tema">☾</button><button>Dashboard</button></div>`;
+  const panel=active?`<section class="panel">${bar}<ul class="list">${list}</ul><label class="nw"><i class="pr"></i><input class="new" placeholder="Nueva tarea…  (#proyecto)" autocomplete="off" spellcheck="false"></label><footer><span>Enter agrega · ↑↓ elige · Ctrl+D hecha</span><button>Limpiar hechas</button></footer></section>`:'';
+  const T=`<span class="ts">00:42:01</span><i class="sep">·</i><span class="tt">00:18:05</span>`;
+  let pill;
+  if(n==4) pill=`<header class="pill"><div class="eyebrow"><span>Ahora</span><span class="tg">#web</span></div><div class="cur"><b>Arreglar login</b></div><div class="times">${T.replace('<i class="sep">·</i>','')}</div></header>`;
+  else if(n==5) pill=`<header class="pill"><div class="ringbox"><svg viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" fill="none" stroke="rgba(120,140,255,.22)" stroke-width="3"/><circle class="arc" cx="23" cy="23" r="19" fill="none" stroke="#5cf2ff" stroke-width="3" stroke-dasharray="119.4" stroke-dashoffset="60" style="filter:drop-shadow(0 0 4px #5cf2ff);transition:stroke-dashoffset .9s linear"/></svg><svg viewBox="0 0 46 46"><circle class="spin" cx="23" cy="23" r="22" fill="none" stroke="rgba(185,164,255,.6)" stroke-width="1" stroke-dasharray="2 7"/></svg><div class="core"><i></i></div></div><div class="info"><div class="times">${T}</div><div class="cur">▶ <b>Arreglar login</b></div></div></header>`;
+  else pill=`<header class="pill"><div class="times">${T}</div><div class="cur">▶ <b>Arreglar login</b></div></header>`;
+  return `<div class="w ${active?'active':'ghost'}" data-n="${n}">${pill}${panel}</div>`;
+}
+
+/* ============ dashboards ============ */
+function dash(n){
+  const side=`<div class="brand">taskghost</div><nav>${nav()}</nav>`;
+  if(n==1) return `<div class="d"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <aside class="glass side">${side}<div class="sf">● Sesión activa<b>00:42:01</b></div></aside>
+  <main><h1>Hoy</h1>
+  <div class="kpis">${[['3h 12m','Tiempo hoy · +24 % vs ayer'],['2','Sesiones'],['5 / 8','Tareas hechas'],['#web','Proyecto top · 63 %']].map(k=>`<div class="glass kpi"><div class="v">${k[0]}</div><div class="l">${k[1]}</div></div>`).join('')}</div>
+  <div class="glass card"><h2>Línea de tiempo</h2><div class="tl">${tl()}</div><div class="ax">${ax()}</div></div>
+  <div class="row"><div class="glass card"><h2>Por proyecto</h2>${pbars()}</div><div class="glass card"><h2>Últimos 7 días</h2><div class="wk">${wk()}</div></div></div></main></div>`;
+  if(n==2){
+    const cells=48,seg=(i)=>{const h=8+i*.25;const s=SEG.find(s=>h>=s[0]&&h<s[1]);return s?s[2]:null};
+    const tline=Array.from({length:cells},(_,i)=>{const s=seg(i);return s?`<span class="c-${s}">█</span>`:'<span class="dm">·</span>'}).join('');
+    const axl='08'+' '.repeat(6)+'10'+' '.repeat(6)+'12'+' '.repeat(6)+'14'+' '.repeat(6)+'16'+' '.repeat(6)+'18'+' '.repeat(6)+'20';
+    const bars=PROJ.map(p=>{const f=Math.round(p[2]/5);return `<div><span class="c-${p[0]}">#${p[0].padEnd(5)}</span> <span class="c-${p[0]}">${'█'.repeat(f)}</span><span class="dm">${'░'.repeat(20-f)}</span> ${p[1]} ${String(p[2]).padStart(3)}%</div>`}).join('');
+    const rows=[5,4,3,2,1].map(r=>WEEK.map(w=>w[1]>=r-.5?' <span style="color:'+(w===WEEK[6]?'var(--g)':'#5e8a6b')+'">██</span> ':'    ').join(''));
+    const wkc=rows.map(r=>`<div>${r}</div>`).join('')+`<div class="dm">${WEEK.map(w=>' '+w[0]+'  ').join('').replace(/ /g,' ')}</div>`;
+    return `<div class="d"><div class="tb"><b>taskghost</b><span>~/hoy</span><span style="flex:1"></span>${NAV.map((x,i)=>`<span${i==0?' class="on"':''}>F${i+1} ${x.toLowerCase()}</span>`).join('')}</div>
+    <div class="grid">
+      <div class="pane"><h3>resumen</h3><div class="kv"><span>tiempo hoy</span><i></i><b>3h 12m</b></div><div class="kv"><span>sesiones</span><i></i><b>2</b></div><div class="kv"><span>hechas</span><i></i><b>5/8</b></div><div class="kv"><span>proyecto top</span><i></i><b>#web 63%</b></div></div>
+      <div class="pane"><h3>sesión ● running</h3><div class="kv"><span>sesión</span><i></i><b>00:42:01</b></div><div class="kv"><span>tarea</span><i></i><b>00:18:05</b></div><div class="kv"><span>actual</span><i></i><b>Arreglar login</b></div><div class="kv"><span>proyecto</span><i></i><b class="c-web">#web</b></div></div>
+      <div class="pane wide"><h3>timeline 08:00–20:00</h3><pre>${tline}</pre><pre class="dm">${axl}</pre></div>
+      <div class="pane"><h3>por proyecto</h3><pre>${bars}</pre></div>
+      <div class="pane"><h3>últimos 7 días (h)</h3><pre>${wkc}</pre></div>
+    </div>
+    <div class="ft"><span><b>-- NORMAL --</b> hoy</span><span>:q cerrar · ctrl+alt+t panel</span></div></div>`;
+  }
+  if(n==3) return `<div class="d"><div class="mq"><div>${'● SESIÓN EN CURSO — ARREGLAR LOGIN — 00:18:05 — '.repeat(10)}</div></div>
+  <aside class="side"><div class="brand">task<br>ghost<small>v0.1</small></div><nav>${nav()}</nav><div class="sf">SESIÓN<b>00:42:01</b></div></aside>
+  <main><h1>Hoy <span>3h 12m</span></h1>
+  <div class="kpis">${[['k1','3h12','Tiempo hoy'],['k2','2','Sesiones'],['k3','5/8','Hechas'],['k4','#web','Top · 63%']].map(k=>`<div class="kpi ${k[0]}"><div class="v">${k[1]}</div><div class="l">${k[2]}</div></div>`).join('')}</div>
+  <div class="card"><h2>Línea de tiempo</h2><div class="tl">${tl()}</div><div class="ax">${ax()}</div></div>
+  <div class="row"><div class="card"><h2>Por proyecto</h2>${pbars()}</div><div class="card"><h2>7 días</h2><div class="wk">${wk()}</div></div></div></main></div>`;
+  if(n==4) return `<div class="d"><div class="mast"><div class="wm">taskghost</div><div class="dt">Miércoles 30 de septiembre · 2026</div></div>
+  <nav>${nav()}</nav>
+  <div class="cols"><div class="lede">Hoy trabajaste <b>3 h 12 m</b> repartidas en <b>dos sesiones</b>, sobre todo en <em>#web</em>. Cerraste <b>cinco de ocho</b> tareas.</div>
+  <div class="stats"><div class="stat"><div class="l">En curso</div><div class="v">00:42:01</div><div class="s">Arreglar login · 00:18:05</div></div><div class="stat"><div class="l">Frente a ayer</div><div class="v">+24 %</div><div class="s">2 h 34 m → 3 h 12 m</div></div></div></div>
+  <div class="h"><span>Línea de tiempo</span><span>08 – 20 h</span></div><div class="tl">${tl()}</div><div class="ax">${ax()}</div>
+  <div class="two"><div><div class="h"><span>Por proyecto</span><span>hoy</span></div>${pbars()}</div><div><div class="h"><span>Últimos siete días</span><span>horas</span></div><div class="wk">${wk()}</div></div></div></div>`;
+  if(n==5){
+    const K=[['3h12','Tiempo · meta 4h',.8,'var(--cy)'],['2','Sesiones · meta 3',.67,'var(--vi)'],['5/8','Tareas hechas',.63,'var(--ok)'],['#web','Proyecto top',.63,'#ffb454']];
+    const kp=K.map(k=>`<div class="frm"><div class="kpi"><div class="rg" style="--k:${k[3]}"><svg viewBox="0 0 70 70"><circle class="tr" cx="35" cy="35" r="28"/><circle class="pg" cx="35" cy="35" r="28" style="stroke-dashoffset:${176*(1-k[2])}"/></svg><b>${Math.round(k[2]*100)}</b></div><div><div class="v">${k[0]}</div><div class="l">${k[1]}</div></div></div></div>`).join('');
+    const pb=PROJ.map(p=>`<div class="pb" style="--c:var(--c-${p[0]})"><u>${p[0]}</u><div class="t">${Array.from({length:20},(_,i)=>`<i class="${i<Math.round(p[2]/5)?'f':''}" style="--i:${i}"></i>`).join('')}</div><span>${p[1]}</span></div>`).join('');
+    const wkc=WEEK.map(w=>`<div>${Array.from({length:10},(_,r)=>`<i class="${(9-r)<Math.round(w[1]*2)?'f':''}" style="--i:${9-r}"></i>`).join('')}${w[0]}</div>`).join('');
+    return `<div class="d"><div class="rail"><span class="on">◷</span><span>☰</span><span>◈</span><span>◉</span><span>▤</span><span>⚙</span><div class="lg">TASKGHOST</div></div>
+    <div class="hd"><b>Hoy</b><span>//</span><span>30.09.2026</span><span class="grow"></span><span class="live">Sesión activa · 00:42:01</span></div>
+    <main><div class="kpis">${kp}</div>
+    <div class="frm"><h2>Línea de tiempo</h2><div class="tl">${tl()}</div><div class="ax">${ax()}</div></div>
+    <div class="row"><div class="frm"><h2>Por proyecto</h2>${pb}</div><div class="frm"><h2>Últimos 7 días</h2><div class="wk">${wkc}</div></div></div></main></div>`;
+  }
+}
+
+/* ============ fichas ============ */
+const SW=(a)=>`<div class="sw">${a.map(c=>`<span><i style="background:${c[0]}"></i>${c[1]}</span>`).join('')}</div>`;
+const P=[
+{n:1,id:'p1',name:'Cristal',tag:'Vidrio esmerilado estilo Fluent/visionOS: capas translúcidas, bordes de luz, esquinas muy redondas y movimiento elástico.',chips:['translúcido','redondeado 20 px','resorte','luz interior'],
+ est:['Píldora y panel pasan a ser <b>dos tarjetas separadas</b> (8 px de aire) en vez de una pieza pegada.','Botones y tags en <b>cápsula</b>; selección = “chip” de vidrio; dashboard con sidebar <b>isla flotante</b> y KPI en tarjetas.','Modo círculo: disco de vidrio con aro de color de estado y el logo.'],
+ tipo:['<b>Inter</b> (o Segoe UI Variable si no querés empaquetar): timers en <b>peso 300</b> 24 px, el de tarea en acento con glow leve.','Números tabulares (<code>tnum</code>) para que el reloj no vibre.','Jerarquía por peso y color, no por tamaño.'],
+ mov:['<b>glassIn</b> 420 ms: entra con blur(8→0) + subida 10 px + leve sobre‑impulso <code>cubic-bezier(.2,.9,.3,1.3)</code>.','Hover: el item se desplaza 2 px, botones suben 1 px con elástico.','Barras del dashboard crecen con la misma curva. Sin animación en los dígitos.'],
+ con:['Texto principal 8.4 : 1 y secundario <b>4.7 : 1</b> sobre fondo blanco (peor caso), con tinte <code>#181a26</code> a alpha .80.','<span class="bad">Con alpha .62 el secundario baja a 2.3 : 1</span> y el acento a 2.2 : 1: hay que fijar un <b>piso de alpha .80</b>.'],
+ tra:['<b>Es la propuesta que más depende de transparencia.</b> Opción A (solo CSS): tinte con alpha alto, sin blur real del escritorio → se ve “plástico”.','Opción B: <code>backgroundMaterial: \'acrylic\'</code> (Win 11) con <code>backgroundColor:\'#00000000\'</code>, sin <code>transparent:true</code>; hay que validar esquinas, click‑through y arrastre. Linux: sin equivalente.','Dashboard: blur real porque la ventana es opaca y trae su propio fondo de manchas de color.'],
+ sw:[['#181a26','tinte .80'],['#f4f6fb','texto'],['#b4bacb','secundario'],['#8ab4ff','acento'],['#7ee0a3','ok'],['rgba(255,255,255,.22)','borde luz']],
+ cost:'Esfuerzo medio‑alto. Riesgo principal: legibilidad sobre fondos claros y comportamiento de acrylic en ventana sin marco.'},
+{n:2,id:'p2',name:'Consola',tag:'Terminal moderna: monoespaciada, bordes de 1 px, marcadores <code>[ ]</code>, selección en video inverso, verde fósforo sobre casi negro.',chips:['monoespaciada','radio 0–2 px','video inverso','teclado primero'],
+ est:['Todo se arma como <b>paneles con título en el borde</b> (<code>┌ resumen ┐</code>); la píldora trae “taskghost ─ sesión” en el marco.','Checkbox → <code>[ ]</code> <code>[>]</code> <code>[x]</code>; botones → <code>[ Pausar ]</code>; footer como <b>barra de estado</b> tipo vim.','Dashboard: sin sidebar; <b>barra superior con F1–F6</b>, paneles en grilla y línea de comando abajo. Gráficos hechos con <code>█ ░ ▁▃▅</code>.','Modo círculo: cuadrado con <code>&gt;_</code> y borde del color de estado.'],
+ tipo:['<b>JetBrains Mono</b> 12.5 px (alt.: Cascadia Mono, ya viene en Windows 11, cero peso extra).','Timer 24 px bold con “cursor” de bloque; todo en minúsculas salvo contenido del usuario.','Ancho fijo = la columna de tiempos y tags se alinea sola.'],
+ mov:['Cursor <code>▌</code> parpadeando con <code>steps(1)</code> a 1.06 s; tarea nueva se “tipea” (<code>clip-path</code> + <code>steps(18)</code>) y destella en verde.','<b>Sin easing suave</b>: los cambios son instantáneos o escalonados; combina con el reloj del modo fantasma que solo salta cada 5 s.','Opcional: scanlines al 4 % (apagadas por defecto).'],
+ con:['Texto 11.9–16.5 : 1, verde 10.6–14.7 : 1, secundario <span class="ok">≥ 4.7 : 1</span> en los peores fondos (blanco, negro, colorido).','La selección por video inverso da contraste máximo (negro sobre verde).'],
+ tra:['Alpha .88 fijo en fantasma y activo; casi sin cambio entre estados, lo que <b>evita que el texto “respire”</b>.','No usa blur ni vidrio. Lo que lo hace “fantasma” es el borde gris en vez de verde y el cursor.'],
+ sw:[['#0b0f0c','fondo .88'],['#c9f7d0','texto'],['#7d9d85','secundario'],['#3dff7a','verde'],['#ffb454','ámbar'],['#2a3b2f','línea']],
+ cost:'Esfuerzo bajo: casi todo CSS. Se puede cambiar el acento (verde/ámbar/cian) sin tocar estructura.'},
+{n:3,id:'p3',name:'Sticker',tag:'Neo‑brutalismo: bordes negros de 3 px, sombras duras sin blur, colores planos saturados y tags pegados como stickers.',chips:['opaco','borde 3 px','sombra dura','color plano'],
+ est:['Cada elemento es un <b>bloque con borde y sombra offset</b> (5 px); al presionar, el bloque “se hunde” hasta perder la sombra.','Tareas como <b>tarjetas individuales</b> (no filas); la activa se pinta amarilla. Tags rotados −2° como etiquetas.','Dashboard: sidebar amarilla sólida, <b>marquee</b> superior con la sesión en curso, KPI en 4 colores, títulos enormes en mayúsculas.','Modo círculo: disco amarillo con borde grueso.'],
+ tipo:['<b>Space Grotesk</b> 500/700 para UI y títulos (hasta 40 px, tracking −.04em); <b>Space Mono</b> 700 para todos los números.','El timer de tarea va sobre un “marcador” amarillo inclinado.'],
+ mov:['<b>Rápido y duro</b>: hover/press en 80 ms con <code>steps(2)</code> (se mueve a saltos, no se desliza). Entrada <b>pop</b> 300 ms con rebote fuerte.','Marquee continuo de 22 s en el dashboard (se puede quitar). Barras crecen escalonadas (<code>steps(8)</code>).'],
+ con:['Tinta <code>#111</code> sobre crema 17.5 : 1, sobre amarillo 13.7 : 1, sobre rosa y azul 7.8 : 1. Secundario <span class="ok">8.2 : 1</span>.','Es la propuesta con el <b>mejor contraste de las cinco</b>, en cualquier fondo.'],
+ tra:['<b>Ninguna</b>: todo opaco. El modo fantasma no usa alpha; se logra <b>reduciendo la sombra</b> (5 → 3 px) y el tamaño.','Consecuencia: el fantasma tapa lo que hay detrás. Si eso importa, esta no es la indicada para el widget.'],
+ sw:[['#fff6e0','crema'],['#111111','tinta'],['#ffd93d','amarillo'],['#ff7ab8','rosa'],['#6aa8ff','azul'],['#5ce08a','verde']],
+ cost:'Esfuerzo medio. Es simple de hacer en CSS pero cambia mucho la escala visual del dashboard.'},
+{n:4,id:'p4',name:'Papel',tag:'Editorial/suizo: fondo papel, tinta, serif para números y titulares, reglas finas en lugar de cajas y un único acento bermellón.',chips:['sin cajas','serif + sans','reglas 1 px','1 acento'],
+ est:['La píldora es un <b>“titular”</b>: etiqueta chica (AHORA · #web), tarea en itálica serif y el tiempo grande abajo. Regla gruesa de 3 px arriba.','Lista <b>numerada</b> (01, 02…) con separadores finos; tags como “— web” en versalitas; botones como texto con subrayado.','Dashboard: <b>cabecera tipo diario</b> con doble regla, nav horizontal centrado, frase‑resumen grande (“Hoy trabajaste 3 h 12 m…”) y columnas.','Modo círculo: sello circular con monograma “t”.'],
+ tipo:['<b>Source Serif 4</b> (timers, titulares, números; <code>lining‑nums tabular‑nums</code>) + <b>Inter</b> 12–13 px para UI.','Etiquetas en <b>versalitas con tracking .14em</b> y 10 px; itálica serif para placeholders y tarea actual.'],
+ mov:['<b>Presupuesto mínimo</b>: fade + subida de 6 px en 220–320 ms <code>ease-out</code>; el subrayado de los botones se <b>dibuja de izquierda a derecha</b>.','Barras del dashboard crecen en 700 ms lineales. Nada de resortes ni brillo.'],
+ con:['Tinta <code>#1d1b16</code> sobre papel 15.3 : 1; secundario <code>#5f584e</code> <span class="ok">6.2 : 1</span> (4.7 en el peor fondo del fantasma).','<span class="bad">El bermellón baja a 4.0 : 1</span> sobre fondo negro en fantasma: usarlo solo en elementos grandes o con peso ≥ 600.'],
+ tra:['Activo: papel opaco. Fantasma: alpha .88 con 2 px de blur; <b>la transparencia es casi imperceptible a propósito</b>.','Variante oscura: “tinta sobre papel” invertida (papel carbón, texto marfil) para no deslumbrar de noche.'],
+ sw:[['#f6f1e7','papel'],['#1d1b16','tinta'],['#5f584e','secundario'],['#b53a08','bermellón'],['#1f5f99','azul web'],['#3f6b3a','ok']],
+ cost:'Esfuerzo medio: cambia el markup de la píldora y la nav del dashboard; el resto es CSS. Menos densidad que hoy.'},
+{n:5,id:'p5',name:'Espectro',tag:'HUD fantasmal: vacío azul marino, cian y violeta con glow, marcos con esquinas recortadas, anillos y celdas LED. Pensado para “taskghost”.',chips:['glow','esquinas cortadas','anillos / LED','identidad'],
+ est:['Píldora con <b>anillo de segundos</b> (se barre cada minuto) + aro violeta girando + punto de estado que pulsa.','Esquinas <b>recortadas</b> (<code>clip-path</code>), marcos con “corchetes” cian, tags como <code>‹WEB›</code>, marcador de tarea en <b>rombo</b>.','Dashboard: <b>rail de íconos</b> de 64 px, cabecera con reloj en vivo, KPI como <b>anillos</b> y barras como <b>celdas LED</b>; grilla tenue de fondo.','Modo círculo: el propio anillo, 34 px, con el punto de estado al centro.'],
+ tipo:['<b>Chakra Petch</b> 400–600 para etiquetas y títulos (mayúsculas con tracking .12em) + <b>Share Tech Mono</b> para todos los dígitos.','Timer de tarea en cian con <code>text-shadow</code> (glow 14 px); de sesión en violeta.'],
+ mov:['<b>scanIn</b> 450 ms: se revela con <code>clip-path</code> + parpadeo de 2 frames; anillos que se dibujan en 1.2 s; LED que se encienden escalonados (30 ms c/u).','Loops ambientales: pulso 2 s, respiración del borde 4 s, aro 18 s. <span class="bad">Son movimiento permanente</span>: se apagan con <code>prefers-reduced-motion</code> y conviene un ajuste “sin animaciones”.'],
+ con:['Texto 11.3–16.6 : 1, cian 9.9–14.6 : 1, violeta <code>#b9a4ff</code> ≥ 6.2 : 1, secundario <span class="ok">≥ 5.4 : 1</span> con alpha .86.','<span class="bad">Con alpha .78 el secundario caía a 4.0 : 1 sobre blanco</span>: por eso el piso es .86.'],
+ tra:['Alpha .86 + blur 6 px + borde luminoso. El glow solo funciona sobre fondo oscuro del widget: nunca pintar glow fuera del propio recuadro, porque sobre un escritorio claro se ensucia.','La “transparencia” se comunica con el borde y el glow más que con el fondo.'],
+ sw:[['#0a0d1a','vacío .86'],['#e6ecff','texto'],['#9aa3c7','secundario'],['#5cf2ff','cian'],['#b9a4ff','violeta'],['#6dffb3','ok']],
+ cost:'Esfuerzo alto: SVG de anillos, animaciones y dashboard con LED/anillos. Más riesgo de distraer si se deja todo animado.'}
+];
+const box=$('#sections');
+P.forEach(p=>{
+ box.insertAdjacentHTML('beforeend',`<section class="prop ${p.id}" id="${p.id}">
+  <div class="phead"><span class="num">0${p.n}</span><h2>${p.name}</h2></div>
+  <p class="ptag">${p.tag}</p>
+  <div class="chips">${p.chips.map(c=>`<span>${c}</span>`).join('')}</div>
+  <div class="lbl">Widget <i>320 px · izquierda: fantasma (reposo) · derecha: activo (Ctrl+Alt+T)</i></div>
+  <div class="desk"><div class="fake"></div>
+    <div class="frame"><em>Fantasma</em>${widget(p.n,false)}</div>
+    <div class="frame"><em>Activo</em>${widget(p.n,true)}</div></div>
+  <div class="lbl">Dashboard <i>vista “Hoy” · 1000 × 580 escalado</i></div>
+  <div class="dwrap"><div class="d-host">${dash(p.n)}</div></div>
+  <div class="spec">
+   <div><h4>Estructura</h4><ul>${p.est.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+   <div><h4>Tipografía</h4><ul>${p.tipo.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+   <div><h4>Animaciones</h4><ul>${p.mov.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+   <div><h4>Contraste</h4><ul>${p.con.map(x=>`<li>${x}</li>`).join('')}</ul>${SW(p.sw)}</div>
+   <div><h4>Transparencia</h4><ul>${p.tra.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+   <div><h4>Costo y riesgo</h4><p>${p.cost}</p></div>
+  </div></section>`);
+});
+/* el .d tiene que quedar dentro de .dwrap para el escalado */
+$$('.d-host').forEach(h=>{h.replaceWith(...h.childNodes)});
+
+/* lineas falsas del escritorio */
+$$('.fake').forEach(f=>{let s=7,r=()=>(s=(s*9301+49297)%233280)/233280,o='';for(let i=0;i<24;i++){const ind=Math.floor(r()*3)*24,w=25+Math.floor(r()*55),k=r();o+=`<div class="ln ${k>.8?'a':k>.6?'b':''}" style="width:${w}%;margin-left:${ind}px"></div>`}f.innerHTML=o});
+
+/* escalado de dashboards */
+function fit(){$$('.dwrap').forEach(w=>{const d=$('.d',w);d.style.transform=`scale(${w.clientWidth/1000})`})}
+addEventListener('resize',fit);fit();document.fonts&&document.fonts.ready.then(fit);
+
+/* fondos de prueba */
+$$('.wall button').forEach(b=>b.onclick=()=>{document.body.dataset.wall=b.dataset.w;$$('.wall button').forEach(x=>x.classList.toggle('on',x===b))});
+
+/* timers en vivo (el fantasma avanza de a 5 s, como la app) */
+let sess=42*60+1,task=18*60+5;
+setInterval(()=>{sess++;task++;
+ $$('.w').forEach(w=>{const ghost=w.classList.contains('ghost');if(ghost&&task%5)return;
+  $$('.ts',w).forEach(e=>e.textContent=fmt(ghost?sess-sess%5:sess));$$('.tt',w).forEach(e=>e.textContent=fmt(ghost?task-task%5:task));});
+ $$('.arc').forEach(a=>a.setAttribute('stroke-dashoffset',119.4*(1-((task%60)+1)/60)));
+},1000);
+
+/* agregar tarea (Enter) para ver la animacion de entrada de cada estilo */
+document.addEventListener('keydown',e=>{
+ if(e.key!=='Enter'||!e.target.classList.contains('new'))return;
+ const inp=e.target,w=inp.closest('.w'),ul=$('.list',w);let txt=inp.value.trim();if(!txt)return;
+ let p=null;txt=txt.replace(/#(\w+)/,(m,t)=>{p=['web','api','docs'].includes(t)?t:null;return''}).trim()||'Tarea nueva';
+ const idx=ul.children.length;
+ const l=document.createElement('li');l.className='task enter';
+ l.innerHTML=`<span class="n">${pad(idx+1)}</span><button class="chk"></button><span class="title"></span>${p?`<span class="tag" style="--c:var(--c-${p})">#${p}</span>`:''}<span class="ms"></span>`;
+ $('.title',l).textContent=txt;
+ const firstDone=$('.task.done',ul);ul.insertBefore(l,firstDone);inp.value='';
+ $$('.n',ul).forEach((n,i)=>n.textContent=pad(i+1));
+ setTimeout(()=>l.classList.remove('enter'),900);
+});
+</script>
+</body>
+</html>

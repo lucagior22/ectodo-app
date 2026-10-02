@@ -1,0 +1,338 @@
+/* taskghost · widget (estilo Apple): una sola superficie tipo Live Activity que se estira de píldora a panel.
+   Colores, tipografía, espacios, radios y springs vienen de tokens.css; --accent / --accent-text / --on-accent los escribe theme.js.
+   Regla de frecuencia (M19): NO se animan la selección con flechas, el tic de segundos ni NORMAL/INSERT. */
+@property --surface-a { syntax: '<number>'; inherits: true; initial-value: 0.97; }
+
+:root {
+  --M: 24px;                 /* margen transparente de la ventana: ahí vive la sombra (= M en main.js) */
+  --r-card: 24px;
+  --ghost-a: 0.78;           /* alpha del fondo en reposo; el texto siempre es opaco. widget.js lo escribe desde ghostOpacity */
+  --surface-a: var(--ghost-a);
+  --o: 2px;                  /* el recorte del morph sobra este margen para no comerse el contorno exterior */
+  --e: calc(var(--r-card) + var(--o));
+  --k: calc(var(--e) * 0.213); /* asa de la curva de esquina (≈ superellipse 1.6) */
+  --sh-rest-1: rgba(0, 0, 0, 0.20); --sh-rest-2: rgba(0, 0, 0, 0.20);
+  --sh-on-1: rgba(0, 0, 0, 0.26); --sh-on-2: rgba(0, 0, 0, 0.34);
+  --hud-bg: var(--bg-3);
+  --icon-cut: var(--bg);
+  transition: --surface-a var(--d-menu) var(--ease-out);
+}
+:root[data-theme="light"] {
+  --sh-rest-1: rgba(0, 0, 0, 0.10); --sh-rest-2: rgba(0, 0, 0, 0.12);
+  --sh-on-1: rgba(0, 0, 0, 0.12); --sh-on-2: rgba(0, 0, 0, 0.22);
+  --hud-bg: rgba(40, 40, 44, 0.94);
+}
+/* abierto (panel, captura, líder): casi opaco */
+:root:has(body.active, body.capture, body.leader) { --surface-a: 0.97; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: transparent;
+  overflow: hidden;
+  font: var(--t-body); letter-spacing: var(--tr-body);
+  font-optical-sizing: auto;
+  color: var(--label);
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+body { padding: var(--M); }
+
+/* #app: 320 px de tarjeta. La sombra va acá (filter) y no en #surface: así sigue la forma recortada durante el morph */
+#app {
+  position: relative; width: 320px;
+  filter: drop-shadow(0 1px 2px var(--sh-rest-1)) drop-shadow(0 8px 18px var(--sh-rest-2));
+  transition: filter var(--d-close) var(--ease-out);
+}
+body.active #app, body.capture #app, body.leader #app {
+  filter: drop-shadow(0 1px 3px var(--sh-on-1)) drop-shadow(0 10px 20px var(--sh-on-2));
+}
+
+/* ---- superficie: material + luz + contorno ---- */
+#surface {
+  position: relative; --cb: 100%; /* --cb: borde inferior del recorte (100% = todo; el alto de la píldora = colapsado) */
+  border-radius: var(--r-card); corner-shape: superellipse(1.6);
+  background: linear-gradient(180deg, var(--surface-top), var(--surface-bot));
+  box-shadow: inset 0 1px 0 var(--specular), inset 0 0 0 0.5px var(--sep-soft), 0 0 0 0.5px var(--outline);
+  /* clip-path con shape() porque inset(round) redondea con círculos y pierde el corner-shape; sobra --o por fuera */
+  clip-path: shape(
+    from calc(0px - var(--o)) calc(var(--e) - var(--o)),
+    curve to calc(var(--e) - var(--o)) calc(0px - var(--o)) with calc(0px - var(--o)) calc(var(--k) - var(--o)) / calc(var(--k) - var(--o)) calc(0px - var(--o)),
+    hline to calc(100% + var(--o) - var(--e)),
+    curve to calc(100% + var(--o)) calc(var(--e) - var(--o)) with calc(100% + var(--o) - var(--k)) calc(0px - var(--o)) / calc(100% + var(--o)) calc(var(--k) - var(--o)),
+    vline to calc(var(--cb) + var(--o) - var(--e)),
+    curve to calc(100% + var(--o) - var(--e)) calc(var(--cb) + var(--o)) with calc(100% + var(--o)) calc(var(--cb) + var(--o) - var(--k)) / calc(100% + var(--o) - var(--k)) calc(var(--cb) + var(--o)),
+    hline to calc(var(--e) - var(--o)),
+    curve to calc(0px - var(--o)) calc(var(--cb) + var(--o) - var(--e)) with calc(var(--k) - var(--o)) calc(var(--cb) + var(--o)) / calc(0px - var(--o)) calc(var(--cb) + var(--o) - var(--k)),
+    close
+  );
+}
+/* colapsado a la altura de la píldora: en reposo y durante el morph (--pill-h la mide widget.js) */
+body:not(.style-dot).ghost #surface, body:not(.style-dot).collapsing #surface { --cb: var(--pill-h, 100%); }
+/* el recorte solo se anima en el morph: en reposo un cambio de alto de la píldora (líder, aviso) no puede arrastrar el recorte */
+body:not(.style-dot).morph-open #surface { transition: clip-path var(--d-open) var(--spring-snappy); }
+body:not(.style-dot).morph-close #surface { transition: clip-path var(--d-close) var(--ease-out); }
+
+/* borde de acento de la tecla líder: se enciende una vez y se queda (no late) */
+#surface::before {
+  content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  border-radius: inherit; corner-shape: inherit; border: 1.5px solid rgba(var(--accent-rgb), 0.6);
+  opacity: 0; transition: opacity var(--d-view) var(--ease-out);
+}
+body.leader #surface::before { opacity: 1; }
+
+/* ---- botones: relleno / teñido / plano en cápsula; íconos circulares de 28 px ---- */
+button {
+  font: inherit; letter-spacing: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer;
+  white-space: nowrap; -webkit-app-region: no-drag;
+  transition: transform var(--d-press) var(--ease-out), background var(--d-hover) var(--ease-out), color var(--d-hover) var(--ease-out);
+}
+button:disabled { opacity: 0.35; cursor: default; }
+.btn {
+  font: 600 12.5px/1 var(--sans); letter-spacing: var(--tr-headline); flex: none;
+  display: inline-flex; align-items: center; padding: 8px 11px; border-radius: var(--r-ctl);
+  color: var(--label); background: var(--fill-4);
+}
+.btn .i { width: 12px; height: 12px; vertical-align: 0; margin-right: 5px; }
+.btn.fill { background: var(--accent); color: var(--on-accent); }
+.btn.tint { background: rgba(var(--accent-rgb), 0.18); color: var(--accent-text); }
+.btn.warn { background: var(--orange-fill); color: var(--orange); }
+.btn u { color: inherit; text-decoration-color: color-mix(in srgb, currentColor 55%, transparent); }
+.btn:active:not(:disabled) { transform: scale(0.96); }
+.ibtn { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: var(--label-2); }
+.ibtn .i { width: 15px; height: 15px; vertical-align: 0; }
+.ibtn:active { transform: scale(0.92); }
+@media (hover: hover) {
+  .btn:hover:not(:disabled):not(.fill):not(.tint):not(.warn) { background: var(--fill-3); }
+  .btn.fill:hover:not(:disabled) { filter: brightness(1.08); }
+  .btn.tint:hover { background: rgba(var(--accent-rgb), 0.26); }
+  .ibtn:hover { background: var(--fill-4); color: var(--label); }
+}
+
+/* ---- píldora (estado en reposo y cabecera del panel) ---- */
+#pill { padding: 12px 16px 13px; }
+body.active #pill, body.capture #pill { -webkit-app-region: drag; }
+
+.ttl { display: flex; justify-content: space-between; align-items: center; gap: 8px; font: var(--t-sub); letter-spacing: var(--tr-sub); color: var(--label-2); }
+#ttl-l { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#ttl-r { display: inline-flex; flex: none; align-items: center; gap: 6px; }
+#ttl-r.run { color: var(--accent-text); font-weight: 600; }
+#ttl-r.pause { color: var(--orange); font-weight: 600; }
+#ttl-r.run::before, #ttl-r.pause::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent); }
+body.running #ttl-r.run::before { animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.4; } }
+
+/* reloj: la tarea manda; la sesión es dato secundario con su etiqueta */
+.times { display: flex; align-items: baseline; gap: 10px; margin: 4px 0 3px; min-width: 0; }
+.clock { font: var(--t-display); letter-spacing: var(--tr-display); font-variant-numeric: tabular-nums; display: inline-flex; flex: none; min-height: 38px; }
+.clock .dg { display: inline-block; position: relative; overflow: hidden; height: 38px; }
+.clock .dg i { display: block; font-style: normal; }
+.clock .dg i.in { animation: dgIn 380ms var(--spring-snappy) both; }
+.clock .dg i.out { position: absolute; inset: 0; animation: dgOut 240ms var(--ease-out) both; }
+@keyframes dgIn { from { transform: translateY(70%); filter: blur(3px); opacity: 0; } }
+@keyframes dgOut { to { transform: translateY(-70%); filter: blur(3px); opacity: 0; } }
+.clock .colon { padding: 0 0.02em; transform: translateY(-0.06em); opacity: 0.9; }
+#t-sess { font: 500 13px/18px var(--sans); letter-spacing: var(--tr-body); color: var(--label-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+#t-sess[hidden] { display: none; }
+
+/* En reposo solo importa el reloj de la tarea; el de sesión vuelve al abrir el panel o con la hoja del círculo. */
+body.ghost:not(.style-dot):not(.peek):not(.leader) #t-sess { display: none; }
+
+.cur { color: var(--label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cur b { color: var(--label); font-weight: 600; }
+.cur .i { width: 12px; height: 12px; vertical-align: -1px; margin-right: 6px; color: var(--accent-text); }
+.cur.paused .i { color: var(--orange); }
+.cur.notice { white-space: normal; }
+.cur .bad { color: var(--orange); font-weight: 600; }
+
+/* leyenda de la tecla líder: aparece con fundido escalonado (30 ms por grupo) */
+#legend { display: none; font: var(--t-sub); color: var(--label-2); line-height: 22px; margin-top: 2px; }
+#legend .g { display: inline-block; margin-right: 10px; white-space: nowrap; }
+body.leader #legend .g { animation: legendIn 260ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 30ms); }
+@keyframes legendIn { from { opacity: 0; transform: translateY(3px); } }
+#legend .lead { color: var(--on-accent); background: var(--accent); padding: 2px 8px; border-radius: 999px; font-weight: 600; font-size: 10px; }
+body.leader .cur { display: none; }
+body.leader .cur.notice { display: block; white-space: normal; }
+body.leader #legend { display: block; }
+
+/* ---- estilo "círculo": logo arriba a la derecha; el hover muestra el rectángulo ----
+   El rectángulo siempre ocupa su lugar (la ventana no cambia de alto al pasar el mouse); en reposo se recorta
+   a un círculo bajo el logo, y al abrirse/cerrarse el recorte crece/encoge: el círculo "se funde" con el widget. */
+#dot {
+  display: none; position: absolute; z-index: 2; top: 0; right: 0; width: 34px; height: 34px; place-items: center;
+  border-radius: 50%; color: var(--label);
+  background: linear-gradient(180deg, var(--surface-top), var(--surface-bot));
+  box-shadow: inset 0 0 0 2px var(--state, var(--label-3));
+  opacity: 0; transform: scale(1.35); pointer-events: none;
+  transition: opacity 0.18s, transform 0.3s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+#dot svg { width: 17px; height: 19.5px; display: block; }
+body.style-dot #dot { display: grid; }
+body.style-dot #surface {
+  clip-path: circle(150% at calc(100% - 17px) 17px);
+  transition: clip-path 0.32s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+/* capas propias ya rasterizadas: el primer frame del morph no tiene que pintar el contenido desde cero */
+body.style-dot #pill { transition: opacity 0.22s; will-change: opacity; }
+body.style-dot #dot { will-change: transform, opacity; }
+body.style-dot.ghost:not(.peek):not(.leader) #surface, body.style-dot.collapsing #surface { clip-path: circle(17px at calc(100% - 17px) 17px); }
+body.style-dot.ghost:not(.peek):not(.leader) #pill, body.style-dot.collapsing #pill { opacity: 0; }
+body.style-dot.ghost:not(.peek):not(.leader) #dot, body.style-dot.collapsing #dot { opacity: 1; transform: none; pointer-events: auto; }
+
+/* ---- panel ---- */
+/* En reposo el panel no se destruye (display:none obligaria a rehacer todo su layout, ~30 ms, al abrir):
+   queda maquetado fuera del flujo e invisible, sin contar para el alto de la ventana ni recibir eventos. */
+#panel { position: absolute; left: 0; right: 0; visibility: hidden; padding: 0 8px; }
+body.active #panel, body.capture #panel { position: static; visibility: visible; }
+
+/* el contenido del panel entra escalonado (30 ms entre grupos, máx. 4) y sale rápido */
+#panel > * { --i: 0; }
+body.ghost #panel > *, body.collapsing #panel > * { opacity: 0; transform: translateY(-6px); filter: blur(3px); }
+body.morph-open #panel > * {
+  transition: opacity 300ms var(--ease-out), transform 420ms var(--spring-smooth), filter 300ms var(--ease-out);
+  transition-delay: calc(30ms + var(--i) * 30ms);
+}
+body.morph-close #panel > * { transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out), filter 160ms var(--ease-out); }
+
+.bar { display: flex; gap: 4px; align-items: center; padding: 4px 2px 10px; }
+.grow { flex: 1; min-width: 0; }
+#btn-end { display: none; }
+#proj-chip { display: none; flex: 0 1 auto; min-width: 40px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+#proj-chip.locked { cursor: default; }
+.tag { flex: none; font: 550 11px/1 var(--sans); color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); padding: 5px 8px; border-radius: 999px; }
+
+/* aviso persistente: ícono + texto corto sobre naranja al 16 % */
+#warn { display: none; align-items: center; gap: 8px; margin: 0 0 8px; padding: 8px 10px; border-radius: var(--r-inner); background: var(--orange-fill); font: var(--t-callout); letter-spacing: var(--tr-callout); color: var(--label); }
+#warn .i { width: 14px; height: 14px; color: var(--orange); vertical-align: 0; }
+#hidden-note { display: none; margin: 0 6px 8px; font: var(--t-sub); letter-spacing: var(--tr-sub); color: var(--label-3); }
+
+/* ---- lista: filas de 34 px, radio concéntrico, selección al estilo macOS ---- */
+#list { list-style: none; max-height: 340px; overflow-y: auto; margin-bottom: 6px; }
+#list:empty::after { content: "Sin tareas · n para escribir una"; color: var(--label-3); display: block; padding: 10px 8px 12px; text-align: center; }
+
+/* cada fila va envuelta: colapsa con grid-template-rows (1fr → 0fr), nunca animando height */
+.row { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 220ms var(--ease-out), opacity 180ms var(--ease-out); }
+.row.gone { grid-template-rows: 0fr; opacity: 0; }
+.rw { min-height: 0; overflow: hidden; }
+
+.task { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 8px 0 10px; border-radius: var(--r-inner); corner-shape: superellipse(1.4); }
+.task .n { flex: none; width: 1ch; color: var(--label-3); font: var(--t-sub); font-variant-numeric: tabular-nums; text-align: right; }
+body.ins .task .n { visibility: hidden; }
+.task .title { flex: 1; min-width: 0; cursor: pointer; font: var(--t-body); letter-spacing: var(--tr-body); }
+.task .tt { position: relative; display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: top; }
+.task .tt::after { /* tachado que se traza de izquierda a derecha */
+  content: ""; position: absolute; left: 0; top: 50%; width: 100%; height: 1.5px; background: currentColor;
+  transform: scaleX(0); transform-origin: left; transition: transform 260ms var(--ease-out) 120ms;
+}
+.task.active .title { font-weight: 600; }
+.task.done .title { color: var(--label-2); cursor: default; transition: color 200ms 120ms; }
+.task.done .tt::after { transform: scaleX(1); }
+.task .now { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-text); }
+.task:not(.active) .now { display: none; }
+.task .ms { flex: none; min-width: 28px; text-align: right; color: var(--label-3); font: var(--t-sub); letter-spacing: var(--tr-sub); font-variant-numeric: tabular-nums; }
+
+/* check de Recordatorios: anillo de 18 px; hecho = relleno que escala con spring bouncy + trazo que se dibuja */
+.chk {
+  flex: none; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--label-3);
+  display: grid; place-items: center; position: relative; transition: border-color var(--d-hover);
+}
+.chk::after {
+  content: ""; position: absolute; inset: -1.5px; border-radius: 50%; background: var(--accent);
+  transform: scale(0.4); opacity: 0; transition: transform var(--d-check) var(--spring-bouncy), opacity 120ms;
+}
+.chk svg {
+  position: relative; z-index: 1; width: 10px; height: 10px; fill: none; stroke: var(--on-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 14; stroke-dashoffset: 14; transition: stroke-dashoffset 220ms var(--ease-out) 90ms;
+}
+.task.done .chk { border-color: transparent; }
+.task.done .chk::after { transform: none; opacity: 1; }
+.task.done .chk svg { stroke-dashoffset: 0; }
+
+.x { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; color: var(--label-3); visibility: hidden; }
+.x .i { width: 12px; height: 12px; vertical-align: 0; }
+.task:hover .x, .task.sel .x { visibility: visible; }
+@media (hover: hover) {
+  .task:hover { background: var(--fill-4); }
+  .chk:hover { border-color: var(--label-2); }
+  .x:hover { color: var(--red); background: var(--fill-4); }
+}
+
+/* selección: relleno de acento con texto sobre acento; sin barra lateral y sin animar (ocurre cientos de veces al día) */
+.task.sel { background: var(--accent); color: var(--on-accent); }
+.task.sel .n, .task.sel .ms, .task.sel .x { color: color-mix(in srgb, var(--on-accent) 75%, transparent); }
+.task.sel.done .title { color: color-mix(in srgb, var(--on-accent) 80%, transparent); }
+.task.sel .now { background: var(--on-accent); }
+.task.sel .chk { border-color: color-mix(in srgb, var(--on-accent) 70%, transparent); }
+.task.sel .chk::after { background: var(--on-accent); }
+.task.sel .chk svg { stroke: var(--accent); }
+.task.sel.done .chk { border-color: transparent; }
+.task.sel .tag { color: var(--on-accent); background: color-mix(in srgb, var(--on-accent) 20%, transparent); }
+@media (hover: hover) { .task.sel:hover { background: var(--accent); } .task.sel .x:hover { color: var(--on-accent); background: color-mix(in srgb, var(--on-accent) 18%, transparent); } }
+
+.nw {
+  display: flex; align-items: center; gap: 10px; height: 34px; margin: 0 0 2px; padding: 0 10px;
+  background: var(--fill-4); border-radius: var(--r-inner); corner-shape: superellipse(1.4);
+  box-shadow: inset 0 0 0 1.5px transparent; transition: box-shadow var(--d-hover) var(--ease-out);
+}
+.nw:focus-within { box-shadow: inset 0 0 0 1.5px rgba(var(--accent-rgb), 0.6); }
+.nw .i { width: 14px; height: 14px; color: var(--label-3); vertical-align: 0; }
+.nw:focus-within .i { color: var(--accent-text); }
+#new {
+  flex: 1; min-width: 0; background: transparent; border: 0; outline: none; color: var(--label);
+  font: var(--t-body); letter-spacing: var(--tr-body); caret-color: var(--accent); user-select: text;
+}
+#new::placeholder { color: var(--label-3); }
+
+/* ---- hoja de ayuda (?) ---- */
+#help { display: none; margin: 0 6px 8px; font: var(--t-callout); line-height: 1.5; }
+body.help #list { display: none; }
+body.help #help { display: block; }
+#help .hr { display: grid; grid-template-columns: 56px 1fr; gap: 6px; margin-bottom: 6px; }
+#help .hr > b { color: var(--label-3); font-weight: 500; padding-top: 3px; }
+#help .hr > span { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+#help .it { white-space: nowrap; }
+#help .it span { color: var(--label-2); }
+
+/* ---- barra de estado: modo + pistas de teclas (+ HUD de deshacer encima) ---- */
+#status {
+  position: relative; display: flex; align-items: flex-start; gap: 4px 8px;
+  margin: 8px 0 0; padding: 9px 6px 11px; border-top: 0.5px solid var(--sep-soft);
+  font: var(--t-sub); letter-spacing: var(--tr-sub); color: var(--label-2); line-height: 20px;
+}
+#mode-tag {
+  flex: none; margin-top: 1px; background: var(--fill-4); color: var(--label-2); padding: 2px 7px; border-radius: 6px;
+  font: 650 10px/14px var(--sans); letter-spacing: 0.02em;
+}
+body.ins #mode-tag, body.capture #mode-tag { background: rgba(var(--accent-rgb), 0.18); color: var(--accent-text); }
+#hint { flex: 1; min-width: 0; }
+#hint .sp { color: var(--label-3); margin: 0 3px; }
+#hint .pend { color: var(--accent-text); font-weight: 600; }
+#status > button { flex: none; font: var(--t-sub); letter-spacing: var(--tr-sub); color: var(--label-2); padding: 1px 8px; margin-top: 1px; border-radius: var(--r-ctl); }
+@media (hover: hover) { #status > button:hover { background: var(--fill-4); color: var(--label); } }
+#status > :not(#hud) { transition: opacity var(--d-menu) var(--ease-out); }
+#status.hud > :not(#hud) { opacity: 0.08; }
+
+/* HUD: cápsula que aparece 2,5 s tras completar, borrar o limpiar; entra con spring snappy, sale con fundido */
+#hud {
+  position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: 2; pointer-events: none;
+  display: flex; align-items: center; gap: 10px; padding: 7px 8px 7px 14px; border-radius: var(--r-ctl);
+  background: var(--hud-bg); color: #fff; font: 500 12px/16px var(--sans); white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 14px rgba(0, 0, 0, 0.35);
+  opacity: 0; transform: translateY(8px) scale(0.96); transition: opacity 200ms var(--ease-out), transform 360ms var(--spring-snappy);
+}
+#hud.on { opacity: 1; transform: none; }
+#hud kbd { background: rgba(255, 255, 255, 0.14); color: #fff; box-shadow: none; }
+
+/* captura rápida: solo la línea de entrada */
+body.capture #panel .bar, body.capture #list, body.capture #warn, body.capture #hidden-note,
+body.capture #help, body.capture #btn-clear { display: none; }
+body.capture #panel { padding-top: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  body.running #ttl-r.run::before { animation: none; }
+  #app, #surface, #surface::before, .row, .chk::after, .chk svg, .tt::after, #hud { transition-duration: 0.01ms; transition-delay: 0s; }
+  body.style-dot #pill, #dot { transition: none; }
+  body.leader #legend .g { animation: none; }
+  .clock .dg i.in, .clock .dg i.out { animation: none; }
+  #hud, #hud.on { transform: none; }
+}

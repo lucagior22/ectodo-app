@@ -1,0 +1,37 @@
+{
+  "name": "taskghost",
+  "version": "0.2.0",
+  "description": "Widget always-on-top con timer de sesion y todo list, mas dashboard. 100% local.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test \"test/*.test.js\"",
+    "dist": "electron-builder"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "chart.js": "^4.5.1"
+  },
+  "build": {
+    "appId": "com.taskghost.app",
+    "productName": "taskghost",
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "assets/icon.ico"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility",
+      "icon": "assets/icon.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3"
+  }
+}

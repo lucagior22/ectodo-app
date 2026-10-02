@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="270 230 530 610" width="530" height="610">
+  <!-- Silueta del fantasma "Voluta" con los ojos calados (una tinta): bandeja y círculo del widget. -->
+  <path fill-rule="evenodd" fill="#000" d="M300,450 A212,212 0 0 1 724,450 C724,610 700,700 770,806 C660,826 576,776 528,712 C484,780 410,812 316,800 C344,712 300,640 300,450 Z
+    M415,458 a31,45 0 1 0 62,0 a31,45 0 1 0 -62,0 Z M549,458 a31,45 0 1 0 62,0 a31,45 0 1 0 -62,0 Z"/>
+</svg>

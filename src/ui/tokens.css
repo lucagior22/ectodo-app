@@ -1,0 +1,128 @@
+/* taskghost · tokens de diseño compartidos por el widget y el dashboard (estilo Apple).
+   Jerarquía por transparencia (label 1–4, fill 1–4), fondos base/elevado, retícula de 4 pt, radios concéntricos,
+   escala tipográfica de macOS y movimiento con springs. --accent / --accent-rgb / --accent-text / --on-accent
+   los escribe theme.js (BG de theme.js = --bg de cada tema). */
+:root {
+  /* ---- tema oscuro (por defecto) ---- */
+  --bg: #1c1c1e;          /* base: contenido del dashboard, superficie del widget */
+  --bg-rgb: 28, 28, 30;
+  --bg-2: #2c2c2e;        /* elevado / agrupado (tarjetas dentro del contenido) */
+  --bg-3: #3a3a3c;        /* elevado 2 (controles sobre tarjetas) */
+  --sidebar: rgba(36, 36, 38, 0.72);
+  --label: #ffffff;
+  --label-2: rgba(235, 235, 245, 0.60);
+  --label-3: rgba(235, 235, 245, 0.30);
+  --label-4: rgba(235, 235, 245, 0.16);
+  --fill-1: rgba(120, 120, 128, 0.36);
+  --fill-2: rgba(120, 120, 128, 0.32);
+  --fill-3: rgba(120, 120, 128, 0.24);
+  --fill-4: rgba(120, 120, 128, 0.18);
+  --sep: rgba(84, 84, 88, 0.60);
+  --sep-soft: rgba(255, 255, 255, 0.08);
+  --orange: #ff9f0a;
+  --orange-fill: rgba(255, 146, 48, 0.16);
+  --red: #ff453a;
+  --green: #30d158;
+  --specular: rgba(255, 255, 255, 0.10);   /* brillo superior de las superficies */
+  --outline: rgba(0, 0, 0, 0.45);          /* contorno exterior de 0,5 px */
+  --card-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  --pop-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.10), 0 10px 30px rgba(0, 0, 0, 0.45);
+  --surface-top: rgba(46, 46, 50, var(--surface-a, 0.97));
+  --surface-bot: rgba(28, 28, 30, var(--surface-a, 0.97));
+  color-scheme: dark;
+
+  /* ---- tipografía ---- */
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter Variable", Inter, "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --mono: "Cascadia Mono", ui-monospace, Consolas, monospace;
+  /* escala de macOS: tamaño/interlineado · peso · tracking (cuerpo en 450: Windows dibuja más fino que macOS) */
+  --t-large: 700 26px/32px var(--sans);      --tr-large: -0.021em;
+  --t-title2: 650 17px/22px var(--sans);     --tr-title2: -0.012em;
+  --t-title3: 600 15px/20px var(--sans);     --tr-title3: -0.009em;
+  --t-headline: 600 13px/18px var(--sans);   --tr-headline: -0.003em;
+  --t-body: 450 13px/18px var(--sans);       --tr-body: -0.003em;
+  --t-callout: 450 12px/16px var(--sans);    --tr-callout: 0em;
+  --t-sub: 500 11px/14px var(--sans);        --tr-sub: 0.005em;
+  --t-caption: 500 10px/13px var(--sans);    --tr-caption: 0.01em;
+  --t-display: 620 34px/38px var(--sans);    --tr-display: -0.026em;
+
+  /* ---- espacio (retícula de 4 pt) ---- */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px;
+
+  /* ---- radios concéntricos: interior = exterior − padding ---- */
+  --r-card: 22px;                            /* superficie del widget */
+  --r-inner: calc(var(--r-card) - 8px);      /* filas e input dentro del widget (padding 8) */
+  --r-tile: 14px;                            /* tarjetas del dashboard */
+  --r-cell: 8px;                             /* filas dentro de tarjetas, campos */
+  --r-ctl: 999px;                            /* botones en cápsula */
+
+  /* ---- movimiento (springs de Apple, duración + rebote, muestreados con linear()) ---- */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --spring-smooth: linear(0, 0.024, 0.081, 0.158, 0.243, 0.329, 0.412, 0.49, 0.561, 0.625, 0.681, 0.73, 0.773, 0.809, 0.841, 0.867, 0.89, 0.908, 0.924, 0.937, 0.948, 0.958, 0.965, 0.971, 0.977, 0.981, 0.984, 0.987, 0.99, 0.991, 0.993, 0.994, 0.995, 0.996, 0.997, 0.998, 1);
+  --spring-snappy: linear(0, 0.022, 0.078, 0.154, 0.242, 0.333, 0.423, 0.509, 0.587, 0.659, 0.721, 0.776, 0.822, 0.861, 0.894, 0.921, 0.942, 0.959, 0.973, 0.983, 0.991, 0.996, 1, 1.003, 1.005, 1.006, 1.006, 1.006, 1.006, 1.006, 1.005, 1.005, 1.004, 1.003, 1.003, 1.002, 1);
+  --spring-bouncy: linear(0, 0.029, 0.101, 0.201, 0.314, 0.43, 0.543, 0.646, 0.738, 0.816, 0.881, 0.933, 0.973, 1.002, 1.023, 1.036, 1.043, 1.046, 1.045, 1.042, 1.038, 1.033, 1.028, 1.022, 1.018, 1.013, 1.009, 1.006, 1.004, 1.002, 1, 0.999, 0.998, 0.998, 0.998, 0.998, 1);
+  /* Duraciones: press 120 · hover 150 · menú 180 · vista 200 · check 380 (bouncy) · panel 460 (snappy) · cierre 260.
+     Regla de frecuencia: NO se animan la selección con flechas, el tic de segundos ni NORMAL/INSERT. */
+  --d-press: 120ms; --d-hover: 150ms; --d-menu: 180ms; --d-view: 200ms; --d-check: 380ms; --d-open: 460ms; --d-close: 260ms;
+}
+
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-rgb: 255, 255, 255;
+  --bg-2: #f2f2f7;
+  --bg-3: #e5e5ea;
+  --sidebar: rgba(236, 236, 241, 0.72);
+  --label: #000000;
+  --label-2: rgba(60, 60, 67, 0.72);   /* Apple usa .60 (3,4:1); se sube para cumplir 4,5:1 */
+  --label-3: rgba(60, 60, 67, 0.36);
+  --label-4: rgba(60, 60, 67, 0.18);
+  --fill-1: rgba(120, 120, 128, 0.20);
+  --fill-2: rgba(120, 120, 128, 0.16);
+  --fill-3: rgba(120, 120, 128, 0.12);
+  --fill-4: rgba(120, 120, 128, 0.08);
+  --sep: rgba(60, 60, 67, 0.18);
+  --sep-soft: rgba(0, 0, 0, 0.06);
+  --orange: #c55300;
+  --orange-fill: rgba(255, 141, 40, 0.14);
+  --red: #e9152d;
+  --green: #008932;
+  --specular: rgba(255, 255, 255, 0.9);
+  --outline: rgba(0, 0, 0, 0.10);
+  --card-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.05);
+  --pop-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.10), 0 10px 30px rgba(0, 0, 0, 0.18);
+  --surface-top: rgba(255, 255, 255, var(--surface-a, 0.97));
+  --surface-bot: rgba(246, 246, 248, var(--surface-a, 0.97));
+  color-scheme: light;
+}
+
+/* Tracking de un estilo: font: var(--t-x); letter-spacing: var(--tr-x). Helpers: */
+.t-large { font: var(--t-large); letter-spacing: var(--tr-large); }
+.t-title2 { font: var(--t-title2); letter-spacing: var(--tr-title2); }
+.t-title3 { font: var(--t-title3); letter-spacing: var(--tr-title3); }
+.t-headline { font: var(--t-headline); letter-spacing: var(--tr-headline); }
+.t-callout { font: var(--t-callout); letter-spacing: var(--tr-callout); }
+.t-sub { font: var(--t-sub); letter-spacing: var(--tr-sub); }
+
+/* íconos SVG de icons.js: escalan con el texto y heredan el color */
+.i { width: 1.1em; height: 1.1em; flex: none; vertical-align: -0.17em; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.i.f { fill: currentColor; stroke: none; }
+
+/* teclas: keycap sans con sombra inferior (se sienten teclas) */
+kbd {
+  font: 550 10.5px/1 var(--sans); color: var(--label);
+  display: inline-block; min-width: 18px; padding: 3px 5px; text-align: center;
+  background: var(--fill-3); border-radius: 5px; box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+/* la letra subrayada es la tecla de la acción: subrayado callado, la letra en color de texto */
+u { text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; text-decoration-color: var(--label-3); color: var(--label); }
+
+/* foco de teclado */
+:focus-visible { outline: 3px solid rgba(var(--accent-rgb), 0.45); outline-offset: 1px; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--fill-1); border-radius: 999px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background-color: var(--label-3); }
+::-webkit-scrollbar-track { background: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --spring-smooth: ease-out; --spring-snappy: ease-out; --spring-bouncy: ease-out; }
+}

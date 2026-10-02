@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:">
+  <title>taskghost · dashboard</title>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <aside id="sidebar">
+    <div class="sb-top">
+      <span class="logo"><svg viewBox="270 230 530 610" aria-hidden="true"><path fill-rule="evenodd" d="M300,450 A212,212 0 0 1 724,450 C724,610 700,700 770,806 C660,826 576,776 528,712 C484,780 410,812 316,800 C344,712 300,640 300,450 Z M415,458 a31,45 0 1 0 62,0 a31,45 0 1 0 -62,0 Z M549,458 a31,45 0 1 0 62,0 a31,45 0 1 0 -62,0 Z"/></svg></span>
+      <span class="brand">taskghost</span>
+    </div>
+    <nav id="nav">
+      <button data-view="hoy" title="Hoy (F1)"><span class="ico" style="--c:#0088ff" data-icon="today"></span><span class="nm">Hoy</span><em>F1</em></button>
+      <button data-view="tareas" title="Tareas (F2)"><span class="ico" style="--c:#ff8d28" data-icon="list"></span><span class="nm">Tareas</span><em>F2</em></button>
+      <button data-view="proyectos" title="Proyectos (F3)"><span class="ico" style="--c:#6155f5" data-icon="folder"></span><span class="nm">Proyectos</span><em>F3</em></button>
+      <button data-view="sesiones" title="Sesiones (F4)"><span class="ico" style="--c:#34c759" data-icon="clock"></span><span class="nm">Sesiones</span><em>F4</em></button>
+      <button data-view="graficos" title="Gráficos (F5)"><span class="ico" style="--c:#ff2d55" data-icon="chart"></span><span class="nm">Gráficos</span><em>F5</em></button>
+      <div class="sec"><span>General</span></div>
+      <button data-view="ajustes" title="Ajustes (F6)"><span class="ico" style="--c:#8e8e93" data-icon="gear"></span><span class="nm">Ajustes</span><em>F6</em></button>
+    </nav>
+  </aside>
+  <div id="col">
+    <header id="toolbar">
+      <span class="grow"></span>
+      <span id="notice" role="status"></span>
+      <span id="live" data-s="none"><i></i><span id="live-t">Sin sesión</span> <b id="live-v"></b></span>
+      <button id="theme-btn" class="tb-btn" title="Cambiar tema claro/oscuro (c)" aria-label="Cambiar tema"></button>
+    </header>
+    <main id="view"></main>
+    <footer id="statusbar">
+      <span id="dmode">NORMAL</span>
+      <span id="dhint"></span>
+      <span class="grow"></span>
+      <span><kbd>?</kbd> ayuda</span>
+    </footer>
+  </div>
+  <div id="hud" role="status"></div>
+  <div id="dhelp"></div>
+  <script src="theme.js"></script>
+  <script src="icons.js"></script>
+  <script src="../../node_modules/chart.js/dist/chart.umd.js"></script>
+  <script src="stats.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

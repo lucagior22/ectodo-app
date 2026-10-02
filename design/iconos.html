@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>taskghost · 16 fantasmas</title>
+<style>
+@font-face { font-family: 'Inter Variable'; font-weight: 100 900; font-display: block;
+  src: url(../assets/fonts/inter-latin-opsz-normal.woff2) format('woff2-variations'); }
+@font-face { font-family: 'Inter Variable'; font-weight: 100 900; font-display: block;
+  src: url(../assets/fonts/inter-latin-ext-opsz-normal.woff2) format('woff2-variations');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1E9F,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+:root {
+  --sans: "Inter Variable", -apple-system, "Segoe UI Variable Text", system-ui, sans-serif;
+  --bg: #f2f2f7; --raised: #fff; --label: #000; --label-2: rgba(60,60,67,.72); --label-3: rgba(60,60,67,.36);
+  --fill: rgba(120,120,128,.12); --sep: rgba(60,60,67,.18); --accent: #0088ff;
+  --shadow: 0 0 0 .5px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.05);
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #000; --raised: #1c1c1e; --label: #fff; --label-2: rgba(235,235,245,.6); --label-3: rgba(235,235,245,.3);
+  --fill: rgba(120,120,128,.24); --sep: rgba(84,84,88,.6); --accent: #0091ff; --shadow: 0 0 0 .5px rgba(255,255,255,.06);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000; --raised: #1c1c1e; --label: #fff; --label-2: rgba(235,235,245,.6); --label-3: rgba(235,235,245,.3);
+    --fill: rgba(120,120,128,.24); --sep: rgba(84,84,88,.6); --accent: #0091ff; --shadow: 0 0 0 .5px rgba(255,255,255,.06);
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--label); font: 15px/1.5 var(--sans); font-optical-sizing: auto; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px 64px; }
+header { padding: 48px 0 20px; display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; }
+header .t { flex: 1; min-width: 300px; }
+h1 { font-size: 40px; line-height: 1.08; font-weight: 700; letter-spacing: -.028em; }
+.lead { color: var(--label-2); font-size: 17px; max-width: 720px; margin-top: 10px; letter-spacing: -.01em; }
+.seg { display: inline-flex; padding: 2px; background: var(--fill); border-radius: 9px; }
+.seg button { font: 500 12.5px var(--sans); color: var(--label); background: none; border: 0; padding: 5px 12px; border-radius: 7px; cursor: pointer; }
+.seg button.on { background: var(--raised); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.ctl { display: flex; gap: 10px; align-items: center; font-size: 12.5px; color: var(--label-2); flex-wrap: wrap; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+@media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
+
+.board { border-radius: 20px; padding: 18px 18px 8px; transition: background .25s; }
+.board.b-light { background: #fff; box-shadow: var(--shadow); }
+.board.b-dark { background: #161618; }
+.board.b-wall { background: radial-gradient(120% 90% at 10% 0%, #ff9a6b 0%, transparent 55%), radial-gradient(90% 80% at 100% 30%, #6b7bff 0%, transparent 60%), radial-gradient(90% 80% at 40% 100%, #2fd3c1 0%, transparent 60%), #2a2f45; }
+.fam { display: grid; grid-template-columns: 110px repeat(4, minmax(0, 1fr)); gap: 8px; align-items: center; padding: 10px 0; }
+.fam + .fam { border-top: .5px solid var(--sep); }
+.board.b-dark .fam + .fam, .board.b-wall .fam + .fam { border-top-color: rgba(255,255,255,.12); }
+.fam > .fl { font-size: 13px; font-weight: 600; color: var(--label); }
+.fam > .fl span { display: block; font-weight: 450; font-size: 12px; color: var(--label-2); margin-top: 2px; }
+.board.b-dark .fl, .board.b-wall .fl, .board.b-dark .cell .nm, .board.b-wall .cell .nm { color: #fff; }
+.board.b-dark .fl span, .board.b-wall .fl span, .board.b-dark .cell .nm small, .board.b-wall .cell .nm small { color: rgba(235,235,245,.6); }
+@media (max-width: 700px) { .fam { grid-template-columns: repeat(2, minmax(0, 1fr)); } .fam > .fl { grid-column: 1 / -1; } }
+.cell { border: 0; background: none; font: inherit; color: inherit; cursor: pointer; border-radius: 16px; padding: 12px 6px 10px; display: grid; justify-items: center; gap: 8px; position: relative;
+  transition: background .15s, transform .12s cubic-bezier(.23,1,.32,1); }
+.cell:hover { background: rgba(120,120,128,.10); }
+.cell:active { transform: scale(.97); }
+.cell.on { background: rgba(0,136,255,.12); box-shadow: inset 0 0 0 2px var(--accent); }
+.cell svg { width: min(116px, 100%); aspect-ratio: 1; filter: drop-shadow(0 6px 12px rgba(0,0,0,.22)) drop-shadow(0 1px 2px rgba(0,0,0,.15)); }
+.cell .nm { font-size: 12.5px; font-weight: 600; text-align: center; line-height: 1.3; }
+.cell .nm small { display: block; font-weight: 450; color: var(--label-2); font-size: 11.5px; }
+.cell .num { position: absolute; top: 8px; left: 10px; font-size: 11px; font-weight: 600; color: var(--label-3); font-variant-numeric: tabular-nums; }
+.board.b-dark .num, .board.b-wall .num { color: rgba(235,235,245,.4); }
+
+.detail { position: sticky; top: 16px; background: var(--raised); border-radius: 20px; box-shadow: var(--shadow); padding: 20px; }
+.detail .hero { display: grid; place-items: center; padding: 18px 0 12px; border-radius: 14px; background: var(--bg); }
+.detail .hero svg { width: 200px; height: 200px; filter: drop-shadow(0 14px 24px rgba(0,0,0,.28)) drop-shadow(0 2px 4px rgba(0,0,0,.15)); }
+.detail h2 { font-size: 22px; letter-spacing: -.02em; margin-top: 14px; }
+.detail .fam2 { font-size: 13px; color: var(--label-2); }
+.detail p { font-size: 14px; color: var(--label-2); margin-top: 8px; }
+.detail p b { color: var(--label); font-weight: 600; }
+.h4 { font-size: 12px; font-weight: 600; color: var(--label-2); margin: 16px 0 6px; }
+.strip { display: flex; align-items: flex-end; gap: 14px; padding: 12px 14px; border-radius: 12px; }
+.strip.d { background: #202020; }
+.strip.l { background: #f3f3f3; box-shadow: inset 0 0 0 .5px rgba(0,0,0,.08); }
+.strip svg { display: block; flex: none; }
+.strip span { font-size: 10px; color: #8e8e93; display: block; text-align: center; margin-top: 4px; }
+.mini { display: flex; gap: 10px; align-items: center; }
+.taskbar { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; background: rgba(32,32,32,.92); }
+.taskbar i { width: 24px; height: 24px; border-radius: 6px; background: #3a3a3c; display: block; }
+.taskbar svg { width: 24px; height: 24px; }
+.dotw { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 2px #0091ff; }
+.dotw svg { width: 100%; height: 100%; transform: scale(1.18); }
+.kbdh { font-size: 12.5px; color: var(--label-2); margin-top: 14px; }
+.kbd { font: 500 11px/1 var(--sans); background: var(--fill); padding: 3px 6px; border-radius: 5px; color: var(--label); }
+.notes { margin-top: 26px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.note { background: var(--raised); border-radius: 16px; box-shadow: var(--shadow); padding: 16px 18px; font-size: 14px; color: var(--label-2); }
+.note b { color: var(--label); display: block; margin-bottom: 4px; font-size: 15px; }
+</style>
+</head>
+<body>
+<svg id="lib" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
+
+<div class="wrap">
+  <header>
+    <div class="t">
+      <h1>16 fantasmas nuevos</h1>
+      <p class="lead">Ahora cambia el personaje, no solo el envase. Hay 4 familias: <b>siluetas</b> nuevas, <b>caras</b> con otra personalidad, <b>actitudes</b> y <b>construcciones</b> distintas. Con “Placa grafito” los ves a todos sobre el mismo fondo para comparar solo la forma. Recorrés la grilla con <span class="kbd">←</span><span class="kbd">→</span><span class="kbd">↑</span><span class="kbd">↓</span>.</p>
+    </div>
+    <div class="ctl">Placa
+      <div class="seg" id="plSeg"><button data-p="color" class="on">Color</button><button data-p="uni">Grafito</button></div>
+      Fondo
+      <div class="seg" id="bgSeg"><button data-b="light" class="on">Claro</button><button data-b="dark">Oscuro</button><button data-b="wall">Escritorio</button></div>
+      Página
+      <div class="seg" id="thSeg"><button data-t="auto" class="on">Auto</button><button data-t="light">Claro</button><button data-t="dark">Oscuro</button></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="board b-light" id="board"></section>
+    <aside class="detail" id="detail">
+      <div class="hero"><svg viewBox="0 0 1024 1024"><use id="dUse" href="#ic1"/></svg></div>
+      <h2 id="dName"></h2>
+      <div class="fam2" id="dFam"></div>
+      <p id="dIdea"></p>
+      <p id="dPro"></p>
+      <p id="dCon"></p>
+      <div class="h4">Tamaños reales</div>
+      <div class="strip d" id="sDark"></div>
+      <div class="strip l" id="sLight" style="margin-top:8px"></div>
+      <div class="h4">En contexto</div>
+      <div class="mini">
+        <div class="taskbar"><i></i><i></i><svg viewBox="0 0 1024 1024"><use class="ctx" href="#ic1"/></svg><i></i></div>
+        <div class="dotw" title="Widget en estilo círculo"><svg viewBox="0 0 1024 1024"><use class="ctx" href="#ic1"/></svg></div>
+      </div>
+      <p class="kbdh">Decime el número o una mezcla (“la silueta del 1 con la cara del 6”). Iteramos sobre ese y después lo llevo a arte final.</p>
+    </aside>
+  </div>
+
+  <div class="notes">
+    <div class="note"><b>Qué cambia respecto de antes</b>El fantasma anterior era siempre el mismo: cabeza redonda y tres ondas iguales. Acá cada uno tiene otra silueta, otra cara o otra forma de estar construido. Los anteojos, que eran la marca, aparecen solo en algunos.</div>
+    <div class="note"><b>Cómo juzgarlos</b>Primero la silueta: si la ves a 16 px y sigue siendo “un fantasma”, sirve. Después, la cara: tiene que leerse a 32 px. El color se cambia fácil, así que no lo uses para decidir (para eso está la placa grafito).</div>
+    <div class="note"><b>Combinables</b>Las familias se pueden mezclar: una silueta de la fila 1 con una cara de la fila 2, por ejemplo la voluta con el visor o la sábana con los anteojos.</div>
+  </div>
+</div>
+
+<script>
+const SQ = 'M924.0,512.0L923.6,650.4L922.6,694.5L920.8,726.3L918.3,751.9L915.1,773.7L911.2,792.6L906.4,809.3L901.0,824.2L894.7,837.7L887.6,849.8L879.6,860.8L870.7,870.7L860.8,879.6L849.8,887.6L837.7,894.7L824.2,901.0L809.3,906.4L792.6,911.2L773.7,915.1L751.9,918.3L726.3,920.8L694.5,922.6L650.4,923.6L512.0,924.0L373.6,923.6L329.5,922.6L297.7,920.8L272.1,918.3L250.3,915.1L231.4,911.2L214.7,906.4L199.8,901.0L186.3,894.7L174.2,887.6L163.2,879.6L153.3,870.7L144.4,860.8L136.4,849.8L129.3,837.7L123.0,824.2L117.6,809.3L112.8,792.6L108.9,773.7L105.7,751.9L103.2,726.3L101.4,694.5L100.4,650.4L100.0,512.0L100.4,373.6L101.4,329.5L103.2,297.7L105.7,272.1L108.9,250.3L112.8,231.4L117.6,214.7L123.0,199.8L129.3,186.3L136.4,174.2L144.4,163.2L153.3,153.3L163.2,144.4L174.2,136.4L186.3,129.3L199.8,123.0L214.7,117.6L231.4,112.8L250.3,108.9L272.1,105.7L297.7,103.2L329.5,101.4L373.6,100.4L512.0,100.0L650.4,100.4L694.5,101.4L726.3,103.2L751.9,105.7L773.7,108.9L792.6,112.8L809.3,117.6L824.2,123.0L837.7,129.3L849.8,136.4L860.8,144.4L870.7,153.3L879.6,163.2L887.6,174.2L894.7,186.3L901.0,199.8L906.4,214.7L911.2,231.4L915.1,250.3L918.3,272.1L920.8,297.7L922.6,329.5L923.6,373.6Z';
+
+// siluetas nuevas (lienzo 1024)
+const S = {
+  voluta: 'M300,450 A212,212 0 0 1 724,450 C724,610 700,700 770,806 C660,826 576,776 528,712 C484,780 410,812 316,800 C344,712 300,640 300,450 Z',
+  onda: 'M320,436 A192,192 0 0 1 704,436 L704,760 Q672,808 640,760 Q608,712 576,760 Q544,808 512,760 Q480,712 448,760 Q416,808 384,760 Q352,712 320,760 Z',
+  sabana: 'M512,206 C644,206 722,300 726,440 C730,566 756,686 806,800 C744,794 704,772 662,800 C620,830 580,790 540,812 C500,836 460,800 420,822 C378,844 330,800 252,814 C296,692 298,566 298,440 C302,300 380,206 512,206 Z',
+  perfil: 'M300,566 C300,384 420,262 566,262 C696,262 768,360 768,474 C768,566 724,628 660,668 C598,708 520,726 440,766 C376,798 300,826 226,806 C280,772 300,704 300,566 Z',
+  blob: 'M512,232 C664,232 742,344 742,504 C742,644 760,740 800,792 C722,804 682,772 640,802 C600,832 560,792 512,812 C464,792 424,832 384,802 C342,772 302,804 224,792 C264,740 282,644 282,504 C282,344 360,232 512,232 Z',
+  arco: 'M320,440 A192,192 0 0 1 704,440 L704,770 Q704,812 664,800 L600,780 Q560,770 532,798 Q512,818 492,798 Q464,770 424,780 L360,800 Q320,812 320,770 Z',
+  zigzag: 'M296,470 A216,216 0 0 1 728,470 L728,800 L674,746 L620,800 L566,746 L512,800 L458,746 L404,800 L350,746 L296,800 Z',
+  bu: 'M330,456 A182,182 0 0 1 694,456 L694,780 A45.5,45.5 0 0 1 603,780 A45.5,45.5 0 0 1 512,780 A45.5,45.5 0 0 1 421,780 A45.5,45.5 0 0 1 330,780 Z',
+  humo: 'M312,450 A200,200 0 0 1 712,450 C712,590 690,662 620,722 C560,772 470,792 430,842 C400,878 330,874 300,842 C350,848 380,822 372,772 C364,712 312,640 312,450 Z',
+  casco: 'M512,236 C650,236 720,330 720,470 L720,560 C720,690 760,760 800,800 C700,812 620,790 512,800 C404,790 324,812 224,800 C264,760 304,690 304,560 L304,470 C304,330 374,236 512,236 Z',
+};
+
+const lin = (id, stops, x2 = 0, y2 = 1) => `<linearGradient id="${id}" x1="0" y1="0" x2="${x2}" y2="${y2}">${stops.map(([o, c, a = 1]) => `<stop offset="${o}" stop-color="${c}" stop-opacity="${a}"/>`).join('')}</linearGradient>`;
+const shadow = (op = .4, cx = 512, rx = 190, cy = 848) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="26" fill="#000" opacity="${op}" filter="url(#b18)"/>`;
+const body = (d, fill = 'url(#ghW)', extra = '') => `<path d="${d}" fill="${fill}" ${extra}/><path d="${d}" fill="none" stroke="#fff" stroke-opacity=".85" stroke-width="3"/>`;
+const tile = (bg, inner) => `<g clip-path="url(#sq)"><rect width="1024" height="1024" fill="${bg}"/>${inner}<use href="#sqP" fill="none" stroke="url(#rim)" stroke-width="8"/></g>`;
+const scaleAt = (s, cx = 512, cy = 530, dx = 0, dy = 0) => `translate(${(cx * (1 - s) + dx).toFixed(1)} ${(cy * (1 - s) + dy).toFixed(1)}) scale(${s})`;
+const INK = '#141721';
+const glasses = (x1, x2, y, r = 50, f = INK, l = '#e3e9fa', w = 18) =>
+  `<circle cx="${x1}" cy="${y}" r="${r}" fill="${l}" stroke="${f}" stroke-width="${w}"/><circle cx="${x2}" cy="${y}" r="${r}" fill="${l}" stroke="${f}" stroke-width="${w}"/>` +
+  `<path d="M${x1 + r},${y - 6} Q${(x1 + x2) / 2},${y - 22} ${x2 - r},${y - 6}" fill="none" stroke="${f}" stroke-width="${w - 2}" stroke-linecap="round"/>` +
+  `<circle cx="${x1 + 9}" cy="${y + 7}" r="${r * .32}" fill="${f}"/><circle cx="${x2 + 9}" cy="${y + 7}" r="${r * .32}" fill="${f}"/>`;
+
+// origami: abanico de facetas sombreadas según una luz arriba a la izquierda
+function origami() {
+  const P = [[512, 212], [630, 236], [714, 318], [736, 452], [736, 620], [772, 808], [660, 752], [586, 822], [512, 756], [438, 822], [364, 752], [252, 808], [288, 620], [288, 452], [310, 318], [394, 236]];
+  const C = [512, 500];
+  let out = '';
+  P.forEach((p, i) => {
+    const q = P[(i + 1) % P.length];
+    const mx = (p[0] + q[0]) / 2 - C[0], my = (p[1] + q[1]) / 2 - C[1], len = Math.hypot(mx, my);
+    const dot = (-mx * .6 - my * .8) / len;
+    const L = 86 + 10 * dot + (i % 2 ? -2.5 : 2.5);
+    out += `<path d="M${p}L${q}L${C}Z" fill="hsl(226 30% ${L.toFixed(1)}%)" stroke="hsl(226 30% ${L.toFixed(1)}%)" stroke-width="1.5" stroke-linejoin="round"/>`;
+  });
+  return out;
+}
+// matriz de puntos
+function pixels() {
+  const R = ['...XXXXX...', '.XXXXXXXXX.', 'XXXXXXXXXXX', 'XXEEXXXEEXX', 'XXEEXXXEEXX', 'XXXXXXXXXXX', 'XXXXXXXXXXX', 'XXXXXXXXXXX', 'XXXXXXXXXXX', 'XX.XX.XX.XX', 'X..X...X..X'];
+  let out = '';
+  R.forEach((row, j) => [...row].forEach((ch, i) => {
+    const cx = 252 + 52 * i, cy = 252 + 52 * j;
+    if (ch === 'X') out += `<circle cx="${cx}" cy="${cy}" r="22" fill="#fff"/>`;
+    else if (ch === 'E') out += `<circle cx="${cx}" cy="${cy}" r="22" fill="#0a84ff"/>`;
+    else out += `<circle cx="${cx}" cy="${cy}" r="22" fill="#fff" opacity=".06"/>`;
+  }));
+  return `<circle cx="408" cy="434" r="70" fill="#0a84ff" opacity=".25" filter="url(#b18)"/><circle cx="616" cy="434" r="70" fill="#0a84ff" opacity=".25" filter="url(#b18)"/>` + out;
+}
+
+const ICONS = [
+  // ---------- fila 1: siluetas ----------
+  { fam: 'Siluetas', name: 'Voluta', bg: [['#5cb8ff'], ['#0a6cff', .5], ['#0043b8', 1]],
+    idea: 'La cabeza baja en un solo trazo y termina en dos puntas desparejas, como una llama o una pincelada. Sin ondas repetidas.',
+    pro: 'Silueta única: no se parece a ningún otro fantasma de ícono. Se siente veloz pero de frente.', con: 'Asimétrica: en chico puede leerse como una gota.',
+    art: () => shadow(.35, 540) + body(S.voluta) + `<ellipse cx="446" cy="458" rx="30" ry="44" fill="${INK}"/><ellipse cx="580" cy="458" rx="30" ry="44" fill="${INK}"/><circle cx="456" cy="440" r="9" fill="#fff"/><circle cx="590" cy="440" r="9" fill="#fff"/>` },
+  { fam: 'Siluetas', name: 'Ondas', bg: [['#7d7dff'], ['#4b3fd6', .55], ['#24196e', 1]],
+    idea: 'Una cápsula alta con el ruedo en onda continua (seno) en lugar de semicírculos. Ojos de punto y una boquita en “o”.',
+    pro: 'Más suave y más “tela flotando” que el actual. Muy limpio a cualquier tamaño.', con: 'Personalidad discreta: es lindo, pero no sorprende.',
+    art: () => shadow(.4) + body(S.onda) + `<circle cx="452" cy="476" r="30" fill="${INK}"/><circle cx="572" cy="476" r="30" fill="${INK}"/><ellipse cx="512" cy="566" rx="18" ry="22" fill="${INK}"/>` },
+  { fam: 'Siluetas', name: 'Sábana', bg: [['#ff9f6b'], ['#c2457a', .55], ['#4a1b5e', 1]],
+    idea: 'El disfraz clásico: una sábana que cae con pliegues, el ruedo irregular y dos agujeros para los ojos.',
+    pro: 'Cálido y con historia: se siente artesanal, como un ícono de app indie premiada. Los ojos calados funcionan en monocromo.', con: 'Los pliegues son detalle fino que a 16 px desaparece (la silueta igual se sostiene).',
+    art: () => lin('sab', [[0, '#ffffff'], [1, '#e2e5ef']]) + shadow(.4, 520, 230) + body(S.sabana, 'url(#sab)') +
+      `<g fill="none" stroke="#1d2130" stroke-opacity=".10" stroke-width="12" stroke-linecap="round"><path d="M576,540 C600,640 616,720 650,792"/><path d="M450,560 C444,650 432,730 424,812"/><path d="M660,420 C676,520 700,640 740,760"/></g>` +
+      `<ellipse cx="450" cy="432" rx="34" ry="46" fill="${INK}"/><ellipse cx="576" cy="432" rx="34" ry="46" fill="${INK}"/>` },
+  { fam: 'Siluetas', name: 'Perfil', bg: [['#64d2ff'], ['#2f80ed', .55], ['#1b3a8a', 1]],
+    idea: 'El fantasma de costado volando hacia adelante, con un solo lente de los anteojos y la patilla. Mantiene el movimiento del ícono actual con otra forma.',
+    pro: 'Dinámico y reconocible; los anteojos de perfil son un detalle muy propio.', con: 'La HIG recomienda vista frontal. Además, de costado puede leerse como un globo de diálogo.',
+    art: () => `<g stroke="#fff" stroke-opacity=".28" stroke-width="20" stroke-linecap="round"><path d="M150,560 H230"/><path d="M170,650 H250"/></g>` + shadow(.35, 540, 220) + body(S.perfil) +
+      `<path d="M598,424 L500,410" stroke="${INK}" stroke-width="16" stroke-linecap="round"/><circle cx="654" cy="430" r="56" fill="#e3e9fa" stroke="${INK}" stroke-width="18"/><circle cx="674" cy="438" r="18" fill="${INK}"/>` },
+
+  // ---------- fila 2: caras ----------
+  { fam: 'Caras', name: 'Kawaii', bg: [['#ffc2d4'], ['#ff7aa2', .55], ['#e0457b', 1]],
+    idea: 'Un blob redondo con ojos grandes, bajos y brillantes, y cachetes. El estilo de los stickers y Memoji.',
+    pro: 'El más tierno: genera cariño enseguida. Los ojos grandes se leen perfecto a 16 px.', con: 'Muy dulce para una herramienta de foco “pro”.',
+    art: () => shadow(.3) + body(S.blob) + `<circle cx="440" cy="512" r="48" fill="${INK}"/><circle cx="584" cy="512" r="48" fill="${INK}"/><circle cx="456" cy="494" r="15" fill="#fff"/><circle cx="600" cy="494" r="15" fill="#fff"/><circle cx="430" cy="530" r="7" fill="#fff" opacity=".7"/><circle cx="574" cy="530" r="7" fill="#fff" opacity=".7"/>` +
+      `<ellipse cx="380" cy="584" rx="36" ry="20" fill="#ff7aa2" opacity=".55"/><ellipse cx="644" cy="584" rx="36" ry="20" fill="#ff7aa2" opacity=".55"/><path d="M496,580 Q512,596 528,580" fill="none" stroke="${INK}" stroke-width="12" stroke-linecap="round"/>` },
+  { fam: 'Caras', name: 'Cíclope', bg: [['#3ad6c6'], ['#0f8f8a', .55], ['#064a4f', 1]],
+    idea: 'Un solo ojo grande con iris de color: el ojo como lente que enfoca. Es la idea de “foco” hecha cara.',
+    pro: 'Potente y raro: un ojo se recuerda. El iris lleva el color de acento.', con: 'Un ojo solo puede resultar inquietante para algunos.',
+    art: () => `<radialGradient id="iris" cx=".42" cy=".38" r=".7"><stop offset="0" stop-color="#7fe3ff"/><stop offset=".6" stop-color="#0a84ff"/><stop offset="1" stop-color="#0646a8"/></radialGradient>` + shadow(.4) + body(S.onda) +
+      `<circle cx="512" cy="470" r="116" fill="${INK}"/><circle cx="512" cy="470" r="88" fill="url(#iris)"/><circle cx="512" cy="470" r="40" fill="#05070c"/><circle cx="540" cy="438" r="20" fill="#fff"/><circle cx="486" cy="500" r="8" fill="#fff" opacity=".7"/>` },
+  { fam: 'Caras', name: 'Visor', bg: [['#ffbe5c'], ['#ff8a00', .55], ['#d45500', 1]],
+    idea: 'En lugar de anteojos, un visor negro brillante que le cruza la cara, como unas antiparras: el fantasma en “modo foco”.',
+    pro: 'Moderno y “tech”, y conserva la idea de los anteojos. El visor es una forma fuerte que se lee a cualquier tamaño.', con: 'Pierde la expresión: sin ojos visibles es menos simpático.',
+    art: () => lin('vis', [[0, '#3a3f55'], [.5, '#10121a'], [1, '#05060a']]) + shadow(.35) + body(S.arco) +
+      `<rect x="296" y="404" width="432" height="112" rx="56" fill="url(#vis)"/><rect x="298" y="406" width="428" height="108" rx="54" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="3"/>` +
+      `<rect x="344" y="426" width="210" height="16" rx="8" fill="#fff" opacity=".35"/><rect x="574" y="426" width="40" height="16" rx="8" fill="#fff" opacity=".2"/>` +
+      `<circle cx="664" cy="466" r="26" fill="#64d2ff" opacity=".35" filter="url(#b18)"/><circle cx="664" cy="466" r="12" fill="#64d2ff"/>` },
+  { fam: 'Caras', name: 'Auriculares', bg: [['#7ef0b4'], ['#20b36b', .55], ['#0c6b3f', 1]],
+    idea: 'El fantasma con auriculares, los ojos cerrados y una sonrisa: concentrado, en su mundo. Es el estado que la app quiere darte.',
+    pro: 'Cuenta la historia de la app (trabajo profundo) sin texto ni símbolos de reloj. Muy simpático.', con: 'Más piezas: a 16 px los auriculares pueden leerse como orejas.',
+    art: () => shadow(.35) + `<g transform="${scaleAt(.92, 512, 540)}">${body(S.blob)}</g>` +
+      `<path d="M276,500 A236,236 0 0 1 748,500" fill="none" stroke="#1d2130" stroke-width="34" stroke-linecap="round"/>` +
+      `<rect x="236" y="430" width="84" height="150" rx="38" fill="#1d2130"/><rect x="704" y="430" width="84" height="150" rx="38" fill="#1d2130"/><rect x="306" y="452" width="20" height="106" rx="10" fill="#30d158"/><rect x="698" y="452" width="20" height="106" rx="10" fill="#30d158"/>` +
+      `<path d="M420,520 Q448,546 476,520" fill="none" stroke="${INK}" stroke-width="16" stroke-linecap="round"/><path d="M548,520 Q576,546 604,520" fill="none" stroke="${INK}" stroke-width="16" stroke-linecap="round"/><path d="M490,588 Q512,610 534,588" fill="none" stroke="${INK}" stroke-width="13" stroke-linecap="round"/>` },
+
+  // ---------- fila 3: actitud ----------
+  { fam: 'Actitud', name: 'Arcade', bg: [['#2c3354'], ['#141a33', .55], ['#070a18', 1]],
+    idea: 'Un fantasma de color (coral) con ruedo en zigzag y los ojos blancos mirando de costado, como en los arcades. Los bordes se redondean.',
+    pro: 'Color propio en la figura, no solo en el fondo: se distingue de todo. Divertido y nostálgico.', con: 'Muy asociado a Pac-Man; hay que alejarse lo suficiente para que no parezca copia.',
+    art: () => lin('coral', [[0, '#ff9a8f'], [1, '#ff4d4d']]) + shadow(.5) +
+      `<path d="${S.zigzag}" fill="url(#coral)" stroke="url(#coral)" stroke-width="26" stroke-linejoin="round"/>` +
+      `<ellipse cx="436" cy="474" rx="50" ry="60" fill="#fff"/><ellipse cx="596" cy="474" rx="50" ry="60" fill="#fff"/><circle cx="460" cy="486" r="27" fill="#2342d8"/><circle cx="620" cy="486" r="27" fill="#2342d8"/>` },
+  { fam: 'Actitud', name: '¡Bu!', bg: [['#ff6b61'], ['#e0221a', .55], ['#8a0d0d', 1]],
+    idea: 'Brazos arriba y boca abierta: el fantasma que te asusta. Más chiquito y redondo, con cuatro ondas.',
+    pro: 'Gesto clarísimo y con humor. Los brazos le dan una silueta muy reconocible (una “T” redondeada).', con: 'Asustar no es el mensaje de una app de foco; es más un chiste que una marca.',
+    art: () => shadow(.4) + `<ellipse cx="300" cy="470" rx="44" ry="100" fill="url(#ghW)" transform="rotate(-38 300 470)"/><ellipse cx="724" cy="470" rx="44" ry="100" fill="url(#ghW)" transform="rotate(38 724 470)"/>` + body(S.bu) +
+      `<path d="M424,420 Q452,404 480,420" fill="none" stroke="${INK}" stroke-width="12" stroke-linecap="round"/><path d="M544,420 Q572,404 600,420" fill="none" stroke="${INK}" stroke-width="12" stroke-linecap="round"/>` +
+      `<circle cx="452" cy="466" r="24" fill="${INK}"/><circle cx="572" cy="466" r="24" fill="${INK}"/><ellipse cx="512" cy="574" rx="44" ry="56" fill="${INK}"/><ellipse cx="512" cy="600" rx="24" ry="20" fill="#ff7a7a"/>` },
+  { fam: 'Actitud', name: 'Humo', bg: [['#b9a8ff'], ['#6b55e6', .55], ['#2e1f8f', 1]],
+    idea: 'El cuerpo se convierte en una sola cola de humo que se enrosca. Conserva los anteojos.',
+    pro: 'Etéreo y elegante; la cola dice “movimiento” sin líneas de velocidad. Mantiene la marca de los anteojos.', con: 'La cola enroscada puede leerse como un globo de diálogo, y en chico se adelgaza demasiado.',
+    art: () => shadow(.3, 470, 150) + body(S.humo) + glasses(444, 584, 452) },
+  { fam: 'Actitud', name: 'Zen', bg: [['#d9ceff'], ['#9b8cff', .55], ['#5a4bd1', 1]],
+    idea: 'Flotando alto, con los ojos cerrados y ondas debajo: el fantasma meditando, en calma total.',
+    pro: 'Transmite calma y foco. Hay mucho aire alrededor de la figura y se siente muy Apple.', con: 'Figura más chica dentro del ícono; pierde presencia en la barra de tareas.',
+    art: () => `<g fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="8"><ellipse cx="512" cy="852" rx="120" ry="20"/><ellipse cx="512" cy="852" rx="210" ry="36"/><ellipse cx="512" cy="852" rx="300" ry="52" stroke-opacity=".12"/></g>` +
+      `<g transform="${scaleAt(.84, 512, 500, 0, -26)}">${body(S.blob)}<path d="M410,492 Q440,520 470,492" fill="none" stroke="${INK}" stroke-width="15" stroke-linecap="round"/><path d="M554,492 Q584,520 614,492" fill="none" stroke="${INK}" stroke-width="15" stroke-linecap="round"/><path d="M494,568 Q512,582 530,568" fill="none" stroke="${INK}" stroke-width="12" stroke-linecap="round"/></g>` },
+
+  // ---------- fila 4: construcción ----------
+  { fam: 'Construcción', name: 'Eco', bg: [['#3b5bdb'], ['#1e3296', .55], ['#0b1648', 1]],
+    idea: 'Tres contornos concéntricos del fantasma, cada uno más tenue: una onda que se expande, como un eco.',
+    pro: 'Geométrico y sofisticado. Se lee como logotipo y queda bien en una sola tinta.', con: 'Las líneas finas de afuera se pierden a 16 px (queda el núcleo, que alcanza).',
+    art: () => `<g transform="${scaleAt(1.04, 512, 520)}"><path d="${S.blob}" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="22"/></g>` +
+      `<g transform="${scaleAt(.76, 512, 520)}"><path d="${S.blob}" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="28"/></g>` +
+      `<g transform="${scaleAt(.5, 512, 520)}">${body(S.blob)}<circle cx="452" cy="500" r="36" fill="${INK}"/><circle cx="572" cy="500" r="36" fill="${INK}"/></g>` },
+  { fam: 'Construcción', name: 'Monograma', bg: [['#3a3a40'], ['#1a1a1e', .55], ['#050506', 1]],
+    idea: 'La “g” de taskghost dibujada de un trazo: el ojo de la letra es la cabeza del fantasma, con dos ojitos adentro.',
+    pro: 'Funciona como logotipo, favicon y bandeja con la misma pieza. Es tipográfico y adulto.', con: 'Hay que mirarlo dos veces para ver el fantasma: es más letra que personaje.',
+    art: () => lin('gg', [[0, '#ffffff'], [1, '#cfd5e3']]) +
+      `<circle cx="490" cy="432" r="168" fill="none" stroke="url(#gg)" stroke-width="88"/><path d="M658,282 L658,640 C658,792 548,840 462,832 C398,826 356,804 330,772" fill="none" stroke="url(#gg)" stroke-width="88" stroke-linecap="round"/>` +
+      `<circle cx="452" cy="436" r="26" fill="#fff"/><circle cx="532" cy="436" r="26" fill="#fff"/>` },
+  { fam: 'Construcción', name: 'Matriz', bg: [['#26282f'], ['#121318', .55], ['#060608', 1]],
+    idea: 'El fantasma de 8 bits redibujado en puntos redondos, como un panel LED. Los ojos son puntos azules que brillan.',
+    pro: 'Tiene un toque “display” muy acorde a un timer. Retro pero prolijo y con color de acento.', con: 'A 16 px la grilla se vuelve gris; ahí conviene una versión de bandeja maciza.',
+    art: () => pixels() },
+  { fam: 'Construcción', name: 'Origami', bg: [['#4fd1c5'], ['#1f8fb3', .55], ['#124c7a', 1]],
+    idea: 'El fantasma plegado en papel: facetas planas que reciben la luz desde arriba a la izquierda, con ojos de rombo.',
+    pro: 'Se ve como un objeto real con volumen, sin gradientes. Es la variante más original.', con: 'El facetado es más “2016” que “2026” si no se cuida el detalle.',
+    art: () => shadow(.4) + origami() + `<path d="M450,436 L476,470 L450,504 L424,470 Z" fill="${INK}"/><path d="M574,436 L600,470 L574,504 L548,470 Z" fill="${INK}"/>` },
+];
+
+const FAMS = [
+  ['Siluetas', 'Otra forma de cuerpo.'],
+  ['Caras', 'La personalidad está en los ojos.'],
+  ['Actitud', 'Qué está haciendo el fantasma.'],
+  ['Construcción', 'Cómo está dibujado.'],
+];
+
+let uni = false;
+function build() {
+  const lib = document.getElementById('lib');
+  lib.innerHTML = `<defs>
+    <path id="sqP" d="${SQ}"/><clipPath id="sq"><use href="#sqP"/></clipPath>
+    ${lin('ghW', [[0, '#ffffff'], [1, '#dde2ee']])}
+    ${lin('rim', [[0, '#fff', .3], [.22, '#fff', 0]])}
+    ${lin('gU', [[0, '#3a4052'], [.55, '#1b1e28'], [1, '#0d0f15']])}
+    <filter id="b18" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>` + ICONS.map((ic, i) => {
+    const gid = 'bg' + (i + 1);
+    const grad = lin(gid, ic.bg.map(([c, o = 0], k) => [k === 0 ? 0 : o, c]));
+    return `<symbol id="ic${i + 1}" viewBox="0 0 1024 1024">${grad}${tile(uni ? 'url(#gU)' : `url(#${gid})`, ic.art())}</symbol>`;
+  }).join('');
+}
+build();
+
+const board = document.getElementById('board');
+board.innerHTML = FAMS.map(([f, d], r) => `<div class="fam"><div class="fl">${f}<span>${d}</span></div>` +
+  ICONS.slice(r * 4, r * 4 + 4).map((ic, c) => { const n = r * 4 + c + 1; return `<button class="cell" data-n="${n}"><span class="num">${n}</span><svg viewBox="0 0 1024 1024"><use href="#ic${n}"/></svg><span class="nm">${ic.name}</span></button>`; }).join('') + '</div>').join('');
+
+let cur = 1;
+const sizes = [16, 20, 24, 32, 48, 64];
+function pick(n) {
+  cur = n;
+  const ic = ICONS[n - 1];
+  document.querySelectorAll('.cell').forEach((c) => c.classList.toggle('on', +c.dataset.n === n));
+  document.getElementById('dUse').setAttribute('href', '#ic' + n);
+  document.querySelectorAll('.ctx').forEach((u) => u.setAttribute('href', '#ic' + n));
+  document.getElementById('dName').textContent = n + ' · ' + ic.name;
+  document.getElementById('dFam').textContent = ic.fam;
+  document.getElementById('dIdea').textContent = ic.idea;
+  document.getElementById('dPro').innerHTML = '<b>A favor.</b> ' + ic.pro;
+  document.getElementById('dCon').innerHTML = '<b>En contra.</b> ' + ic.con;
+  const strip = sizes.map((s) => `<div><svg width="${s}" height="${s}" viewBox="0 0 1024 1024"><use href="#ic${n}"/></svg><span>${s}</span></div>`).join('');
+  document.getElementById('sDark').innerHTML = strip;
+  document.getElementById('sLight').innerHTML = strip;
+}
+board.addEventListener('click', (e) => { const c = e.target.closest('.cell'); if (c) pick(+c.dataset.n); });
+document.addEventListener('keydown', (e) => {
+  const d = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 4, ArrowUp: -4 }[e.key];
+  if (!d) return;
+  e.preventDefault();
+  const n = cur + d;
+  if (n >= 1 && n <= 16) { pick(n); document.querySelector(`.cell[data-n="${n}"]`).focus({ preventScroll: true }); }
+});
+pick(1);
+
+const seg = (id, fn) => document.getElementById(id).addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  e.currentTarget.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+  fn(b.dataset);
+});
+seg('plSeg', (d) => { uni = d.p === 'uni'; build(); pick(cur); });
+seg('bgSeg', (d) => { board.className = 'board b-' + d.b; });
+seg('thSeg', (d) => { if (d.t === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.dataset.theme = d.t; });
+</script>
+</body>
+</html>
