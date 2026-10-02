@@ -1,6 +1,6 @@
 {
-  "name": "taskghost",
-  "version": "0.2.0",
+  "name": "ectodo",
+  "version": "0.3.0",
   "description": "Widget always-on-top con timer de sesion y todo list, mas dashboard. 100% local.",
   "main": "src/main.js",
   "scripts": {
@@ -13,8 +13,8 @@
     "chart.js": "^4.5.1"
   },
   "build": {
-    "appId": "com.taskghost.app",
-    "productName": "taskghost",
+    "appId": "com.ectodo.app",
+    "productName": "Ectodo",
     "files": [
       "src/**/*",
       "assets/**/*",

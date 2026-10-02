@@ -1,4 +1,4 @@
-/* taskghost · dashboard estilo app de Mac. Tokens de color/tipografía/movimiento en tokens.css;
+/* Ectodo · dashboard estilo app de Mac. Tokens de color/tipografía/movimiento en tokens.css;
    --accent (relleno) / --accent-text (texto en acento) / --on-accent los escribe theme.js desde config.accent. */
 :root {
   --sb-w: 220px;

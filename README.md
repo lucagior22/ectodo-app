@@ -1,4 +1,4 @@
-# taskghost
+# Ectodo
 
 Panel always-on-top (timer de sesión + tarea actual + todo list) y dashboard. 100% local, sin red.
 
@@ -49,7 +49,7 @@ Si otra app ya usa un atajo global, el widget avisa al arrancar; se cambia en `c
 
 ## Datos
 
-Carpeta de usuario de la app (`%APPDATA%\taskghost` en Windows, `~/.config/taskghost` en Linux):
+Carpeta de usuario de la app (`%APPDATA%\ectodo` en Windows, `~/.config/ectodo` en Linux). La app antes se llamaba taskghost: al arrancar, si `ectodo` no tiene datos y `taskghost` sí, los copia (la carpeta vieja queda de respaldo):
 
 - `state.json` — tareas, proyectos, proyecto del widget, sesión en curso, posición de la ventana
 - `intervals.jsonl` — un tramo trabajado por línea (tarea, inicio, fin); base de los gráficos

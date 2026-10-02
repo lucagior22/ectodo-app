@@ -1,4 +1,4 @@
-/* taskghost · widget (estilo Apple): una sola superficie tipo Live Activity que se estira de píldora a panel.
+/* Ectodo · widget (estilo Apple): una sola superficie tipo Live Activity que se estira de píldora a panel.
    Colores, tipografía, espacios, radios y springs vienen de tokens.css; --accent / --accent-text / --on-accent los escribe theme.js.
    Regla de frecuencia (M19): NO se animan la selección con flechas, el tic de segundos ni NORMAL/INSERT. */
 @property --surface-a { syntax: '<number>'; inherits: true; initial-value: 0.97; }

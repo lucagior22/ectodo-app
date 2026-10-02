@@ -11,7 +11,7 @@ const uid = () => `${Date.now().toString(36)}${(seq++).toString(36)}${Math.rando
 const TAG_RE = /(?:^|\s)#([\p{L}\p{N}_-]+)/u;
 const TAG_RE_ALL = /(?:^|\s)#[\p{L}\p{N}_-]+/gu;
 
-// "arreglar login #taskghost" -> { title: "arreglar login", project: "taskghost" }
+// "arreglar login #ectodo" -> { title: "arreglar login", project: "ectodo" }
 function parseTitle(raw) {
   const str = String(raw == null ? '' : raw);
   const m = str.match(TAG_RE);

@@ -1,6 +1,6 @@
-# taskghost — Manual de uso
+# Ectodo — Manual de uso
 
-taskghost es un panel que queda siempre arriba a la derecha de tu pantalla, con un timer de sesión, un timer de la tarea actual y tu lista de tareas. Corre 100% local: no usa internet ni cuentas.
+Ectodo es un panel que queda siempre arriba a la derecha de tu pantalla, con un timer de sesión, un timer de la tarea actual y tu lista de tareas. Corre 100% local: no usa internet ni cuentas.
 
 ---
 
@@ -20,7 +20,7 @@ npm start
 npm run dist
 ```
 
-Genera `dist\taskghost 0.2.0.exe`. Es un solo archivo: copialo donde quieras y ejecutalo. Como no está firmado, Windows SmartScreen puede avisar la primera vez ("Más información" → "Ejecutar de todas formas").
+Genera `dist\Ectodo 0.3.0.exe`. Es un solo archivo: copialo donde quieras y ejecutalo. Como no está firmado, Windows SmartScreen puede avisar la primera vez ("Más información" → "Ejecutar de todas formas").
 
 Al iniciar, aparece la **píldora** arriba a la derecha y un ícono en la bandeja del sistema. Solo se puede tener una instancia abierta: si lo ejecutás de nuevo, abre el panel de la que ya corre.
 
@@ -175,8 +175,8 @@ También podés usar el mouse: click en el título activa la tarea, en el círcu
 
 ## 6. Tareas y proyectos
 
-- **Proyecto con `#`:** escribí `arreglar login #taskghost` y la tarea queda en el proyecto `taskghost`. El `#tag` se saca del título. Los proyectos se crean solos, con un color asignado.
-- **El widget trabaja en un proyecto:** se ve en el título (`taskghost · #web`) y en el chip junto a *Iniciar*. El panel muestra solo las tareas de ese proyecto (avisa cuántas de otros quedan ocultas) y **toda tarea nueva sin `#tag` va ahí**: no hace falta escribir el proyecto cada vez.
+- **Proyecto con `#`:** escribí `arreglar login #ectodo` y la tarea queda en el proyecto `ectodo`. El `#tag` se saca del título. Los proyectos se crean solos, con un color asignado.
+- **El widget trabaja en un proyecto:** se ve en el título (`Ectodo · #web`) y en el chip junto a *Iniciar*. El panel muestra solo las tareas de ese proyecto (avisa cuántas de otros quedan ocultas) y **toda tarea nueva sin `#tag` va ahí**: no hace falta escribir el proyecto cada vez.
 - **Cambiar de proyecto:** `#` en NORMAL (o click en el chip) abre INSERT con `#` escrito; completá el nombre y `Enter`. `#` solo = *sin proyecto*. También desde Dashboard → Proyectos → **usar**, o activando (▶) una tarea de otro proyecto. Si no existe, se crea. No se puede cambiar con una sesión en curso.
 - **Una sesión, un proyecto:** la sesión arranca en el proyecto del widget y queda fijada a él: solo podés activar sus tareas y al completar una salta a la siguiente **del mismo proyecto**. Las tareas *sin proyecto* cuentan como un grupo más.
 - **Sin tareas abiertas no se puede iniciar sesión.**
@@ -251,8 +251,10 @@ Casi todo se cambia desde **Dashboard → Ajustes** y se guarda solo en `config.
 
 | Sistema | Carpeta |
 |---|---|
-| Windows | `%APPDATA%\taskghost` |
-| Linux | `~/.config/taskghost` |
+| Windows | `%APPDATA%\ectodo` |
+| Linux | `~/.config/ectodo` |
+
+La app antes se llamaba **taskghost**. Si venís de esa versión no tenés que hacer nada: al arrancar, Ectodo copia tus datos de `%APPDATA%\taskghost` (o `~/.config/taskghost`) y deja esa carpeta como respaldo.
 
 | Archivo | Contenido |
 |---|---|

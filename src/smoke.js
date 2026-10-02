@@ -1,6 +1,6 @@
 'use strict';
 
-// Modo de verificacion (TASKGHOST_SMOKE=<carpeta>): siembra datos, saca capturas y sale.
+// Modo de verificacion (ECTODO_SMOKE=<carpeta>): siembra datos, saca capturas y sale.
 const fs = require('fs');
 const path = require('path');
 const { app } = require('electron');
@@ -40,7 +40,7 @@ module.exports = async function smoke(ctx) {
   const H = 3600e3;
   const base = new Date(); base.setHours(0, 0, 0, 0);
   const a = engine.addTask('Revisar PR del login #work', Date.now());
-  const b = engine.addTask('Escribir tests de sesión #taskghost', Date.now());
+  const b = engine.addTask('Escribir tests de sesión #ectodo', Date.now());
   engine.addTask('Comprar café', Date.now());
   engine.addTask('Deploy a staging #work', Date.now());
   for (let d = 1; d <= 12; d++) {
@@ -152,7 +152,7 @@ module.exports = async function smoke(ctx) {
   await js(dash, `document.querySelector('[data-view="tareas"]').click()`);
   await wait(400);
   await js(dash, `(() => { const t = document.querySelector('#nt-title'); t.value = 'Probar formulario del dashboard'; t.dispatchEvent(new Event('input', { bubbles: true })); })()`);
-  await js(dash, `document.querySelector('[data-proj="taskghost"]').click()`);
+  await js(dash, `document.querySelector('[data-proj="ectodo"]').click()`);
   await wait(300);
   await js(dash, `document.querySelector('#nt-add').click()`);
   await wait(500);

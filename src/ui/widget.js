@@ -98,7 +98,7 @@
   function renderTitle() {
     const s = snap && snap.session;
     const p = snap && scope();
-    $('#ttl-l').textContent = 'taskghost' + (p ? ` · #${p}` : '');
+    $('#ttl-l').textContent = 'Ectodo' + (p ? ` · #${p}` : '');
     const r = $('#ttl-r');
     r.className = leaderOn || !s ? '' : s.status === 'running' ? 'run' : 'pause';
     r.textContent = leaderOn ? 'líder' : !s ? 'sin sesión' : s.status === 'running' ? 'en curso' : 'pausada';

@@ -1,4 +1,4 @@
-/* taskghost · tokens de diseño compartidos por el widget y el dashboard (estilo Apple).
+/* Ectodo · tokens de diseño compartidos por el widget y el dashboard (estilo Apple).
    Jerarquía por transparencia (label 1–4, fill 1–4), fondos base/elevado, retícula de 4 pt, radios concéntricos,
    escala tipográfica de macOS y movimiento con springs. --accent / --accent-rgb / --accent-text / --on-accent
    los escribe theme.js (BG de theme.js = --bg de cada tema). */

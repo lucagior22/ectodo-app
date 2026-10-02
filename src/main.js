@@ -9,9 +9,20 @@ const { Engine } = require('./session');
 const { Store } = require('./store');
 const { ANIM_MS, targetFor, frame, createDodge } = require('./dodge');
 
-const SMOKE = process.env.TASKGHOST_SMOKE;
-const PERF = process.env.TASKGHOST_PERF;
-if (process.env.TASKGHOST_DATA) app.setPath('userData', process.env.TASKGHOST_DATA);
+const { migrateData } = require('./migrate');
+
+const SMOKE = process.env.ECTODO_SMOKE;
+const PERF = process.env.ECTODO_PERF;
+if (process.env.ECTODO_DATA) app.setPath('userData', process.env.ECTODO_DATA);
+else {
+  // Carpeta fija en minuscula (igual en desarrollo y empaquetada); la de cuando se llamaba taskghost se migra.
+  const appData = app.getPath('appData');
+  app.setPath('userData', path.join(appData, 'ectodo'));
+  try {
+    const copied = migrateData(path.join(appData, 'taskghost'), app.getPath('userData'));
+    if (copied.length) console.log('[ectodo] datos migrados de taskghost:', copied.join(', '));
+  } catch (e) { console.error('[ectodo] no se pudieron migrar los datos de taskghost:', e); }
+}
 // En Linux always-on-top y posicionamiento absoluto solo son confiables bajo X11/XWayland.
 if (process.platform === 'linux') app.commandLine.appendSwitch('ozone-platform', 'x11');
 const CARD = 320; // ancho visual del widget
@@ -116,7 +127,7 @@ function createWidget() {
   widget = new BrowserWindow({
     x: pos.x - M, y: pos.y - M, width: WIDTH, height: 80 + 2 * M,
     frame: false, transparent: true, hasShadow: false, resizable: false,
-    skipTaskbar: true, alwaysOnTop: true, focusable: false, show: false, title: 'taskghost',
+    skipTaskbar: true, alwaysOnTop: true, focusable: false, show: false, title: 'Ectodo',
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, sandbox: true },
   });
   widget.setAlwaysOnTop(true, 'screen-saver');
@@ -259,7 +270,7 @@ function openDashboard() {
   setMode('ghost');
   // Barra de título unificada con la toolbar (como en Mac): la página dibuja la barra y Windows solo los controles.
   dashboard = new BrowserWindow({
-    width: 1120, height: 780, minWidth: 820, minHeight: 560, title: 'taskghost',
+    width: 1120, height: 780, minWidth: 820, minHeight: 560, title: 'Ectodo',
     backgroundColor: MICA ? '#00000000' : config.theme === 'light' ? '#ffffff' : '#1c1c1e', autoHideMenuBar: true, icon: ICON,
     ...(WIN ? { titleBarStyle: 'hidden', titleBarOverlay: overlayFor(config.theme) } : {}),
     ...(MICA ? { backgroundMaterial: 'mica' } : {}),
@@ -392,7 +403,7 @@ function startLeader() {
   for (const [name, fn] of Object.entries(LEADER_ACTIONS)) {
     const accel = name.length === 1 ? name.toUpperCase() : name; // 'h' -> 'H'; 'Up', 'Control+Z', 'Escape' tal cual
     const run = () => {
-      try { fn(); } catch (e) { console.error('[taskghost] lider:', e); }
+      try { fn(); } catch (e) { console.error('[ectodo] lider:', e); }
       if (leaderOn) { clearTimeout(leaderTimer); leaderTimer = setTimeout(endLeader, LEADER_MS); } // cada tecla renueva la ventana
     };
     try { if (globalShortcut.register(accel, run)) leaderKeys.push(accel); } catch { /* tecla no disponible */ }
@@ -408,7 +419,7 @@ function registerShortcuts() {
     if (!accel) return;
     let ok = false;
     try { ok = globalShortcut.register(accel, fn); } catch { /* acelerador invalido */ }
-    if (!ok) { failed.push(accel); console.warn(`[taskghost] no se pudo registrar el atajo ${accel}`); }
+    if (!ok) { failed.push(accel); console.warn(`[ectodo] no se pudo registrar el atajo ${accel}`); }
   };
   // Un atajo tomado por otra app falla en silencio: se avisa en el widget para que se cambie en config.json.
   setTimeout(() => {
@@ -451,7 +462,7 @@ function trayImage() {
 function createTray() {
   tray = new Tray(trayImage());
   nativeTheme.on('updated', () => { if (tray && !tray.isDestroyed()) tray.setImage(trayImage()); });
-  tray.setToolTip('taskghost');
+  tray.setToolTip('Ectodo');
   tray.on('click', () => setMode('active'));
   rebuildTray();
 }

@@ -1,15 +1,15 @@
 'use strict';
 
-// Banco de animaciones (TASKGHOST_PERF=<carpeta>): repite las transiciones del widget y mide cada frame.
+// Banco de animaciones (ECTODO_PERF=<carpeta>): repite las transiciones del widget y mide cada frame.
 // Sirve para comparar antes/despues de tocar animaciones: node + electron, sin dependencias.
-//   TASKGHOST_PERF_REPS=n     repeticiones (6)
-//   TASKGHOST_PERF_TRACE=1    ademas graba trace.json (abrir en chrome://tracing o ui.perfetto.dev)
+//   ECTODO_PERF_REPS=n     repeticiones (6)
+//   ECTODO_PERF_TRACE=1    ademas graba trace.json (abrir en chrome://tracing o ui.perfetto.dev)
 const fs = require('fs');
 const path = require('path');
 const { app, contentTracing } = require('electron');
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const REPS = Number(process.env.TASKGHOST_PERF_REPS) || 6;
+const REPS = Number(process.env.ECTODO_PERF_REPS) || 6;
 
 // Se inyecta en el widget. Registra el momento de cada frame y cuando corre la transicion del morph
 // (transitionstart/transitionend del clip-path de #app), para separar la latencia previa de la animacion.
@@ -67,7 +67,7 @@ module.exports = async function perf(ctx) {
     'panel -> circulo': () => timedMode('ghost'),
   };
 
-  const trace = process.env.TASKGHOST_PERF_TRACE;
+  const trace = process.env.ECTODO_PERF_TRACE;
   if (trace) await contentTracing.startRecording({ included_categories: ['devtools.timeline', 'disabled-by-default-devtools.timeline', 'blink', 'cc', 'gpu', 'viz'] });
 
   const results = {};

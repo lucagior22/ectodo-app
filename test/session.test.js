@@ -21,7 +21,7 @@ function make(opts) {
 }
 
 test('parseTitle extrae #proyecto y limpia el titulo', () => {
-  assert.deepEqual(parseTitle('arreglar login #TaskGhost'), { title: 'arreglar login', project: 'taskghost' });
+  assert.deepEqual(parseTitle('arreglar login #Ectodo'), { title: 'arreglar login', project: 'ectodo' });
   assert.deepEqual(parseTitle('#web hacer deploy'), { title: 'hacer deploy', project: 'web' });
   assert.deepEqual(parseTitle('  sin tag  '), { title: 'sin tag', project: null });
   assert.deepEqual(parseTitle('issue#12 no es tag'), { title: 'issue#12 no es tag', project: null });
