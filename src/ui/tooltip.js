@@ -12,6 +12,8 @@
   let target = null;
   let showTimer = null;
   let hiddenAt = 0;
+  let watch = null; // mientras hay uno visible: cierra si su elemento se redibujó y refresca valores en vivo
+  let shown = ''; // último contenido escrito (innerHTML no sirve para comparar: el navegador reserializa)
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   // "Ctrl+Z", "b b", "F1–F6": cada parte separada por espacio es una keycap
@@ -53,10 +55,18 @@
     tip.classList.toggle('above', !below);
   }
 
+  const content = (el) => `<span>${esc(el.dataset.tip)}</span>${el.dataset.key ? `<span class="k">${keys(el.dataset.key)}</span>` : ''}`;
+
   function show(el) {
     if (!el.isConnected || !el.dataset.tip) return;
     ensureTip();
-    tip.innerHTML = `<span>${esc(el.dataset.tip)}</span>${el.dataset.key ? `<span class="k">${keys(el.dataset.key)}</span>` : ''}`;
+    tip.innerHTML = shown = content(el);
+    clearInterval(watch);
+    watch = setInterval(() => {
+      if (!target || !target.isConnected || !target.dataset.tip) { hide(); return; }
+      const html = content(target);
+      if (html !== shown) { tip.innerHTML = shown = html; place(target); }
+    }, 250);
     tip.classList.remove('on');
     tip.style.display = 'flex';
     place(el);
@@ -65,6 +75,7 @@
 
   function hide() {
     clearTimeout(showTimer);
+    clearInterval(watch);
     if (tip && tip.classList.contains('on')) hiddenAt = Date.now();
     target = null;
     if (tip) { tip.classList.remove('on'); tip.style.display = 'none'; }

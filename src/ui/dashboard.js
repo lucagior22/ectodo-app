@@ -57,6 +57,10 @@
   const setHtml = (el, h) => { if (el._h !== h) { el.innerHTML = h; el._h = h; } };
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const head = (title, sub) => `<header class="vh"><h1>${title}</h1><p>${sub}</p></header>`;
+  // tooltip propio (tooltip.js): atributos listos para interpolar en el HTML
+  const tip = (text, key) => ` data-tip="${esc(text)}"${key ? ` data-key="${esc(key)}"` : ''}`;
+  const nb = (s) => s.replace(/ /g, ' '); // que una duración no se parta en dos renglones
+  const setTip = (el, t) => { if (el && el.dataset.tip !== t) el.dataset.tip = t; };
   const note = (html, kind, icon) => `<div class="note ${kind || ''}">${ic(icon || 'warn')}<div>${html}</div></div>`;
 
   // Intervalos cerrados + el que esta corriendo ahora (para ver datos en vivo).
@@ -76,7 +80,7 @@
     if (snap.open && snap.open.start < t0) ivs.push({ taskId: snap.open.taskId, start: snap.open.start, end: t0 });
     const byDay = S.msByDayProject(ivs, () => 'x');
     const days = Array.from({ length: 7 }, (_, i) => S.addDays(t0, i - 6));
-    hero = { t0, closed: S.sumMs(byDay[t0]), prior: days.slice(0, 6).map((d) => S.sumMs(byDay[d])), avg: S.avgDaily(byDay, t0, 7) };
+    hero = { t0, days, closed: S.sumMs(byDay[t0]), prior: days.slice(0, 6).map((d) => S.sumMs(byDay[d])), avg: S.avgDaily(byDay, t0, 7) };
 
     const sessToday = hist.sessions.filter((s) => s.endedAt >= t0);
     const sessMs = sessToday.reduce((a, s) => a + s.duration, 0);
@@ -88,17 +92,17 @@
 
     return `${head('Hoy', `${cap(DAYS[d.getDay()])} ${d.getDate()} de ${MONTHS[d.getMonth()]}`)}
     <div class="hero">
-      <div class="tile"><div class="ringwrap">
+      <div class="tile"><div class="ringwrap" id="ringwrap">
         <svg class="ring" viewBox="0 0 76 76" aria-hidden="true"><circle class="bgc" cx="38" cy="38" r="32"/><circle class="fg" id="ring-fg" cx="38" cy="38" r="32"/><circle class="fg2" id="ring-fg2" cx="38" cy="38" r="32"/></svg>
         <div><div class="k">En tareas hoy</div><div class="big" data-live="today"></div><div class="k" id="ring-pct"></div></div>
       </div></div>
       <div class="tile bars-tile"><div class="k">Últimos 7 días</div>
-        <div class="bars" id="bars">${days.map((_, i) => `<i class="${i === 6 ? 't' : ''}" style="--n:${i}"></i>`).join('')}<span class="avg" id="bars-avg"><span></span></span></div>
-        <div class="days">${days.map((x, i) => `<span class="${i === 6 ? 't' : ''}">${'DLMXJVS'[new Date(x).getDay()]}</span>`).join('')}</div>
+        <div class="bars" id="bars">${days.map((_, i) => `<i class="${i === 6 ? 't' : ''}" style="--n:${i}" data-day="${i}"></i>`).join('')}<span class="avg" id="bars-avg"><span data-tip="Promedio diario de los 7 días anteriores, sin hoy"></span></span></div>
+        <div class="days">${days.map((x, i) => `<span class="${i === 6 ? 't' : ''}" data-day="${i}">${'DLMXJVS'[new Date(x).getDay()]}</span>`).join('')}</div>
       </div>
     </div>
     <div class="glist">
-      ${row('Tarea activa', active ? `<span class="ttl">${esc(active.title)}</span> · <span data-live="task:${active.id}"></span>` : 'Ninguna')}
+      ${row('Tarea activa', active ? `<span class="ttl"${tip(active.title)}>${esc(active.title)}</span> · <span data-live="task:${active.id}"></span>` : 'Ninguna')}
       ${row('Sesiones de hoy', sessN ? `<b>${sessN}</b>${sessMs ? ` · ${S.human(sessMs)} cerradas` : ''}${snap.session ? ` · <span data-live="session"></span> en curso` : ''}` : 'Ninguna')}
       ${row('Tareas cerradas hoy', `<b>${doneToday}</b>`)}
       ${snap.session && snap.session.project !== undefined ? row('Proyecto de la sesión', snap.session.project ? chip(snap.session.project) : 'Sin proyecto') : ''}
@@ -124,9 +128,16 @@
     fg2.style.opacity = f2 > 0.003 ? 1 : 0;
     setHtml($('[data-live="today"]'), humanHtml(today));
     setText($('#ring-pct'), hero.avg > 0 ? `${Math.round(frac * 100)} % de tu promedio` : 'Sin historial para comparar');
+    setTip($('#ringwrap'), hero.avg > 0 ? `Hoy ${nb(S.human(today))} vs. promedio de 7 días: ${nb(S.human(hero.avg))}` : 'Sin historial para comparar con tu promedio');
     const vals = [...hero.prior, today];
     const max = Math.max(1, hero.avg, ...vals);
     document.querySelectorAll('#bars i').forEach((b, i) => { b.style.height = `${(vals[i] / max) * 100}%`; });
+    // barra y letra del mismo día comparten tooltip (la letra sirve de blanco cuando la barra es mínima)
+    document.querySelectorAll('#view [data-day]').forEach((el) => {
+      const i = Number(el.dataset.day);
+      const dd = new Date(hero.days[i]);
+      setTip(el, `${i === 6 ? 'Hoy' : `${cap(DAYS[dd.getDay()])} ${dd.getDate()}`} · ${vals[i] > 0 ? S.human(vals[i]) : 'sin tiempo'}`);
+    });
     const avg = $('#bars-avg');
     avg.style.display = hero.avg > 0 ? '' : 'none';
     avg.style.bottom = `${(hero.avg / max) * 100}%`;
@@ -152,7 +163,7 @@
     const hi = Math.max(Math.ceil(now / H) * H, lo + 4 * H);
     const pct = (ts) => ((ts - lo) / (hi - lo)) * 100;
     const hm = (ts) => { const d = new Date(ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
-    const seg = (cls, a, b, c, title) => `<div class="${cls}" style="left:${pct(a)}%;width:${Math.max(0.4, pct(b) - pct(a))}%${c ? `;--c:${c}` : ''}" title="${title}"></div>`;
+    const seg = (cls, a, b, c, title) => `<div class="${cls}" style="left:${pct(a)}%;width:${Math.max(0.4, pct(b) - pct(a))}%${c ? `;--c:${c}` : ''}" ${tip(title)}></div>`;
 
     const T = taskById();
     const lanes = new Map(); // taskId -> intervalos, en orden de primer inicio
@@ -163,16 +174,17 @@
 
     // filas explicitas: 1 = "ahora", 2 = sesiones, 3.. = tareas, ultima = horas (las capas de grilla/ahora ocupan la columna 2 y el auto-placement las esquivaria)
     const sessMs = sess.reduce((a, s) => a + s.end - s.start, 0);
-    let rows = `<div class="tl-name sess dim" style="grid-row:2">Sesiones · ${sess.length}</div><div class="tl-lane sess" style="grid-row:2">${sess.map((s) => seg('tl-sess', s.start, s.end, '', `Sesión · ${hm(s.start)}–${hm(s.end)} · ${S.human(s.end - s.start)}`)).join('')}</div>
-      <div class="tl-total sess dim" style="grid-row:2">${S.human(sessMs)}</div>`;
+    let rows = `<div class="tl-name sess dim" style="grid-row:2"${tip('Sesiones de hoy')}>Sesiones · ${sess.length}</div><div class="tl-lane sess" style="grid-row:2">${sess.map((s) => seg('tl-sess', s.start, s.end, '', `Sesión · ${hm(s.start)}–${hm(s.end)} · ${S.human(s.end - s.start)}`)).join('')}</div>
+      <div class="tl-total sess dim" style="grid-row:2"${tip('Tiempo total en sesiones')}>${S.human(sessMs)}</div>`;
     let r = 2;
     for (const [id, list] of lanes) {
       r++;
-      const name = esc((T[id] || { title: '(eliminada)' }).title);
+      const raw = (T[id] || { title: '(eliminada)' }).title;
+      const name = esc(raw);
       const c = colorOf(projectOf(id));
       const on = id === snap.activeTaskId ? ' on' : '';
-      rows += `<div class="tl-name${on}" style="grid-row:${r}" title="${name}">${name}</div><div class="tl-lane${on}" style="grid-row:${r}">${list.map((i) => seg('tl-seg', i.start, i.end, c, `${name} · ${hm(i.start)}–${hm(i.end)} · ${S.human(i.end - i.start)}`)).join('')}</div>
-        <div class="tl-total${on}" style="grid-row:${r}">${S.human(list.reduce((a, i) => a + i.end - i.start, 0))}</div>`;
+      rows += `<div class="tl-name${on}" style="grid-row:${r}"${tip(raw)}>${name}</div><div class="tl-lane${on}" style="grid-row:${r}">${list.map((i) => seg('tl-seg', i.start, i.end, c, `${raw} · ${hm(i.start)}–${hm(i.end)} · ${S.human(i.end - i.start)}`)).join('')}</div>
+        <div class="tl-total${on}" style="grid-row:${r}"${tip('Tiempo de hoy en esta tarea')}>${S.human(list.reduce((a, i) => a + i.end - i.start, 0))}</div>`;
     }
 
     let grid = '', axis = '';
@@ -199,47 +211,47 @@
     const projLabel = filters.project === '' ? 'Todos los proyectos' : filters.project === NONE ? NONE : `#${filters.project}`;
     const stLabel = menuOpts('status').find(([v]) => v === filters.status)[1];
     const effective = form.newProject ? slug(form.newProject) : (form.project !== undefined ? form.project : widgetProject());
-    const chipBtn = (name, label, color) => `<button class="chip-btn ${!form.newProject && effective === name ? 'on' : ''}" data-proj="${esc(name)}" style="--c:${color}">${label}</button>`;
+    const chipBtn = (name, label, color) => `<button class="chip-btn ${!form.newProject && effective === name ? 'on' : ''}" data-proj="${esc(name)}" style="--c:${color}"${tip(name ? `Agregar a #${name}` : 'Agregar sin proyecto')}>${label}</button>`;
     const banner = snap.session && snap.session.project !== undefined
       ? note(`Sesión en curso limitada a <b>${snap.session.project ? '#' + esc(snap.session.project) : 'tareas sin proyecto'}</b>: las tareas de otros proyectos se ven acá, pero no se pueden activar hasta terminar la sesión.`) : '';
     return `${head('Tareas', `${nOpen} ${nOpen === 1 ? 'abierta' : 'abiertas'} · ${scope}`)}${banner}
       <div class="create">
         <div class="tile">
           <h3>Nueva tarea</h3>
-          <input type="text" id="nt-title" class="big" placeholder="¿Qué hay que hacer?" autocomplete="off" value="${esc(form.title)}">
+          <input type="text" id="nt-title" class="big"${tip('Título de la nueva tarea', 'n')} placeholder="¿Qué hay que hacer?" autocomplete="off" value="${esc(form.title)}">
           <div class="lbl">Proyecto</div>
           <div class="chips">${chipBtn('', 'sin proyecto', GREY)}${snap.projects.map((p) => chipBtn(p.name, '#' + esc(p.name), p.color)).join('')}</div>
-          <input type="text" id="nt-new" placeholder="…o escribí un proyecto nuevo" autocomplete="off" value="${esc(form.newProject)}">
+          <input type="text" id="nt-new"${tip('Escribí un nombre para crear un proyecto')} placeholder="…o escribí un proyecto nuevo" autocomplete="off" value="${esc(form.newProject)}">
           <div class="actions">
-            <button class="btn primary" id="nt-add">Agregar tarea</button>
+            <button class="btn primary" id="nt-add"${tip('Agregar la tarea', 'Enter')}>Agregar tarea</button>
             <span class="hint">Enter también agrega · un #tag en el título tiene prioridad</span>
           </div>
         </div>
         <div class="tile">
           <h3>Agregar varias</h3>
-          <textarea id="nt-bulk" placeholder="Una tarea por línea.&#10;Cada una va al proyecto elegido,&#10;o escribí #proyecto en la línea.">${esc(form.bulk)}</textarea>
+          <textarea id="nt-bulk"${tip('Una tarea por línea')} placeholder="Una tarea por línea.&#10;Cada una va al proyecto elegido,&#10;o escribí #proyecto en la línea.">${esc(form.bulk)}</textarea>
           <div class="actions">
-            <button class="btn" id="nt-bulk-add">Agregar todas</button>
+            <button class="btn" id="nt-bulk-add"${tip('Agregar todas las tareas', 'Ctrl+Enter')}>Agregar todas</button>
             <span class="hint">Proyecto: ${effective ? '#' + esc(effective) : 'sin proyecto'}</span>
           </div>
         </div>
       </div>
       <div class="filters">
-        <button class="menu-btn" id="f-project" data-menu="project" aria-haspopup="listbox">${esc(projLabel)}${ic('chevrons')}</button>
-        <button class="menu-btn" id="f-status" data-menu="status" aria-haspopup="listbox">${stLabel}${ic('chevrons')}</button>
+        <button class="menu-btn" id="f-project" data-menu="project"${tip('Filtrar por proyecto', 'p')} aria-haspopup="listbox">${esc(projLabel)}${ic('chevrons')}</button>
+        <button class="menu-btn" id="f-status" data-menu="status"${tip('Filtrar por estado', 'e')} aria-haspopup="listbox">${stLabel}${ic('chevrons')}</button>
       </div>
       <datalist id="projects">${snap.projects.map((p) => `<option value="${esc(p.name)}">`).join('')}</datalist>
       ${T.length ? `<div class="glist tblw"><table><thead><tr><th style="width:34px"></th><th>Tarea</th><th style="width:150px">Proyecto</th><th class="num" style="width:96px">Tiempo</th><th style="width:84px">Creada</th><th style="width:112px"></th></tr></thead><tbody>
       ${T.map((t) => `<tr data-id="${t.id}" class="${t.done ? 'done' : ''} ${t.id === snap.activeTaskId ? 'active' : ''} ${inScope(t) ? '' : 'out'}">
-        <td><button class="chk" role="checkbox" aria-checked="${t.done ? 'true' : 'false'}" aria-label="Hecha" data-act="done">${ic('check')}</button></td>
-        <td class="t"><input class="cell" data-f="title" value="${esc(t.title)}"></td>
-        <td><input class="cell" data-f="project" list="projects" value="${esc(t.project || '')}" placeholder="—"></td>
-        <td class="num" data-live="taskh:${t.id}">${S.human(snap.taskMs[t.id] || 0)}</td>
-        <td class="muted">${new Date(t.createdAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}${t.archived ? ' · arch.' : ''}</td>
+        <td><button class="chk" role="checkbox" aria-checked="${t.done ? 'true' : 'false'}" aria-label="Hecha" data-act="done"${tip(t.done ? 'Reabrir tarea' : 'Marcar como hecha', 'h')}>${ic('check')}</button></td>
+        <td class="t"><input class="cell" data-f="title"${tip('Renombrar tarea', 'r')} value="${esc(t.title)}"></td>
+        <td><input class="cell" data-f="project"${tip('Cambiar el proyecto de la tarea')} list="projects" value="${esc(t.project || '')}" placeholder="—"></td>
+        <td class="num" data-live="taskh:${t.id}"${tip('Tiempo registrado en la tarea')}>${S.human(snap.taskMs[t.id] || 0)}</td>
+        <td class="muted"${tip(`Creada el ${new Date(t.createdAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}`)}>${new Date(t.createdAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}${t.archived ? ' · arch.' : ''}</td>
         <td><div class="row-actions">
-          ${t.done ? '' : `<button class="ib" data-act="active" ${inScope(t) ? 'title="Hacer activa"' : 'disabled title="Es de otro proyecto que la sesión en curso"'}>${ic('play', 'f')}</button>`}
-          <button class="ib" data-act="up" title="Subir">${ic('up')}</button><button class="ib" data-act="down" title="Bajar">${ic('down')}</button>
-          <button class="ib" data-act="del" title="Eliminar">${ic('x')}</button>
+          ${t.done ? '' : `<button class="ib" data-act="active" aria-label="Hacer activa" ${inScope(t) ? tip('Hacer activa', 'a') : `disabled${tip('Otro proyecto: terminá la sesión para activarla')}`}>${ic('play', 'f')}</button>`}
+          <button class="ib" data-act="up" aria-label="Subir"${tip('Subir', 'Alt+↑')}>${ic('up')}</button><button class="ib" data-act="down" aria-label="Bajar"${tip('Bajar', 'Alt+↓')}>${ic('down')}</button>
+          <button class="ib" data-act="del" aria-label="Eliminar"${tip('Eliminar tarea', 'b b')}>${ic('x')}</button>
         </div></td></tr>`).join('')}</tbody></table></div>` : '<div class="tile empty">No hay tareas con este filtro.</div>'}`;
   }
 
@@ -253,16 +265,16 @@
     const max = Math.max(1, ...names.map((n) => agg[n].ms));
     if (!names.length) return `${head('Proyectos', 'Sin proyectos todavía')}<div class="tile empty">Creá tareas con #proyecto para verlos acá.</div>`;
     const cur = widgetProject() || NONE;
-    const useBtn = (n) => (n === cur ? '<span class="muted">en el widget</span>'
-      : `<button class="btn" data-use="${esc(n === NONE ? '' : n)}" ${snap.session ? 'disabled title="Terminá la sesión para cambiar de proyecto"' : 'title="Trabajar en este proyecto desde el widget"'}>Usar</button>`);
+    const useBtn = (n) => (n === cur ? `<span class="muted"${tip('Es el proyecto actual del widget')}>en el widget</span>`
+      : `<button class="btn" data-use="${esc(n === NONE ? '' : n)}" ${snap.session ? `disabled${tip('Terminá la sesión para cambiar de proyecto')}` : tip('Trabajar en este proyecto desde el widget')}>Usar</button>`);
     const total = names.reduce((a, n) => a + agg[n].ms, 0);
     return `${head('Proyectos', `${names.length} ${names.length === 1 ? 'proyecto' : 'proyectos'} · ${S.human(total)} en total`)}
       <div class="glist tblw"><table><thead><tr><th style="width:36px"></th><th>Proyecto</th><th class="num">Abiertas</th><th class="num">Hechas</th><th class="num">Tiempo total</th><th style="width:28%">Reparto</th><th style="width:100px"></th></tr></thead><tbody>
       ${names.map((n) => `<tr class="sel">
-        <td>${n === NONE ? '' : `<input type="color" data-color="${esc(n)}" value="${colorOf(n)}" title="Color del proyecto">`}</td>
+        <td>${n === NONE ? '' : `<input type="color" data-color="${esc(n)}" value="${colorOf(n)}"${tip(`Color de #${n}`)} aria-label="Color del proyecto">`}</td>
         <td>${n === NONE ? `<span class="muted">${NONE}</span>` : `#${esc(n)}`}</td>
         <td class="num">${agg[n].open}</td><td class="num">${agg[n].done}</td><td class="num">${S.human(agg[n].ms)}</td>
-        <td><div class="bar-track"><div class="bar-fill" style="--c:${colorOf(n)};width:${(agg[n].ms / max) * 100}%"></div></div></td>
+        <td><div class="bar-track"${tip(`${total ? Math.round((agg[n].ms / total) * 100) : 0} % del tiempo total · ${S.human(agg[n].ms)}`)}><div class="bar-fill" style="--c:${colorOf(n)};width:${(agg[n].ms / max) * 100}%"></div></div></td>
         <td style="text-align:right">${useBtn(n)}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
@@ -278,9 +290,9 @@
     return `${head('Sesiones', sub)}${rule}<div class="glist tblw"><table><thead><tr><th>Fecha</th><th>Horario</th><th>Proyecto</th><th class="num">Duración</th><th class="num">Pausas</th><th style="padding-left:24px">Tareas</th></tr></thead><tbody>
       ${list.map((s) => `<tr class="sel">
         <td class="nw">${new Date(s.startedAt).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })}</td>
-        <td class="muted nw num-t">${time(s.startedAt)} – ${time(s.endedAt)}</td>
+        <td class="muted nw num-t"${tip('Inicio y fin de la sesión')}>${time(s.startedAt)} – ${time(s.endedAt)}</td>
         <td>${s.project ? chip(s.project) : '<span class="muted">—</span>'}</td>
-        <td class="num">${S.human(s.duration)}</td><td class="num">${s.pauses}</td>
+        <td class="num"${tip('Tiempo trabajado, sin pausas')}>${S.human(s.duration)}</td><td class="num"${tip(s.pauses === 1 ? 'Se pausó una vez' : `Se pausó ${s.pauses} veces`)}>${s.pauses}</td>
         <td class="tm" style="padding-left:24px"><div class="tasks-mini">${Object.entries(s.tasks || {}).sort((a, b) => b[1] - a[1]).map(([id, ms]) => `<span><b>${esc((T[id] || { title: '(eliminada)' }).title)}</b> ${S.human(ms)}</span>`).join('') || '<span>—</span>'}</div></td></tr>`).join('')}</tbody></table></div>`;
   }
 
@@ -306,16 +318,16 @@
     return { byDay, days, projects, share, names, weeks, perWeek };
   }
 
-  const legendHtml = (items) => `<div class="legend">${items.map(([label, c, extra]) => `<span style="--c:${c}">${esc(label)}${extra ? ` <em style="font-style:normal;color:var(--label-3)">${extra}</em>` : ''}</span>`).join('')}</div>`;
+  const legendHtml = (items) => `<div class="legend">${items.map(([label, c, extra, tt]) => `<span style="--c:${c}"${tt ? tip(tt) : ''}>${esc(label)}${extra ? ` <em style="font-style:normal;color:var(--label-3)">${extra}</em>` : ''}</span>`).join('')}</div>`;
 
   function viewGraficos() {
     if (!intervalsNow().length) return `${head('Gráficos', 'Sin datos todavía')}<div class="tile empty">Todavía no hay datos: iniciá una sesión y trabajá en una tarea.</div>`;
     gm = chartModel();
     const total14 = gm.days.reduce((a, d) => a + S.sumMs(gm.byDay[d]), 0);
     return `${head('Gráficos', `${S.human(total14)} en los últimos 14 días`)}<div class="charts">
-      <div class="tile"><h3>Horas por día · 14 días</h3><div class="chart-box"><canvas id="c-days"></canvas></div>${legendHtml(gm.projects.map((p) => [pname(p), colorOf(p)]))}</div>
-      <div class="tile"><h3>Por proyecto · 30 días</h3><div class="chart-box dn"><canvas id="c-proj"></canvas></div>${legendHtml(gm.names.map((p) => [pname(p), colorOf(p), S.human(gm.share[p])]))}</div>
-      <div class="tile wide"><h3>Tendencia semanal · horas por semana</h3><div class="chart-box"><canvas id="c-weeks"></canvas></div></div>
+      <div class="tile"><h3>Horas por día · 14 días</h3><div class="chart-box"><canvas id="c-days"></canvas></div>${legendHtml(gm.projects.map((p) => [pname(p), colorOf(p), '', `${pname(p)}: ${S.human(gm.days.reduce((a, d) => a + ((gm.byDay[d] || {})[p] || 0), 0))} en 14 días`]))}</div>
+      <div class="tile"><h3>Por proyecto · 30 días</h3><div class="chart-box dn"><canvas id="c-proj"></canvas></div>${legendHtml(gm.names.map((p) => [pname(p), colorOf(p), S.human(gm.share[p]), `${Math.round((gm.share[p] / (gm.names.reduce((a, q) => a + gm.share[q], 0) || 1)) * 100)} % de los últimos 30 días`]))}</div>
+      <div class="tile wide"><h3${tip('Semanas de lunes a domingo')}>Tendencia semanal · horas por semana</h3><div class="chart-box"><canvas id="c-weeks"></canvas></div></div>
     </div>`;
   }
 
@@ -442,16 +454,16 @@
   // ---------- ajustes ----------
 
   // control segmentado con perilla que se desliza: se pinta desde la posición anterior y se mueve en el siguiente cuadro
-  function seg(key, options, current, disabledFn) {
+  function seg(key, options, current, disabledFn) { // opciones: [valor, etiqueta, tooltip, tecla]
     const idx = Math.max(0, options.findIndex(([v]) => String(v) === String(current)));
     const from = key in ctlPrev ? ctlPrev[key] : idx;
-    return `<div class="seg" style="--n:${options.length}"><i class="th" style="--i:${from}" data-ctl="${key}" data-to="${idx}"></i>${options.map(([v, label]) =>
-      `<button data-cfg="${key}" data-val="${v}" class="${String(current) === String(v) ? 'on' : ''}" ${disabledFn && disabledFn(v) ? 'disabled' : ''}>${label}</button>`).join('')}</div>`;
+    return `<div class="seg" style="--n:${options.length}"><i class="th" style="--i:${from}" data-ctl="${key}" data-to="${idx}"></i>${options.map(([v, label, tt, k]) =>
+      `<button data-cfg="${key}" data-val="${v}" class="${String(current) === String(v) ? 'on' : ''}" ${disabledFn && disabledFn(v) ? 'disabled' : ''}${tt ? tip(disabledFn && disabledFn(v) ? 'No disponible en este sistema' : tt, String(current) === String(v) ? '' : k) : ''}>${label}</button>`).join('')}</div>`;
   }
 
-  function toggle(key, on) {
+  function toggle(key, on, tt) {
     const from = key in ctlPrev ? ctlPrev[key] : String(on);
-    return `<button class="switch" role="switch" aria-checked="${from}" data-ctl="${key}" data-to="${on}" data-cfg="${key}" data-val="${!on}"></button>`;
+    return `<button class="switch" role="switch" aria-checked="${from}" data-ctl="${key}" data-to="${on}" data-cfg="${key}" data-val="${!on}"${tt ? tip(on ? `${tt}: activado, tocá para desactivar` : `${tt}: desactivado, tocá para activar`) : ''}></button>`;
   }
 
   // las perillas y los switches se mueven desde donde estaban hasta donde deben estar
@@ -476,22 +488,22 @@
     return `${head('Ajustes', 'Apariencia, widget y sesiones')}
       <div class="gh">Apariencia</div>
       ${group([
-        ['Tema', 'Se aplica al widget y al dashboard.', seg('theme', [['dark', 'Oscuro'], ['light', 'Claro']], cfg.theme)],
+        ['Tema', 'Se aplica al widget y al dashboard.', seg('theme', [['dark', 'Oscuro', 'Usar el tema oscuro', 'c'], ['light', 'Claro', 'Usar el tema claro', 'c']], cfg.theme)],
         ['Color de acento', 'Resalta la selección, el reloj y los estados. Se ajusta solo para mantener un contraste legible en cada tema.',
-          `<div class="swatches">${sys.map(([name, l, d]) => `<button class="sw ${!custom && (l === accent || d === accent) ? 'on' : ''}" data-accent="${l}" style="--c:${theme === 'light' ? l : d}" title="${name}" aria-label="${name}"></button>`).join('')}<span class="sw multi ${custom ? 'custom on' : ''}" style="--c:${accent}" title="Otro color"><input type="color" id="cfg-accent" value="${accent}" aria-label="Otro color"></span></div>`],
+          `<div class="swatches">${sys.map(([name, l, d]) => `<button class="sw ${!custom && (l === accent || d === accent) ? 'on' : ''}" data-accent="${l}" style="--c:${theme === 'light' ? l : d}"${tip(cap(name))} aria-label="${name}"></button>`).join('')}<span class="sw multi ${custom ? 'custom on' : ''}" style="--c:${accent}"${tip('Otro color')}><input type="color" id="cfg-accent" value="${accent}"${tip('Otro color')} aria-label="Otro color"></span></div>`],
       ])}
       <div class="gh">Widget</div>
       ${group([
         ['Widget en reposo', `<strong>Píldora:</strong> solo el reloj de la tarea, que avanza de a 5 s.<br><strong>Círculo:</strong> solo el logo arriba a la derecha; al pasar el mouse aparece el panel con ambos relojes en vivo.${linux ? '<br>El círculo no está disponible en Linux: el mouse no se detecta a través de una ventana transparente.' : ''}`,
-          seg('ghostStyle', [['pill', 'Píldora'], ['dot', 'Círculo']], cfg.ghostStyle, (v) => v === 'dot' && linux)],
+          seg('ghostStyle', [['pill', 'Píldora', 'Solo el reloj de la tarea'], ['dot', 'Círculo', 'Solo el logo, arriba a la derecha']], cfg.ghostStyle, (v) => v === 'dot' && linux)],
         ['Opacidad del fondo en reposo', 'Qué tan visible es el fondo del widget cuando no lo usás. El texto siempre se ve opaco.',
-          `<input type="range" id="cfg-opacity" min="0.2" max="1" step="0.05" value="${op}" style="--p:${((op - 0.2) / 0.8) * 100}%">`],
+          `<input type="range" id="cfg-opacity"${tip(`Opacidad en reposo: ${Math.round(op * 100)} %`)} min="0.2" max="1" step="0.05" value="${op}" style="--p:${((op - 0.2) / 0.8) * 100}%">`],
       ])}
       <div class="gh">Sesiones</div>
       ${group([
         ['Duración mínima de una sesión', 'Las sesiones más cortas no se guardan (minutos; 0 para guardarlas todas).',
-          `<input type="number" id="cfg-min" min="0" max="240" step="1" value="${cfg.minSessionMinutes}">`],
-        ['Exigir una tarea completada', 'Una sesión sin ninguna tarea completada no se guarda, sin importar cuánto dure.', toggle('requireCompletedTask', cfg.requireCompletedTask !== false)],
+          `<input type="number" id="cfg-min"${tip('Minutos mínimos para guardar; 0 guarda todas')} min="0" max="240" step="1" value="${cfg.minSessionMinutes}">`],
+        ['Exigir una tarea completada', 'Una sesión sin ninguna tarea completada no se guarda, sin importar cuánto dure.', toggle('requireCompletedTask', cfg.requireCompletedTask !== false, 'Exigir tarea completada')],
       ])}
       <h2>Atajos de teclado</h2>
       ${note('Los atajos globales se editan en <code>config.json</code> (clave <code>shortcuts</code>; hace falta reiniciar). Las teclas del panel y del dashboard son fijas. <kbd>?</kbd> abre esta hoja en cualquier momento.', 'info', 'keyboard')}
@@ -576,6 +588,7 @@
     const s = snap.session;
     $('#live').dataset.s = !s ? 'none' : s.status === 'running' ? 'run' : 'pause';
     setText($('#live-t'), !s ? 'Sin sesión' : s.status === 'running' ? 'En curso' : 'Pausada');
+    setTip($('#live'), !s ? 'No hay sesión en curso' : s.status === 'running' ? 'Sesión en curso: tiempo trabajado' : 'Sesión pausada: tiempo trabajado');
     setText($('#live-v'), s ? S.clock(s.ms + (snap.running ? now - snap.at : 0)) : '');
   }
 
@@ -671,8 +684,9 @@
     const n = $('#notice');
     n.style.setProperty('--icon-cut', 'var(--bg)');
     n.innerHTML = `${ic('warn')}<span>${esc(text)}</span>`;
+    n.dataset.tip = text; // el aviso se recorta con puntos suspensivos: el tooltip lo muestra entero
     clearTimeout(noticeTimer);
-    noticeTimer = setTimeout(() => { n.innerHTML = ''; }, ms);
+    noticeTimer = setTimeout(() => { n.innerHTML = ''; delete n.dataset.tip; }, ms);
   }
   api.onNotice((text) => showNotice(text));
 
@@ -770,7 +784,7 @@
     if (e.target.id === 'nt-title') form.title = e.target.value;
     else if (e.target.id === 'nt-new') form.newProject = e.target.value;
     else if (e.target.id === 'nt-bulk') form.bulk = e.target.value;
-    else if (e.target.id === 'cfg-opacity') e.target.style.setProperty('--p', `${((e.target.value - 0.2) / 0.8) * 100}%`);
+    else if (e.target.id === 'cfg-opacity') { e.target.style.setProperty('--p', `${((e.target.value - 0.2) / 0.8) * 100}%`); e.target.dataset.tip = `Opacidad en reposo: ${Math.round(e.target.value * 100)} %`; }
   });
 
   main.addEventListener('keydown', (e) => {
@@ -816,7 +830,7 @@
       document.documentElement.dataset.theme = next;
       window.Theme.apply(document.documentElement, next, c.accent);
       $('#theme-btn').innerHTML = ic(next === 'light' ? 'moon' : 'sun');
-      $('#theme-btn').title = next === 'light' ? 'Cambiar a tema oscuro (c)' : 'Cambiar a tema claro (c)';
+      $('#theme-btn').dataset.tip = next === 'light' ? 'Cambiar a tema oscuro' : 'Cambiar a tema claro';
       render(); // los graficos leen los colores del tema
       if (helpOpen) $('#dhelp').innerHTML = helpHtml();
     };
@@ -836,6 +850,7 @@
     document.body.classList.toggle('typing', typing);
     document.body.classList.toggle('help', helpOpen);
     $('#dmode').textContent = helpOpen ? 'AYUDA' : typing ? 'INSERT' : 'NORMAL';
+    $('#dmode').dataset.tip = helpOpen ? 'Hoja de ayuda abierta' : typing ? 'Modo insertar: escribiendo en un campo' : 'Modo normal: las teclas son atajos';
     const h = $('#dhint');
     if (helpOpen) { h.innerHTML = '<kbd>?</kbd> o <kbd>esc</kbd> cierra'; return; }
     if (typing) { h.innerHTML = `<kbd>esc</kbd> vuelve a normal ${sepDot} <kbd>enter</kbd> confirma`; return; }

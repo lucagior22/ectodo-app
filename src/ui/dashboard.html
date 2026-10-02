@@ -15,28 +15,28 @@
       <span class="brand">taskghost</span>
     </div>
     <nav id="nav">
-      <button data-view="hoy" title="Hoy (F1)"><span class="ico" style="--c:#0088ff" data-icon="today"></span><span class="nm">Hoy</span><em>F1</em></button>
-      <button data-view="tareas" title="Tareas (F2)"><span class="ico" style="--c:#ff8d28" data-icon="list"></span><span class="nm">Tareas</span><em>F2</em></button>
-      <button data-view="proyectos" title="Proyectos (F3)"><span class="ico" style="--c:#6155f5" data-icon="folder"></span><span class="nm">Proyectos</span><em>F3</em></button>
-      <button data-view="sesiones" title="Sesiones (F4)"><span class="ico" style="--c:#34c759" data-icon="clock"></span><span class="nm">Sesiones</span><em>F4</em></button>
-      <button data-view="graficos" title="Gráficos (F5)"><span class="ico" style="--c:#ff2d55" data-icon="chart"></span><span class="nm">Gráficos</span><em>F5</em></button>
+      <button data-view="hoy" data-tip="Hoy" data-key="F1"><span class="ico" style="--c:#0088ff" data-icon="today"></span><span class="nm">Hoy</span><em>F1</em></button>
+      <button data-view="tareas" data-tip="Tareas" data-key="F2"><span class="ico" style="--c:#ff8d28" data-icon="list"></span><span class="nm">Tareas</span><em>F2</em></button>
+      <button data-view="proyectos" data-tip="Proyectos" data-key="F3"><span class="ico" style="--c:#6155f5" data-icon="folder"></span><span class="nm">Proyectos</span><em>F3</em></button>
+      <button data-view="sesiones" data-tip="Sesiones" data-key="F4"><span class="ico" style="--c:#34c759" data-icon="clock"></span><span class="nm">Sesiones</span><em>F4</em></button>
+      <button data-view="graficos" data-tip="Gráficos" data-key="F5"><span class="ico" style="--c:#ff2d55" data-icon="chart"></span><span class="nm">Gráficos</span><em>F5</em></button>
       <div class="sec"><span>General</span></div>
-      <button data-view="ajustes" title="Ajustes (F6)"><span class="ico" style="--c:#8e8e93" data-icon="gear"></span><span class="nm">Ajustes</span><em>F6</em></button>
+      <button data-view="ajustes" data-tip="Ajustes" data-key="F6"><span class="ico" style="--c:#8e8e93" data-icon="gear"></span><span class="nm">Ajustes</span><em>F6</em></button>
     </nav>
   </aside>
   <div id="col">
     <header id="toolbar">
       <span class="grow"></span>
       <span id="notice" role="status"></span>
-      <span id="live" data-s="none"><i></i><span id="live-t">Sin sesión</span> <b id="live-v"></b></span>
-      <button id="theme-btn" class="tb-btn" title="Cambiar tema claro/oscuro (c)" aria-label="Cambiar tema"></button>
+      <span id="live" data-s="none" data-tip="No hay sesión en curso"><i></i><span id="live-t">Sin sesión</span> <b id="live-v"></b></span>
+      <button id="theme-btn" class="tb-btn" data-tip="Cambiar tema" data-key="c" aria-label="Cambiar tema"></button>
     </header>
     <main id="view"></main>
     <footer id="statusbar">
-      <span id="dmode">NORMAL</span>
+      <span id="dmode" data-tip="Modo normal: las teclas son atajos">NORMAL</span>
       <span id="dhint"></span>
       <span class="grow"></span>
-      <span><kbd>?</kbd> ayuda</span>
+      <span data-tip="Ver los atajos" data-key="?"><kbd>?</kbd> ayuda</span>
     </footer>
   </div>
   <div id="hud" role="status"></div>

@@ -124,7 +124,7 @@ h3 { font: var(--t-title3); letter-spacing: var(--tr-title3); }
 .bars i { flex: 1; height: 3px; min-height: 3px; background: var(--fill-1); border-radius: 5px 5px 2px 2px; transform-origin: bottom; }
 .bars i.t { background: var(--accent); }
 .bars .avg { position: absolute; left: 0; right: 0; border-top: 1.5px dashed var(--label-3); pointer-events: none; }
-.bars .avg span { position: absolute; right: 0; top: -19px; padding: 0 4px; border-radius: 4px; background: var(--bg-2); font: 500 10.5px/14px var(--sans); color: var(--label-2); white-space: nowrap; }
+.bars .avg span { pointer-events: auto; position: absolute; right: 0; top: -19px; padding: 0 4px; border-radius: 4px; background: var(--bg-2); font: 500 10.5px/14px var(--sans); color: var(--label-2); white-space: nowrap; }
 .days { display: flex; gap: 8px; margin-top: 6px; font: var(--t-caption); letter-spacing: var(--tr-caption); color: var(--label-3); }
 .days span { flex: 1; text-align: center; }
 .days span.t { color: var(--label); font-weight: 650; }
