@@ -32,7 +32,7 @@ Al iniciar, aparece la **píldora** arriba a la derecha y un ícono en la bandej
 Por defecto, una píldora semitransparente con:
 
 ```
-00:18:05                 ← reloj de la tarea actual
+18:05                    ← reloj de la tarea actual (las horas aparecen recién al pasar la hora: 1:02:05)
 ▶ Arreglar bug de login  ← tarea activa
 ```
 
@@ -42,7 +42,7 @@ Por defecto, una píldora semitransparente con:
 - **Se corre si dejás el mouse encima:** al apoyar el cursor sobre la píldora, se desliza al otro lado de la pantalla, a la misma altura, y vuelve cuando sacás el cursor de esa esquina. Pasar de largo no la mueve. Al cerrar el panel con el cursor encima tampoco: primero tenés que sacar el mouse. No cambia la posición guardada. En el estilo círculo no se mueve, porque ahí el hover abre el rectángulo.
 
 #### Variante opcional: círculo con logo
-En **Ajustes → Widget en reposo → Círculo**, el estado de reposo pasa a ser solo el logo de la app en un circulito arriba a la derecha (el borde cambia de color: el de acento corriendo, naranja pausada, gris sin sesión). **Al pasar el mouse por el círculo, el círculo se expande en el rectángulo** con los dos relojes en vivo; se vuelve a cerrar en el círculo al sacar el mouse o, si no lo movés, solo a los ~3,5 s. Abrir y cerrar el panel también se anima desde y hacia el círculo. Sigue siendo click-through: es solo para mirar.
+En **Ajustes → Widget en reposo → Círculo**, el estado de reposo pasa a ser solo el logo de la app en un circulito arriba a la derecha (el borde cambia de color: el de acento corriendo, naranja pausada, gris sin sesión). **Al pasar el mouse por el círculo, el círculo se expande en el rectángulo** con los dos relojes en vivo; se vuelve a cerrar en el círculo al sacar el mouse o, si no lo movés, solo a los ~3,5 s. Abrir y cerrar el panel también se anima desde y hacia el círculo (en el estilo píldora, la píldora se estira hasta ser el panel). Sigue siendo click-through: es solo para mirar.
 
 No está disponible en Linux (no se puede detectar el mouse a través de una ventana transparente); ahí se usa la píldora.
 
@@ -188,12 +188,12 @@ También podés usar el mouse: click en el título activa la tarea, en el círcu
 
 ## 7. Dashboard
 
-Se abre con `Ctrl+Alt+D` (o `d` desde el panel), desde el ícono de la bandeja o con el botón **Dashboard** del panel. Es una ventana normal; podés cerrarla sin afectar el widget.
+Se abre con `Ctrl+Alt+D` (o `d` desde el panel), desde el ícono de la bandeja o con el botón de la grilla del panel. Es una ventana normal; podés cerrarla sin afectar el widget. Las vistas están en la barra lateral (con su atajo `F1`–`F6` a la derecha); en Windows 11 la barra lateral usa el material Mica del sistema.
 
 | Vista | Qué muestra |
 |---|---|
-| **Hoy** | Tiempo trabajado hoy, sesiones, tareas cerradas, tarea activa y línea de tiempo del día: una fila por tarea (en orden de inicio, con su total), las sesiones arriba (un hueco dentro de una sesión es una pausa) y una línea en la hora actual |
-| **Tareas** | Arriba, dos tarjetas para crear: **Nueva tarea** (título, proyecto por botones o uno nuevo escrito, `Enter` agrega) y **Agregar varias** (una por línea, cada una acepta su `#proyecto`; `Ctrl+Enter` o el botón las agrega). Debajo, la tabla editable: renombrar (click en el texto y `Enter`), cambiar proyecto, marcar hecha, activar (▶), reordenar (↑↓), eliminar (✕), con filtros por proyecto y estado. Con una sesión en curso, las tareas de otros proyectos se atenúan y no se pueden activar |
+| **Hoy** | Tiempo trabajado hoy con un anillo que lo compara con tu promedio diario de los 7 días anteriores, las barras de esos 7 días, sesiones, tareas cerradas, tarea activa y línea de tiempo del día: una fila por tarea (en orden de inicio, con su total), las sesiones arriba (un hueco dentro de una sesión es una pausa) y una línea en la hora actual |
+| **Tareas** | Arriba, dos tarjetas para crear: **Nueva tarea** (título, proyecto por botones o uno nuevo escrito, `Enter` agrega) y **Agregar varias** (una por línea, cada una acepta su `#proyecto`; `Ctrl+Enter` o el botón las agrega). Debajo, la tabla editable: renombrar (click en el texto y `Enter`), cambiar proyecto, marcar hecha, activar (▶), reordenar (↑↓), eliminar (✕), con filtros por proyecto y estado (las acciones de cada fila aparecen al pasar el mouse o con el cursor de teclado). Con una sesión en curso, las tareas de otros proyectos se atenúan y no se pueden activar |
 | **Proyectos** | Tiempo total, tareas abiertas/hechas y reparto por proyecto. El selector de color cambia el color en todo el programa; **usar** lo pone como proyecto del widget |
 | **Sesiones** | Historial: fecha, horario, duración, pausas y cuánto se dedicó a cada tarea |
 | **Ajustes** | Tema, **color de acento**, estilo del widget en reposo (píldora/círculo), opacidad del fondo, duración mínima de sesión, exigir tarea completada, y la hoja de atajos (los globales se editan en `config.json`). Todo se guarda en `config.json` y se aplica al instante |
@@ -237,7 +237,7 @@ Casi todo se cambia desde **Dashboard → Ajustes** y se guarda solo en `config.
 | Clave | Valores |
 |---|---|
 | `theme` | `"dark"` / `"light"` |
-| `accent` | Color de acento `#rrggbb`. En cada tema se aclara u oscurece lo necesario para mantener un contraste mínimo de 4.5:1 contra el fondo, así que cualquier color queda legible |
+| `accent` | Color de acento `#rrggbb` (por defecto el azul de sistema `#0088ff`). Los colores de sistema usan su variante clara u oscura según el tema. Los rellenos (botón principal, selección, checks) usan el color tal cual; el texto en acento se aclara u oscurece lo necesario para mantener un contraste mínimo de 4.5:1 contra el fondo, así que cualquier color queda legible |
 | `ghostStyle` | `"pill"` (píldora) / `"dot"` (círculo con logo) |
 | `minSessionMinutes` | 0–240; las sesiones más cortas se descartan |
 | `requireCompletedTask` | `true` descarta las sesiones sin ninguna tarea completada |

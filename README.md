@@ -11,7 +11,7 @@ npm run dist       # .exe portable (Windows) / AppImage (Linux)
 
 ## Uso
 
-Estilo minimalista (sans, esquinas redondeadas) y pensada para usarse con el teclado.
+Estilo inspirado en Apple (superficies con material y sombra, esquinas continuas, tipografía con escala de macOS, animaciones con springs) y pensada para usarse con el teclado.
 
 **Regla de las teclas:** cada acción usa la primera letra de su nombre, y en la interfaz esa letra está subrayada. Si dos acciones chocan, gana la más usada; las que tienen tecla estándar la usan (`Ctrl+Z`, `Supr`, `Espacio`, flechas).
 
@@ -42,7 +42,9 @@ Para cambiarlo: `#` en el panel (o click en el chip), escribí el nombre y `Ente
 Modo fantasma: los clicks atraviesan la ventana y nunca toma foco.
 La sesión se pausa sola al bloquear la pantalla, suspender o cerrar la app.
 
-**Acento:** Dashboard → Ajustes → *Color de acento* (presets o cualquier color). Se ajusta solo por tema para no perder contraste.
+**Acento:** Dashboard → Ajustes → *Color de acento*: los colores de sistema de Apple (azul por defecto, con su variante clara y oscura) o cualquier color. Los rellenos usan el color vivo; el texto en acento se ajusta solo por tema para no perder contraste.
+
+**Ícono:** la fuente es `assets/logo.svg` (y la silueta de una tinta, `assets/glyph.svg`). `npx electron assets/make_icon.js` regenera `icon.png`, `icon.ico` y los íconos de bandeja (`tray-dark`/`tray-light`).
 Si otra app ya usa un atajo global, el widget avisa al arrancar; se cambia en `config.json` → `shortcuts`.
 
 ## Datos
