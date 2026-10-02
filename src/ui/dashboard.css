@@ -3,7 +3,9 @@
 :root {
   --sb-w: 220px;
   --sb-solid: #262628;                       /* barra lateral sin Mica */
-  --sb-mica: rgba(46, 46, 48, 0.30);         /* barra lateral con Mica: muy leve, deja ver el material */
+  /* Barra lateral con Mica. Windows tiñe el Mica con SU modo (claro/oscuro), no con el de la app: un tinte alto
+     garantiza el color del tema en cualquier combinación y el material aporta solo un matiz del escritorio. */
+  --sb-mica: rgba(38, 38, 40, 0.88);
   --pop-bg: rgba(52, 52, 55, 0.78);          /* menús, tooltips y hojas: material */
   --seg-thumb: #636366;
   --hud-bg: rgba(58, 58, 60, 0.86);
@@ -11,7 +13,7 @@
 }
 :root[data-theme="light"] {
   --sb-solid: #f0f0f4;
-  --sb-mica: rgba(255, 255, 255, 0.34);
+  --sb-mica: rgba(240, 240, 244, 0.82);
   --pop-bg: rgba(255, 255, 255, 0.78);
   --seg-thumb: #ffffff;
   --hud-bg: rgba(40, 40, 42, 0.86);
@@ -416,3 +418,7 @@ body.help #dhelp { display: block; }
   #hud, #hud.show { transform: translate(-50%, 0); transition: opacity 150ms ease-out; }
   .seg .th, .switch::after { transition: none; }
 }
+
+/* celdas que no se parten (fecha y horario de sesiones) */
+td.nw { white-space: nowrap; }
+td.num-t { font-variant-numeric: tabular-nums; }

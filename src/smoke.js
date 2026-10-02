@@ -107,11 +107,28 @@ module.exports = async function smoke(ctx) {
   await wait(1500);
   const dash = ctx.getDashboard();
   log(dash, 'dash');
+  // Las View Transitions no avanzan mientras la ventana no se dibuja en primer plano: con "reducir movimiento"
+  // el cambio de vista es instantáneo y las capturas muestran siempre el estado final.
+  try {
+    dash.webContents.debugger.attach('1.3');
+    await dash.webContents.debugger.sendCommand('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+  } catch (e) { console.log('[smoke] no se pudo emular reduced-motion:', e.message); }
   for (const view of ['hoy', 'tareas', 'proyectos', 'sesiones', 'graficos']) {
     await dash.webContents.executeJavaScript(`document.querySelector('[data-view="${view}"]').click()`);
     await wait(700);
     await shot(dash, `dash-${view}`);
   }
+  // capturePage no incluye el material del sistema (Mica): la miniatura de la ventana sí, porque la compone Windows
+  try {
+    const { desktopCapturer } = require('electron');
+    dash.show(); dash.focus();
+    await dash.webContents.executeJavaScript(`document.querySelector('[data-view="hoy"]').click()`);
+    await wait(900);
+    const srcs = await desktopCapturer.getSources({ types: ['window'], thumbnailSize: { width: 1120, height: 780 } });
+    const src = srcs.find((x) => x.id === dash.getMediaSourceId());
+    if (src) { fs.writeFileSync(path.join(out, 'dash-hoy-sistema.png'), src.thumbnail.toPNG()); console.log('[smoke] captura dash-hoy-sistema (con Mica)'); }
+    else console.log('[smoke] no se encontró la ventana del dashboard para la captura del sistema');
+  } catch (e) { console.log('[smoke] captura del sistema fallo:', e.message); }
   // --- crear tareas desde el formulario del dashboard (simula tipeo real) ---
   const js = (w, code) => w.webContents.executeJavaScript(code);
   console.log('[smoke] fuente Inter empaquetada cargada:', await js(widget, `document.fonts.ready.then(() => document.fonts.check('600 13px "Inter Variable"') && [...document.fonts].some((f) => f.family.includes('Inter') && f.status === 'loaded'))`));
@@ -222,7 +239,8 @@ module.exports = async function smoke(ctx) {
   await js(dash, `api.setConfig({ theme: 'light', accent: '#3ecf8e' })`);
   await wait(600);
   await shot(widget, 'widget-active-light-green');
-  console.log('[smoke] verde en tema claro se oscurece:', await js(widget, `getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()`));
+  // el relleno queda vivo; lo que se oscurece para contrastar es el acento de TEXTO
+  console.log('[smoke] verde en tema claro: relleno / texto:', await js(widget, `['--accent', '--accent-text'].map((v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim()).join(' / ')`));
   await js(dash, `document.querySelector('[data-view="ajustes"]').click()`);
   await wait(500);
   await shot(dash, 'dash-ajustes-light');
@@ -324,6 +342,14 @@ module.exports = async function smoke(ctx) {
   await wait(300);
   console.log('[smoke] dashboard F2 -> vista tareas, fila con cursor:', await js(dash, `!!document.querySelector('tr.cur') && document.querySelector('#nav button.on').dataset.view`));
   await shot(dash, 'dash-tareas-cursor');
+  // menú desplegable propio de los filtros (en lugar del <select> nativo)
+  await js(dash, `document.querySelector('#f-project').click()`);
+  await wait(300);
+  await shot(dash, 'dash-menu-filtro');
+  console.log('[smoke] menu de filtro abierto:', await js(dash, `!!document.querySelector('[role="listbox"]')`));
+  await keyIn(dash, 'Escape');
+  await wait(200);
+  console.log('[smoke] Esc cierra el menu:', await js(dash, `!document.querySelector('[role="listbox"]')`));
   // borrar con el teclado en el dashboard: bb y deshacer con Ctrl+Z
   const curRow = () => js(dash, `(document.querySelector('tr.cur') || {}).dataset && document.querySelector('tr.cur').dataset.id`);
   const d0 = nTasks();

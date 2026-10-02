@@ -260,7 +260,7 @@
       <div class="glist tblw"><table><thead><tr><th style="width:36px"></th><th>Proyecto</th><th class="num">Abiertas</th><th class="num">Hechas</th><th class="num">Tiempo total</th><th style="width:28%">Reparto</th><th style="width:100px"></th></tr></thead><tbody>
       ${names.map((n) => `<tr class="sel">
         <td>${n === NONE ? '' : `<input type="color" data-color="${esc(n)}" value="${colorOf(n)}" title="Color del proyecto">`}</td>
-        <td>${n === NONE ? `<span class="muted">${NONE}</span>` : `<span class="dot" style="--c:${colorOf(n)}"></span>#${esc(n)}`}</td>
+        <td>${n === NONE ? `<span class="muted">${NONE}</span>` : `#${esc(n)}`}</td>
         <td class="num">${agg[n].open}</td><td class="num">${agg[n].done}</td><td class="num">${S.human(agg[n].ms)}</td>
         <td><div class="bar-track"><div class="bar-fill" style="--c:${colorOf(n)};width:${(agg[n].ms / max) * 100}%"></div></div></td>
         <td style="text-align:right">${useBtn(n)}</td></tr>`).join('')}</tbody></table></div>`;
@@ -274,11 +274,11 @@
     const total = list.reduce((a, s) => a + s.duration, 0);
     const sub = list.length ? `${list.length} ${list.length === 1 ? 'sesión' : 'sesiones'} · ${S.human(total)} en total` : 'Sin sesiones guardadas';
     if (!list.length) return `${head('Sesiones', sub)}${rule}<div class="tile empty">Las sesiones terminadas aparecen acá.</div>`;
-    const time = (ts) => new Date(ts).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    const time = (ts) => new Date(ts).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
     return `${head('Sesiones', sub)}${rule}<div class="glist tblw"><table><thead><tr><th>Fecha</th><th>Horario</th><th>Proyecto</th><th class="num">Duración</th><th class="num">Pausas</th><th style="padding-left:24px">Tareas</th></tr></thead><tbody>
       ${list.map((s) => `<tr class="sel">
-        <td>${new Date(s.startedAt).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })}</td>
-        <td class="muted">${time(s.startedAt)} – ${time(s.endedAt)}</td>
+        <td class="nw">${new Date(s.startedAt).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })}</td>
+        <td class="muted nw num-t">${time(s.startedAt)} – ${time(s.endedAt)}</td>
         <td>${s.project ? chip(s.project) : '<span class="muted">—</span>'}</td>
         <td class="num">${S.human(s.duration)}</td><td class="num">${s.pauses}</td>
         <td class="tm" style="padding-left:24px"><div class="tasks-mini">${Object.entries(s.tasks || {}).sort((a, b) => b[1] - a[1]).map(([id, ms]) => `<span><b>${esc((T[id] || { title: '(eliminada)' }).title)}</b> ${S.human(ms)}</span>`).join('') || '<span>—</span>'}</div></td></tr>`).join('')}</tbody></table></div>`;
@@ -840,9 +840,11 @@
     if (helpOpen) { h.innerHTML = '<kbd>?</kbd> o <kbd>esc</kbd> cierra'; return; }
     if (typing) { h.innerHTML = `<kbd>esc</kbd> vuelve a normal ${sepDot} <kbd>enter</kbd> confirma`; return; }
     if (pending) { h.innerHTML = `<span class="pend">${pending}-</span> otra <kbd>${pending}</kbd> borra ${sepDot} <kbd>esc</kbd>`; return; }
-    h.innerHTML = view === 'tareas'
-      ? ['<kbd>↑↓</kbd> fila', '<u>h</u>echa', '<u>b</u>orrar', '<u>a</u>ctivar', '<u>n</u>ueva', '<u>r</u>enombrar', '<u>p</u>royecto', '<u>e</u>stado', '<kbd>Ctrl+Z</kbd> deshacer'].join(sepDot)
-      : ['<kbd>F1-F6</kbd> vistas', '<kbd>↑↓</kbd> desplazar', '<kbd>c</kbd> claro/oscuro'].join(sepDot);
+    const items = view === 'tareas'
+      ? ['<kbd>↑↓</kbd> fila', '<u>h</u>echa', '<u>b</u>orrar', '<u>a</u>ctivar', '<u>n</u>ueva', '<u>r</u>enombrar', '<u>p</u>royecto', '<u>e</u>stado', '<kbd>Ctrl+Z</kbd> deshacer']
+      : ['<kbd>F1-F6</kbd> vistas', '<kbd>↑↓</kbd> desplazar', '<kbd>c</kbd> claro/oscuro'];
+    // #dhint es flex: cada pista en su span, si no la letra subrayada queda separada de su palabra por el gap
+    h.innerHTML = items.map((x) => `<span>${x}</span>`).join(sepDot);
   }
 
   function setPending(k) {
